@@ -622,6 +622,7 @@ interface QuizViewProps {
   onAttempt: (attempt: QuestionAttempt) => void;
   onComplete: (score: number) => void;
   onExit: () => void;
+  onSaveToIdLog?: (entry: { id: number; question: string; correctAnswer: string; explanation: string }) => void;
   randomizeTrigger?: number; // Add trigger to force re-randomization
   randomMode?: boolean; // Random mode: questions from all levels
   randomModeStats?: { totalAnswered: number; totalCorrect: number }; // Base stats for live score display
@@ -634,6 +635,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
   onAttempt,
   onComplete,
   onExit,
+  onSaveToIdLog,
   randomizeTrigger,
   randomMode = false,
   randomModeStats
@@ -747,6 +749,16 @@ export const QuizView: React.FC<QuizViewProps> = ({
     }
   };
 
+  const handleSaveCurrentId = () => {
+    if (!onSaveToIdLog) return;
+    onSaveToIdLog({
+      id: currentQuestion.id,
+      question: currentQuestion.question,
+      correctAnswer: currentQuestion.options[currentQuestion.correct_option_index],
+      explanation: currentQuestion.explanation
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6 text-center">
@@ -847,9 +859,14 @@ export const QuizView: React.FC<QuizViewProps> = ({
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/20">
             {currentQuestion.concept}
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-700/50 text-slate-300 text-[10px] font-black uppercase tracking-[0.2em] border border-slate-600/50">
+          <button
+            onClick={handleSaveCurrentId}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-700/50 text-slate-300 text-[10px] font-black uppercase tracking-[0.2em] border border-slate-600/50 hover:bg-slate-700/70 transition-colors"
+            title={t('idSearch.saveToLog')}
+            type="button"
+          >
             ID: {currentQuestion.id}
-          </div>
+          </button>
         </div>
 
         <div className="space-y-4 pt-8">

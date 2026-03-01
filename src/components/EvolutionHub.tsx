@@ -9,10 +9,9 @@ import { formatTranslation } from '../translations';
 interface EvolutionHubProps {
   stats: UserStats;
   onStartQuiz: () => void;
-  onOpenSettings?: () => void;
 }
 
-export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz, onOpenSettings }) => {
+export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }) => {
   const { t } = useLanguage();
   const randomMode = stats.randomMode ?? false;
   const rm = stats.randomModeStats ?? { totalAnswered: 0, totalCorrect: 0 };
@@ -200,14 +199,6 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz, 
         </div>
 
         <div className="flex items-center gap-4">
-          {onOpenSettings && (
-            <button
-              onClick={onOpenSettings}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all text-sm font-medium"
-            >
-              <i className="fas fa-gear"></i> {t('settings.settings')}
-            </button>
-          )}
           <div className="flex gap-1.5">
           {LEVELS.map(l => (
             <div

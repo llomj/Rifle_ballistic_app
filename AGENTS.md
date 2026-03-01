@@ -11,6 +11,7 @@
 - **Explicit Consent**: No changes shall be made to the source code without explicit user approval.
 - **Layout Preservation**: Do not deviate from the existing visual identity.
 - **Incremental Updates**: Keep updates as minimal as possible while satisfying requirements.
+- **Strict Scope Control**: When the user asks for a specific change, implement only that request. Do not add extra UI elements, display changes, or additional features unless explicitly requested.
 
 ## 3. Glossary & Educational Integrity
 - **Glossary Source of Truth**: The `glossary.md` file is the master reference.

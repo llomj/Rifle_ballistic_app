@@ -286,7 +286,7 @@ const App: React.FC = () => {
 
           <div className="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-2xl border border-white/10">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm">
                 <i className={`fas ${getPersonaIcon(currentPersona)} text-white`}></i>
@@ -301,14 +301,15 @@ const App: React.FC = () => {
               <i className="fas fa-bolt text-amber-400 text-sm"></i>
               <span className="text-sm font-bold text-indigo-400">{stats.xp.toLocaleString()}</span>
             </div>
-            <button
-              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-              className="ml-4 w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all"
-              title={t('settings.settings')}
-            >
-              <i className="fas fa-gear"></i>
-            </button>
           </div>
+
+          <button
+            onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            className="ml-auto w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all"
+            title={t('settings.settings')}
+          >
+            <i className="fas fa-gear"></i>
+          </button>
         </div>
 
       </nav>
@@ -352,6 +353,7 @@ const App: React.FC = () => {
             randomizeTrigger={randomizeTrigger}
             randomMode={randomMode}
             randomModeStats={stats.randomModeStats}
+            onSaveToIdLog={saveToIdLog}
           />
         ) : view === 'log' ? (
           <HistoryLog history={stats.history} onBack={() => setView('hub')} />
@@ -431,7 +433,6 @@ const App: React.FC = () => {
           <EvolutionHub
             stats={stats}
             onStartQuiz={handleStartEvolution}
-            onOpenSettings={() => setShowSettingsMenu(true)}
           />
         )}
       </main>
