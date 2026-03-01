@@ -275,7 +275,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30">
-      <nav className="p-4 flex items-center justify-between border-b border-white/5 sticky top-0 z-50 glass">
+      <nav className="pt-[max(1rem,env(safe-area-inset-top,0px))] px-4 pb-4 flex items-center justify-between border-b border-white/5 sticky top-0 z-50 glass">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('hub')}>
             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
