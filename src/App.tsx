@@ -312,7 +312,7 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className="ml-auto hidden sm:flex w-10 h-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all"
+            className="ml-auto w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition-all"
             title={t('settings.settings')}
           >
             <i className="fas fa-gear"></i>
@@ -322,7 +322,7 @@ const App: React.FC = () => {
       </nav>
 
       {/* Settings at bottom - pb lifts gear above iPhone home-indicator; min 2rem when env is 0 in PWA */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-end pr-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-slate-950 to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-slate-950 to-transparent">
         <button
           onClick={() => setShowSettingsMenu(!showSettingsMenu)}
           className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px]"
