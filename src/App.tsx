@@ -274,7 +274,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 pb-20">
       <nav className="p-4 flex items-center justify-between border-b border-white/5 sticky top-0 z-50 glass">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('hub')}>
@@ -304,35 +304,10 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="relative hidden sm:block">
-          <button
-            onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
-            title={t('settings.settings')}
-          >
-            <i className="fas fa-gear text-sm"></i>
-          </button>
-          <SettingsMenu
-            isOpen={showSettingsMenu}
-            onClose={() => setShowSettingsMenu(false)}
-            view={view}
-            randomMode={randomMode}
-            onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
-            onShowGlossary={view === 'hub' ? () => setView('glossary') : undefined}
-            onShowIdSearch={view === 'hub' ? () => setShowIdSearch(true) : undefined}
-            onShowIdLog={view === 'hub' ? () => setShowIdLog(true) : undefined}
-            onShowLearningLog={view === 'hub' ? () => setView('log') : undefined}
-            onShowOperations={view === 'quiz' ? () => setShowOperations(true) : undefined}
-            onShowLevelSelector={() => setShowLevelSelector(true)}
-            onToggleLanguage={toggleLanguage}
-            onResetApp={() => setShowResetModal(true)}
-          />
-        </div>
-
       </nav>
 
-      {/* Mobile: settings button at bottom - always accessible */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-[env(safe-area-inset-bottom,0)] pt-3 bg-gradient-to-t from-slate-950 to-transparent sm:hidden">
+      {/* Settings at bottom - always accessible, avoids status bar overlap on iPhone */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-[env(safe-area-inset-bottom,0)] pt-3 bg-gradient-to-t from-slate-950 to-transparent">
         <button
           onClick={() => setShowSettingsMenu(!showSettingsMenu)}
           className="w-14 h-14 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg"
@@ -341,12 +316,11 @@ const App: React.FC = () => {
           <i className="fas fa-gear text-xl"></i>
         </button>
       </div>
-      <div className="sm:hidden">
-        <SettingsMenu
-          isOpen={showSettingsMenu}
-          onClose={() => setShowSettingsMenu(false)}
-          view={view}
-          anchorBottom
+      <SettingsMenu
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
+        view={view}
+        anchorBottom
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
           onShowGlossary={view === 'hub' ? () => setView('glossary') : undefined}
@@ -357,8 +331,7 @@ const App: React.FC = () => {
           onShowLevelSelector={() => setShowLevelSelector(true)}
           onToggleLanguage={toggleLanguage}
           onResetApp={() => setShowResetModal(true)}
-        />
-      </div>
+      />
 
       <main className="container mx-auto px-4 py-6 max-w-4xl min-h-[calc(100dvh-160px)]">
         {view === 'quiz' ? (
