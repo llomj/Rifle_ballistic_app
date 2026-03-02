@@ -164,6 +164,7 @@ export const translations = {
       switchToRandomMode: "Switch to Random Mode",
       settings: "Settings",
       resetApp: "Reset App",
+      refreshApp: "Refresh app (get latest)",
     },
     
     // Reset App Modal
@@ -405,6 +406,7 @@ export const translations = {
       switchToRandomMode: "Passer en Mode Aléatoire",
       settings: "Paramètres",
       resetApp: "Réinitialiser l'App",
+      refreshApp: "Actualiser l'app (dernière version)",
     },
     
     // Reset App Modal

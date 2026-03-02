@@ -144,6 +144,17 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     });
   }
 
+  // Refresh app: clears SW cache and loads latest (for PWA users seeing stale content)
+  const basePath = typeof window !== 'undefined' ? (import.meta.env.BASE_URL || '/') : '/';
+  menuItems.push({
+    icon: 'fa-arrows-rotate',
+    label: t('settings.refreshApp'),
+    onClick: () => {
+      onClose();
+      window.location.href = `${basePath}clear-sw.html`;
+    }
+  });
+
   return (
     <>
       {/* Backdrop */}

@@ -1,11 +1,8 @@
-const CACHE_NAME = 'python-exercises-learn-offline-v7';
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+const CACHE_NAME = 'python-exercises-learn-offline-v9';
+// Don't pre-cache index.html — install-time fetch can get stale HTML; we cache it only after network-first fetch
+const STATIC_ASSETS = ['./manifest.json'];
 
-// Install: Cache static assets
+// Install: Cache manifest only (index.html cached on first network fetch)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
