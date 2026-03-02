@@ -233,6 +233,10 @@ Before moving to the next level:
 - UI also shows a hint in the options block:  
   `Spaces are shown as · to make padded options distinct.`
 
+- Coverage:
+  - `QuizView` answer options
+  - `IdSearchModal` answer options (search-by-ID flow)
+
 ## 🔴 URGENT CRITICAL BUG: Vague "What is?" Questions
 
 **STATUS: ⚠️ IN PROGRESS - PARTIALLY FIXED**

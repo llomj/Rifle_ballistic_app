@@ -162,6 +162,59 @@ const splitQuestion = (text: string, language: string = 'en') => {
   }
 };
 
+const shouldVisualizeOptionWhitespace = (options: string[]): boolean => {
+  const normalized = new Map<string, Set<string>>();
+  const noInvisible = new Map<string, Set<string>>();
+  const invisibleFormatCharRegex = /\p{Cf}/u;
+
+  for (const option of options) {
+    const collapsedKey = option.replace(/\s+/g, ' ').trim();
+    if (!normalized.has(collapsedKey)) normalized.set(collapsedKey, new Set<string>());
+    normalized.get(collapsedKey)!.add(option);
+
+    let stripped = '';
+    for (const char of option) {
+      if (/\s/u.test(char) || invisibleFormatCharRegex.test(char)) continue;
+      stripped += char;
+    }
+    if (!noInvisible.has(stripped)) noInvisible.set(stripped, new Set<string>());
+    noInvisible.get(stripped)!.add(option);
+  }
+
+  const hasWhitespaceSensitiveVariants = Array.from(normalized.values()).some(variants => variants.size > 1);
+  const hasInvisibleOnlyDifferences = Array.from(noInvisible.values()).some(variants => variants.size > 1);
+  const hasSignificantWhitespace = options.some(option => /^\s|\s$| {2,}|\t|\n/.test(option));
+
+  return hasWhitespaceSensitiveVariants || hasInvisibleOnlyDifferences || hasSignificantWhitespace;
+};
+
+const visualizeWhitespace = (text: string): string => {
+  const invisibleFormatCharRegex = /\p{Cf}/u;
+  let result = '';
+
+  for (const char of text) {
+    if (char === ' ') {
+      result += '·';
+    } else if (char === '\t') {
+      result += '⇥';
+    } else if (char === '\n') {
+      result += '↵\n';
+    } else if (char === '\r') {
+      result += '↵';
+    } else if (char === '\u00A0') {
+      result += '⍽';
+    } else if (invisibleFormatCharRegex.test(char)) {
+      result += '◌';
+    } else if (/\s/u.test(char)) {
+      result += '·';
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+};
+
 interface IdSearchModalProps {
   onClose: () => void;
   onSaveToLog: (entry: { id: number; question: string; correctAnswer: string; explanation: string }) => void;
@@ -172,6 +225,7 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
   const [idInput, setIdInput] = useState('');
   const [question, setQuestion] = useState<Question | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showWhitespaceHints = question ? shouldVisualizeOptionWhitespace(question.options) : false;
 
   const handleSearch = () => {
     const id = parseInt(idInput.trim());
@@ -324,6 +378,9 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
 
                 <div className="space-y-2 mb-4">
                   <p className="text-sm font-bold text-slate-400 mb-2">{t('idSearch.options')}:</p>
+                  {showWhitespaceHints && (
+                    <p className="text-[10px] text-slate-400 font-mono mb-2">{t('quiz.whitespaceHint')}</p>
+                  )}
                   {question.options.map((option, idx) => (
                     <div
                       key={idx}
@@ -338,7 +395,9 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
                           <i className="fas fa-check-circle text-emerald-400"></i>
                         )}
                         <span className="font-mono text-xs mr-2">{String.fromCharCode(65 + idx)}.</span>
-                        <span>{option}</span>
+                        <span className={`whitespace-pre-wrap break-words ${showWhitespaceHints ? 'font-mono' : ''}`}>
+                          {showWhitespaceHints ? visualizeWhitespace(option) : option}
+                        </span>
                         {idx === question.correct_option_index && (
                           <span className="ml-auto text-xs font-bold">{t('quiz.correct')}</span>
                         )}
