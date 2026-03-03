@@ -2,6 +2,13 @@ import React from 'react';
 import { QuestionAttempt } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatTranslation } from '../translations';
+import { splitQuestion, hasCodeLikeContent } from '../utils/splitQuestion';
+import { translateQuestionText } from '../utils/translateQuestion';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+const splitQuestionForDisplay = (text: string, lang: string) =>
+  splitQuestion(text, lang, translateQuestionText);
 
 interface HistoryLogProps {
   history: QuestionAttempt[];
@@ -9,7 +16,7 @@ interface HistoryLogProps {
 }
 
 export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onBack }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const sortedHistory = [...history].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
@@ -53,9 +60,64 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onBack }) => {
                 </span>
               </div>
               
-              <p className="text-slate-200 font-bold mb-3 leading-tight">
-                {attempt.question}
-              </p>
+              <div className="mb-3">
+                {(() => {
+                  const { prefix, code } = splitQuestionForDisplay(attempt.question, language);
+                  const displayText = translateQuestionText(attempt.question, language);
+                  if (code) {
+                    return (
+                      <div className="rounded-lg bg-slate-800/50 overflow-hidden">
+                        {prefix && (
+                          <p className="text-slate-200 font-bold px-3 pt-3 pb-1 leading-tight">{prefix}</p>
+                        )}
+                        <SyntaxHighlighter
+                          language="python"
+                          style={oneDark}
+                          customStyle={{
+                            padding: '0.75rem 1rem',
+                            margin: 0,
+                            background: 'transparent',
+                            fontSize: '0.8rem',
+                            lineHeight: '1.5',
+                            fontFamily: "'Fira Code', monospace"
+                          }}
+                          codeTagProps={{ style: { fontFamily: "'Fira Code', monospace" } }}
+                          PreTag="div"
+                        >
+                          {code}
+                        </SyntaxHighlighter>
+                      </div>
+                    );
+                  }
+                  if (hasCodeLikeContent(displayText)) {
+                    return (
+                      <div className="rounded-lg bg-slate-800/50 overflow-hidden">
+                        <SyntaxHighlighter
+                          language="python"
+                          style={oneDark}
+                          customStyle={{
+                            padding: '0.75rem 1rem',
+                            margin: 0,
+                            background: 'transparent',
+                            fontSize: '0.8rem',
+                            lineHeight: '1.5',
+                            fontFamily: "'Fira Code', monospace"
+                          }}
+                          codeTagProps={{ style: { fontFamily: "'Fira Code', monospace", whiteSpace: 'pre-wrap' } }}
+                          PreTag="div"
+                        >
+                          {displayText}
+                        </SyntaxHighlighter>
+                      </div>
+                    );
+                  }
+                  return (
+                    <p className="text-slate-200 font-bold leading-tight">
+                      {displayText}
+                    </p>
+                  );
+                })()}
+              </div>
               
               <div className="space-y-2 mb-4">
                 <div className={`text-xs p-2 rounded-lg flex items-center gap-2 ${
