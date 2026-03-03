@@ -92,6 +92,7 @@ const QuizView = lazy(() => import('./components/QuizView').then((module) => ({ 
 const HistoryLog = lazy(() => import('./components/HistoryLog').then((module) => ({ default: module.HistoryLog })));
 const GlossaryView = lazy(() => import('./components/GlossaryView').then((module) => ({ default: module.GlossaryView })));
 const OperationsView = lazy(() => import('./components/OperationsView').then((module) => ({ default: module.OperationsView })));
+const MethodsView = lazy(() => import('./components/MethodsView').then((module) => ({ default: module.MethodsView })));
 const IdSearchModal = lazy(() => import('./components/IdSearchModal').then((module) => ({ default: module.IdSearchModal })));
 const IdLogView = lazy(() => import('./components/IdLogView').then((module) => ({ default: module.IdLogView })));
 const LevelSelectorModal = lazy(() => import('./components/LevelSelectorModal').then((module) => ({ default: module.LevelSelectorModal })));
@@ -119,6 +120,7 @@ const App: React.FC = () => {
   const [showRandomModeModal, setShowRandomModeModal] = useState(false);
   const randomMode = stats.randomMode ?? false;
   const [showOperations, setShowOperations] = useState(false);
+  const [showMethods, setShowMethods] = useState(false);
   const [showIdSearch, setShowIdSearch] = useState(false);
   const [showIdLog, setShowIdLog] = useState(false);
   const [showLevelSelector, setShowLevelSelector] = useState(false);
@@ -413,6 +415,7 @@ const App: React.FC = () => {
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
           onShowGlossary={view === 'hub' ? () => setView('glossary') : undefined}
+          onShowMethods={view === 'hub' ? () => setShowMethods(true) : undefined}
           onShowIdSearch={view === 'hub' ? () => setShowIdSearch(true) : undefined}
           onShowIdLog={view === 'hub' ? () => setShowIdLog(true) : undefined}
           onShowLearningLog={view === 'hub' ? () => setView('log') : undefined}
@@ -536,6 +539,17 @@ const App: React.FC = () => {
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <Suspense fallback={<ViewLoading />}>
               <OperationsView onBack={() => setShowOperations(false)} />
+            </Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* Methods View Modal */}
+      {showMethods && (
+        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <Suspense fallback={<ViewLoading />}>
+              <MethodsView onBack={() => setShowMethods(false)} />
             </Suspense>
           </div>
         </div>

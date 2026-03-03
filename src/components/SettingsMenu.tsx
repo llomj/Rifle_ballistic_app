@@ -10,6 +10,7 @@ interface SettingsMenuProps {
   anchorBottom?: boolean; // When true, menu opens near top-right (mobile-friendly placement)
   onToggleRandomMode?: () => void;
   onShowGlossary?: () => void;
+  onShowMethods?: () => void;
   onShowIdSearch?: () => void;
   onShowIdLog?: () => void;
   onShowLearningLog?: () => void;
@@ -27,6 +28,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   anchorBottom = false,
   onToggleRandomMode,
   onShowGlossary,
+  onShowMethods,
   onShowIdSearch,
   onShowIdLog,
   onShowLearningLog,
@@ -52,6 +54,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
           onClose();
         },
         active: view === 'glossary'
+      });
+    }
+    if (onShowMethods) {
+      menuItems.push({
+        icon: 'fa-code',
+        label: t('app.methods'),
+        onClick: () => {
+          onShowMethods();
+          onClose();
+        }
       });
     }
     if (onShowIdSearch) {
