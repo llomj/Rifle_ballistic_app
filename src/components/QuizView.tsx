@@ -505,6 +505,22 @@ const translateText = (text: string, language: string): string => {
   return translated;
 };
 
+// Check if text contains any code-like content (for syntax highlighting)
+const hasCodeLikeContent = (text: string): boolean => {
+  if (!text || text.length < 2) return false;
+  return (
+    /["'][^"']*["']/.test(text) ||           // String literals
+    /[a-zA-Z_]\w*\s*\(/.test(text) ||         // Function/method calls
+    /[\[\(\{]/.test(text) ||                  // Brackets
+    /\.[a-zA-Z_]\w*\s*\(/.test(text) ||       // Method calls .name(
+    /\b(def|class|for|while|if|with|import|from|print)\s+/.test(text) ||  // Keywords
+    /\[\d*:?-?\d*:?-?\d*\]/.test(text) ||     // Indexing/slicing [0], [0:3]
+    /[\+\-\*\/\%]/.test(text) ||             // Arithmetic operators
+    /\*\*/.test(text) ||                      // Power operator
+    /\b(True|False|None)\b/.test(text)        // Python literals
+  );
+};
+
 // Function to split question into prefix and code
 // Keeps all question text (like "What is", "Result of", "Value of", etc.) together at the top
 const splitQuestion = (text: string, language: string = 'en') => {
@@ -929,7 +945,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
           <div className="max-h-[70vh] overflow-y-auto overflow-x-hidden bg-slate-800 rounded-lg">
             {(() => {
               const { prefix, code } = splitQuestion(currentQuestion.question, language);
-              // If we detected code, show prefix at top and code below
+              const displayText = translateText(currentQuestion.question, language);
+              // If we detected code, show prefix at top and code below with syntax highlighting
               if (code) {
                 return (
                   <div className="flex flex-col">
@@ -967,10 +984,39 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   </div>
                 );
               }
+              // No split, but question has code-like content — use syntax highlighting for entire question
+              if (hasCodeLikeContent(displayText)) {
+                return (
+                  <div className="overflow-x-auto flex-1">
+                    <SyntaxHighlighter
+                      language="python"
+                      style={oneDark}
+                      customStyle={{
+                        padding: '1rem',
+                        margin: 0,
+                        background: 'transparent',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.75',
+                        fontFamily: "'Fira Code', monospace"
+                      }}
+                      codeTagProps={{
+                        style: {
+                          fontFamily: "'Fira Code', monospace",
+                          whiteSpace: 'pre-wrap',
+                          display: 'block'
+                        }
+                      }}
+                      PreTag="div"
+                    >
+                      {formatCodeSnippet(displayText)}
+                    </SyntaxHighlighter>
+                  </div>
+                );
+              }
               // No code detected, show as regular question
               return (
                 <h2 className="text-xl md:text-2xl font-bold leading-tight text-white px-4 pt-4">
-                  {translateText(currentQuestion.question, language)}
+                  {displayText}
                 </h2>
               );
             })()}
