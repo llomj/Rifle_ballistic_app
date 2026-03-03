@@ -1,5 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface MethodsViewProps {
   onBack: () => void;
@@ -267,9 +269,29 @@ export const MethodsView: React.FC<MethodsViewProps> = ({ onBack }) => {
       </div>
 
       <div className="glass rounded-2xl p-6 border border-white/5 overflow-x-auto">
-        <pre className="code-font text-xs sm:text-sm text-indigo-300 leading-relaxed whitespace-pre">
-          <code>{content}</code>
-        </pre>
+        <SyntaxHighlighter
+          language="python"
+          style={oneDark}
+          customStyle={{
+            padding: '1rem',
+            margin: 0,
+            borderRadius: '0.75rem',
+            background: 'transparent',
+            fontSize: '0.8rem',
+            lineHeight: '1.6',
+            fontFamily: "'Fira Code', monospace"
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: "'Fira Code', monospace",
+              whiteSpace: 'pre',
+              display: 'block'
+            }
+          }}
+          PreTag="div"
+        >
+          {content}
+        </SyntaxHighlighter>
       </div>
     </div>
   );
