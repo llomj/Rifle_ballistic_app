@@ -61,6 +61,27 @@ The workflow (`.github/workflows/deploy.yml`) must match the **last successful r
 
 **Checking GitHub in Cursor:** Open the repo in Cursor’s browser (e.g. Simple Browser or browser panel) at `https://github.com/llomj/CLI_exercises`. Sign in to GitHub there to access **Settings → Pages** (Source = GitHub Actions) and **Settings → Actions → General** (workflow permissions). Agents cannot sign in; the user must do this. The README currently links to `python-exercises-learn`; the CLI app URL is `https://llomj.github.io/CLI_exercises/`.
 
+### March 2026 — Desktop browser shows changes, phone app does not
+
+**Pattern:** You see new features/content (e.g. CLI Operations & Math) in the desktop browser, but the GitHub mobile app / PWA still shows the **old Python layout**.
+
+**Root cause:**  
+- Desktop browser is often running a **local dev build** or the latest deployed Pages build.  
+- The phone app is a **cached PWA from GitHub Pages** and only updates when: (1) a new commit is **pushed** to `origin/main`, (2) the **Pages deploy** run is green, and (3) the PWA cache/service worker is refreshed.
+
+**Mandatory checklist before debugging code again:**
+
+1. **Confirm commit is on origin/main**  
+   - `git status` must NOT say “ahead of 'origin/main'”.  
+   - If it does: `git push` first.
+2. **Confirm GitHub Pages deploy is green**  
+   - GitHub → `Actions` → latest Pages workflow must show **conclusion = success** for the commit with your change.
+3. **Reset the PWA cache on the phone ONCE per deploy**  
+   - Open: `https://llomj.github.io/CLI_exercises/clear-sw.html` in the same browser/app the icon uses.  
+   - Fully close the app/tab, then reopen `https://llomj.github.io/CLI_exercises/` from the icon or browser.
+
+**Rule:** If desktop shows the change and code looks correct, assume **deploy/cache** is the problem first, **not** the feature implementation. Do not re‑implement the same feature just because the phone app still serves an old bundle.
+
 ---
 
 ## March 4, 2026 — French options incident (browser OK, phone app stale)
