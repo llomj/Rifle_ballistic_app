@@ -11,6 +11,7 @@ import { getTranslatedDetailedExplanation } from '../data/detailedExplanationsTr
 import { translateQuestionText, getQuestionDisplay } from '../utils/translateQuestion';
 import { getTranslatedShortExplanation, SHORT_EXPLANATIONS_FR } from '../data/shortExplanationsTranslations';
 import { getDetailedExplanationForLevel, type DetailedExplanationLevel } from '../utils/detailedExplanationLevel';
+import { balanceDisplayedOptionLengths } from '../utils/optionLengthBalancer';
 
 // Function to format code snippets with proper Python indentation
 // Ensures newline after : and 4-space indentation for the next line
@@ -877,10 +878,17 @@ export const QuizView: React.FC<QuizViewProps> = ({
   );
 
   const currentQuestion = questions[currentIndex];
-  const { question: displayQuestion, options: displayOptions } = getQuestionDisplay(
+  const { question: displayQuestion, options: translatedOptions } = getQuestionDisplay(
     language,
     currentQuestion.question,
     currentQuestion.options
+  );
+  const displayOptions = balanceDisplayedOptionLengths(
+    translatedOptions,
+    currentQuestion.correct_option_index,
+    currentQuestion.id,
+    language,
+    currentQuestion.questionFormat
   );
   const isIdSaved = savedIdLogIds.includes(currentQuestion.id) || justSavedId === currentQuestion.id;
   const showWhitespaceHints = shouldVisualizeOptionWhitespace(displayOptions);
