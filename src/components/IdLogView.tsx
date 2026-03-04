@@ -3,8 +3,9 @@ import { IdLogEntry } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTranslatedShortExplanation } from '../data/shortExplanationsTranslations';
 import { QUESTIONS_BANK } from '../questionsBank';
-import { translateQuestionText } from '../utils/translateQuestion';
+import { translateQuestionText, getQuestionDisplay } from '../utils/translateQuestion';
 import { getTranslatedDetailedExplanation } from '../data/detailedExplanationsTranslations';
+import { getDetailedExplanationForLevel, type DetailedExplanationLevel } from '../utils/detailedExplanationLevel';
 import { splitQuestion, hasCodeLikeContent } from '../utils/splitQuestion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -105,9 +106,12 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
     });
   };
 
+  const [detailedExplanationLevel, setDetailedExplanationLevel] = useState<DetailedExplanationLevel>('intermediate');
+
   const getQuestionDetailedExplanation = (id: number): string | null => {
     const question = QUESTIONS_BANK.find(q => q.id === id);
-    return question?.detailedExplanation || null;
+    if (!question?.detailedExplanation) return null;
+    return getDetailedExplanationForLevel(question, detailedExplanationLevel) ?? null;
   };
 
   return (
@@ -137,6 +141,15 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
             {sortedEntries.map((entry) => {
               const entryKey = `${entry.id}-${entry.timestamp}`;
               const isExpanded = expandedEntries.has(entryKey);
+              const bankQuestion = QUESTIONS_BANK.find((q) => q.id === entry.id);
+              const translated = bankQuestion
+                ? getQuestionDisplay(language, entry.question, bankQuestion.options)
+                : { question: translateQuestionText(entry.question, language), options: [] as string[] };
+              const displayQuestion = translated.question;
+              const displayCorrectAnswer =
+                bankQuestion && translated.options.length
+                  ? translated.options[bankQuestion.options.indexOf(entry.correctAnswer)] ?? entry.correctAnswer
+                  : entry.correctAnswer;
               const shortExplanation = getTranslatedShortExplanation(entry.id, entry.explanation, language);
               const detailedExplanation = getQuestionDetailedExplanation(entry.id);
               const shortExplanationLooksLikeCode = /\b(def|print|for|if|while|class|import|from)\b/.test(shortExplanation);
@@ -170,8 +183,8 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
                 <div className="mb-4">
                   <div className="max-h-[45vh] overflow-y-auto overflow-x-hidden bg-slate-800 rounded-lg">
                     {(() => {
-                      const { prefix, code } = splitQuestionForDisplay(entry.question, language);
-                      const displayText = translateQuestionText(entry.question, language);
+                      const { prefix, code } = splitQuestionForDisplay(displayQuestion, language);
+                      const displayText = displayQuestion;
                       if (code) {
                         return (
                           <div className="flex flex-col">
@@ -247,7 +260,7 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
                 <div className="mb-4">
                   <div className="text-xs p-2 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center gap-2">
                     <i className="fas fa-check-circle"></i>
-                    <span>{t('quiz.correctAnswer')}: {entry.correctAnswer}</span>
+                    <span>{t('quiz.correctAnswer')}: {displayCorrectAnswer}</span>
                   </div>
                 </div>
 
@@ -293,10 +306,24 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
                     {detailedExplanation && (
                       <div className="p-6 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                         <div className="space-y-2">
-                          <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                            <i className="fas fa-graduation-cap text-xs"></i>
-                            {t('glossary.inDepthDescription')}
-                          </h5>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                              <i className="fas fa-graduation-cap text-xs"></i>
+                              {t('glossary.inDepthDescription')}
+                            </h5>
+                            <label className="flex items-center gap-1.5 text-[10px] text-slate-500 ml-auto">
+                              <span>{t('idSearch.explanationLevel')}:</span>
+                              <select
+                                value={detailedExplanationLevel}
+                                onChange={(e) => setDetailedExplanationLevel(e.target.value as DetailedExplanationLevel)}
+                                className="bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-300 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              >
+                                <option value="beginner">{t('subLevels.beginner')}</option>
+                                <option value="intermediate">{t('subLevels.intermediate')}</option>
+                                <option value="expert">{t('subLevels.expert')}</option>
+                              </select>
+                            </label>
+                          </div>
                           <div className="text-slate-200 leading-relaxed text-sm whitespace-pre-wrap">
                             {getTranslatedDetailedExplanation(entry.id, detailedExplanation, language)}
                           </div>

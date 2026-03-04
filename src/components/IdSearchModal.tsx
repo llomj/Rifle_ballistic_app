@@ -4,8 +4,9 @@ import { QUESTIONS_BANK } from '../questionsBank';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatTranslation } from '../translations';
 import { getTranslatedDetailedExplanation } from '../data/detailedExplanationsTranslations';
-import { translateQuestionText } from '../utils/translateQuestion';
+import { translateQuestionText, getQuestionDisplay } from '../utils/translateQuestion';
 import { getTranslatedShortExplanation } from '../data/shortExplanationsTranslations';
+import { getDetailedExplanationForLevel, type DetailedExplanationLevel } from '../utils/detailedExplanationLevel';
 import { splitQuestion, hasCodeLikeContent } from '../utils/splitQuestion';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -147,7 +148,9 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
   const [idInput, setIdInput] = useState('');
   const [question, setQuestion] = useState<Question | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const showWhitespaceHints = question ? shouldVisualizeOptionWhitespace(question.options) : false;
+  const [detailedExplanationLevel, setDetailedExplanationLevel] = useState<DetailedExplanationLevel>('intermediate');
+  const displayContent = question ? getQuestionDisplay(language, question.question, question.options) : null;
+  const showWhitespaceHints = question ? shouldVisualizeOptionWhitespace(displayContent!.options) : false;
 
   const handleSearch = () => {
     const id = parseInt(idInput.trim());
@@ -259,8 +262,8 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
                 <div className="mb-4">
                   <div className="max-h-[70vh] overflow-y-auto overflow-x-hidden bg-slate-800 rounded-lg">
                     {(() => {
-                      const { prefix, code } = splitQuestionForDisplay(question.question, language);
-                      const displayText = translateQuestionText(question.question, language);
+                      const { prefix, code } = splitQuestionForDisplay(displayContent!.question, language);
+                      const displayText = displayContent!.question;
                       if (code) {
                         return (
                           <div className="flex flex-col">
@@ -338,7 +341,7 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
                   {showWhitespaceHints && (
                     <p className="text-[10px] text-slate-400 font-mono mb-2">{t('quiz.whitespaceHint')}</p>
                   )}
-                  {question.options.map((option, idx) => (
+                  {displayContent!.options.map((option, idx) => (
                     <div
                       key={idx}
                       className={`p-3 rounded-lg ${
@@ -373,9 +376,23 @@ export const IdSearchModal: React.FC<IdSearchModalProps> = ({ onClose, onSaveToL
                       <summary className="cursor-pointer text-sm text-emerald-400 hover:text-emerald-300 font-bold">
                         {t('idSearch.showDetailedExplanation')}
                       </summary>
-                      <p className="mt-2 text-sm text-slate-400 leading-relaxed whitespace-pre-line">
-                        {getTranslatedDetailedExplanation(question.id, question.detailedExplanation, language)}
-                      </p>
+                      <div className="mt-2 space-y-2">
+                        <label className="flex items-center gap-2 text-xs text-slate-500">
+                          <span>{t('idSearch.explanationLevel')}:</span>
+                          <select
+                            value={detailedExplanationLevel}
+                            onChange={(e) => setDetailedExplanationLevel(e.target.value as DetailedExplanationLevel)}
+                            className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          >
+                            <option value="beginner">{t('subLevels.beginner')}</option>
+                            <option value="intermediate">{t('subLevels.intermediate')}</option>
+                            <option value="expert">{t('subLevels.expert')}</option>
+                          </select>
+                        </label>
+                        <p className="text-sm text-slate-400 leading-relaxed whitespace-pre-line">
+                          {getTranslatedDetailedExplanation(question.id, getDetailedExplanationForLevel(question, detailedExplanationLevel) ?? '', language)}
+                        </p>
+                      </div>
                     </details>
                   )}
                 </div>

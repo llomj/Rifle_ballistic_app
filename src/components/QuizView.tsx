@@ -8,8 +8,9 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatTranslation } from '../translations';
 import { getTranslatedDetailedExplanation } from '../data/detailedExplanationsTranslations';
-import { translateQuestionText } from '../utils/translateQuestion';
+import { translateQuestionText, getQuestionDisplay } from '../utils/translateQuestion';
 import { getTranslatedShortExplanation, SHORT_EXPLANATIONS_FR } from '../data/shortExplanationsTranslations';
+import { getDetailedExplanationForLevel, type DetailedExplanationLevel } from '../utils/detailedExplanationLevel';
 
 // Function to format code snippets with proper Python indentation
 // Ensures newline after : and 4-space indentation for the next line
@@ -741,6 +742,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
   const [loading, setLoading] = useState(true);
   const [score, setScore] = useState(0);
   const [showDetailedExplanation, setShowDetailedExplanation] = useState(false);
+  const [detailedExplanationLevel, setDetailedExplanationLevel] = useState<DetailedExplanationLevel>('intermediate');
   const [justSavedId, setJustSavedId] = useState<number | null>(null);
 
   // We use a ref to capture completedIds at the START of the quiz session.
@@ -875,8 +877,13 @@ export const QuizView: React.FC<QuizViewProps> = ({
   );
 
   const currentQuestion = questions[currentIndex];
+  const { question: displayQuestion, options: displayOptions } = getQuestionDisplay(
+    language,
+    currentQuestion.question,
+    currentQuestion.options
+  );
   const isIdSaved = savedIdLogIds.includes(currentQuestion.id) || justSavedId === currentQuestion.id;
-  const showWhitespaceHints = shouldVisualizeOptionWhitespace(currentQuestion.options);
+  const showWhitespaceHints = shouldVisualizeOptionWhitespace(displayOptions);
 
   // Live evolution score for Random mode: base stats + session progress
   // Use sessionCorrectRef so it updates immediately (score state may lag)
@@ -961,8 +968,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
         <div className="space-y-4 pt-8">
           <div className="max-h-[70vh] overflow-y-auto overflow-x-hidden bg-slate-800 rounded-lg">
             {(() => {
-              const { prefix, code } = splitQuestion(currentQuestion.question, language);
-              const displayText = translateText(currentQuestion.question, language);
+              const { prefix, code } = splitQuestion(displayQuestion, language);
+              const displayText = displayQuestion;
               // If we detected code, show prefix at top and code below with syntax highlighting
               if (code) {
                 return (
@@ -1046,7 +1053,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               {t('quiz.whitespaceHint')}
             </div>
           )}
-          {currentQuestion.options.map((option, idx) => {
+          {displayOptions.map((option, idx) => {
             let colorClass = "bg-slate-800/50 border-white/5 hover:border-emerald-500/50 hover:bg-slate-800";
             if (isAnswered) {
               if (idx === currentQuestion.correct_option_index) {
@@ -1149,12 +1156,26 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 {showDetailedExplanation && currentQuestion.detailedExplanation && (
                   <div className="animate-in slide-in-from-top-4 duration-300 pt-4 border-t border-emerald-500/20 space-y-6">
                     <div className="space-y-3">
-                      <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <i className="fas fa-graduation-cap text-xs"></i>
-                        {t('glossary.inDepthDescription')}
-                      </h5>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <i className="fas fa-graduation-cap text-xs"></i>
+                          {t('glossary.inDepthDescription')}
+                        </h5>
+                        <label className="flex items-center gap-1.5 text-[10px] text-slate-500 ml-auto">
+                          <span>{t('idSearch.explanationLevel')}:</span>
+                          <select
+                            value={detailedExplanationLevel}
+                            onChange={(e) => setDetailedExplanationLevel(e.target.value as DetailedExplanationLevel)}
+                            className="bg-slate-800 border border-slate-600 rounded px-2 py-0.5 text-slate-300 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          >
+                            <option value="beginner">{t('subLevels.beginner')}</option>
+                            <option value="intermediate">{t('subLevels.intermediate')}</option>
+                            <option value="expert">{t('subLevels.expert')}</option>
+                          </select>
+                        </label>
+                      </div>
                       <div className="text-slate-200 leading-relaxed text-sm whitespace-pre-wrap">
-                        {getTranslatedDetailedExplanation(currentQuestion.id, currentQuestion.detailedExplanation!, language)}
+                        {getTranslatedDetailedExplanation(currentQuestion.id, getDetailedExplanationForLevel(currentQuestion, detailedExplanationLevel) ?? '', language)}
                       </div>
                     </div>
 
