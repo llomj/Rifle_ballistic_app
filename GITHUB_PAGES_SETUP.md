@@ -1,48 +1,49 @@
-# GitHub Pages Setup Instructions
+# GitHub Pages Setup Instructions (GitHub Actions)
 
-## Quick Fix for 404 Error
+This repo is set up to build and deploy via **GitHub Actions**. Pages → Build and deployment → **Source: GitHub Actions**.
 
-If `https://llomj.github.io/python-exercises-learn/` shows a 404 or redirects to GitHub:
+## Repository & live URL
 
-### Step 1: Go to Repository Settings
-1. Visit: https://github.com/llomj/python-exercises-learn
-2. Click the **"Settings"** tab (top menu, after "Issues" and "Pull requests")
-3. **Note**: You must be signed in as the repository owner
+- **Repo**: https://github.com/llomj/CLI_exercises
+- **App URL (PWA)**: https://llomj.github.io/CLI_exercises/
 
-### Step 2: Configure GitHub Pages
-1. In the left sidebar, scroll down and click **"Pages"**
-2. Under **"Build and deployment"**:
-   - **Source**: Select **"GitHub Actions"** (NOT "Deploy from a branch")
-3. Click **"Save"**
+## Enable Pages (one-time)
 
-### Step 3: Verify Deployment
-1. Go to **"Actions"** tab: https://github.com/llomj/python-exercises-learn/actions
-2. Wait for the **"Deploy to GitHub Pages"** workflow to complete (green checkmark)
-3. It should take 2-3 minutes after you save the settings
+1. Go to **Settings** → **Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”).
+3. Save. Each push to `main` will run the workflow and deploy.
 
-### Step 4: Access Your App
-After deployment completes:
-- **App URL**: https://llomj.github.io/python-exercises-learn/
+## Verify deployment
+
+1. **Actions** tab: https://github.com/llomj/CLI_exercises/actions  
+2. Wait for **Deploy to GitHub Pages** to finish (green check).
+3. Open on phone or desktop: **https://llomj.github.io/CLI_exercises/**  
+4. Add to home screen for PWA install (HTTPS required).
+
+## Current configuration
+
+- Base path: `/CLI_exercises/` (from repo name in workflow).
+- Workflow: `.github/workflows/deploy.yml` — checkout → `npm ci` → `npm run build` (with `VITE_BASE_REPO`) → upload `dist` → deploy-pages.
 
 ## Troubleshooting
 
-### If the Actions workflow is failing:
-1. Check the Actions tab for error messages
-2. Ensure `package.json` exists with all dependencies
-3. Verify `.github/workflows/deploy.yml` exists
+### "Not working" or 404 on phone
 
-### If you still get 404:
-1. Wait 5-10 minutes after saving settings (GitHub Pages needs time to propagate)
-2. Try hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
-3. Clear browser cache
-4. Check that the workflow shows a green checkmark in Actions
+1. **Set Pages source to GitHub Actions**
+   - Repo → **Settings** → **Pages**
+   - Under **Build and deployment**, set **Source** to **GitHub Actions** (not "Deploy from a branch"). Save.
 
-## Current Configuration
+2. **Run the workflow**
+   - Go to **Actions** → **Deploy to GitHub Pages** → **Run workflow** (Run workflow button), or push a commit to `main`.
+   - Wait until the run is green.
 
-- ✅ Base path configured: `/python-exercises-learn/`
-- ✅ Vite build configured correctly
-- ✅ Service worker path updated
-- ✅ 404.html for routing
-- ✅ Deployment workflow exists
+3. **Wait and hard-refresh**
+   - After the first deploy, wait 1–2 minutes. On your phone, open **https://llomj.github.io/CLI_exercises/** and do a hard refresh or clear the site data for that URL.
 
-**All you need to do is enable GitHub Pages with "GitHub Actions" as the source!**
+4. **Use the exact URL**
+   - Open: `https://llomj.github.io/CLI_exercises/` (with trailing slash is fine; without slash should redirect).
+
+### Other issues
+
+- **Blank or wrong base**: Workflow sets `VITE_BASE_REPO` to the repo name so assets load from `/CLI_exercises/`.
+- **Actions failing**: Check the run logs; ensure `package.json` and dependencies are committed.
