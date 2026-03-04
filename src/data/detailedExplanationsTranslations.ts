@@ -3,7 +3,6 @@ import { containsEnglishProse, normalizeFrenchProse } from '../utils/frenchText'
 import {
   buildFoundationFrenchDetailed,
   extractCommandExample,
-  isFoundationQuestion,
   type ExplanationDepth,
 } from '../utils/foundationDetailedFormatter';
 
@@ -75410,31 +75409,23 @@ export const getTranslatedDetailedExplanation = (
   const normalized = normalizeFrenchProse(frenchCandidate);
   const hasEnglishLeak = containsEnglishProse(normalized);
 
-  if (isFoundationQuestion(questionId)) {
-    const commandExample = extractCommandExample(
-      questionText,
-      correctOption,
-      englishText,
-      normalized
-    );
+  const commandExample = extractCommandExample(
+    questionText,
+    correctOption,
+    englishText,
+    normalized
+  );
 
-    const baseFrench = hasEnglishLeak
-      ? getFrenchDetailedFallback(questionId)
-      : normalized;
+  const baseFrench = hasEnglishLeak
+    ? getFrenchDetailedFallback(questionId)
+    : normalized;
 
-    return buildFoundationFrenchDetailed({
-      depth: explanationLevel,
-      baseText: baseFrench,
-      shortText: SHORT_EXPLANATIONS_FR[questionId],
-      commandExample,
-      questionText,
-      correctOption,
-    });
-  }
-
-  if (hasEnglishLeak) {
-    return getFrenchDetailedFallback(questionId);
-  }
-
-  return normalized;
+  return buildFoundationFrenchDetailed({
+    depth: explanationLevel,
+    baseText: baseFrench,
+    shortText: SHORT_EXPLANATIONS_FR[questionId],
+    commandExample,
+    questionText,
+    correctOption,
+  });
 };

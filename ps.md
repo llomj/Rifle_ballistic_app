@@ -117,3 +117,26 @@ The workflow (`.github/workflows/deploy.yml`) must match the **last successful r
    - reduce any machine-like phrasing in generated expert blocks
 3. Optional content hardening:
    - add per-topic custom step templates (navigation/files/processes/text tools) for even more precise examples in Level 0-4.
+
+---
+
+## March 4, 2026 — Full 3000+ in-depth verbosity rollout (EN + FR)
+
+### Completed now
+
+1. Extended the verbosity formatter from Level 0-4 to **all levels (0-10)**.
+2. Detailed explanation depth selector now yields structured verbose output for:
+   - Beginner
+   - Intermediate
+   - Expert
+   across the full question bank.
+3. French detailed explanation flow now follows the same depth behavior for all IDs, with fallback normalization still respected.
+4. No layout changes were made; this is a content-pipeline upgrade only.
+
+### Remaining QA
+
+1. Spot-check random IDs across Levels 5-10 in EN + FR for:
+   - natural phrasing
+   - command example relevance
+   - consistency between Beginner/Intermediate/Expert depth.
+2. Tune per-topic templates if needed (networking/security/containers levels) to reduce generic examples.

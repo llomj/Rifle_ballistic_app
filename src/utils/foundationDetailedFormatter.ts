@@ -1,9 +1,4 @@
-import { QUESTIONS_PER_LEVEL } from '../constants';
-
 export type ExplanationDepth = 'beginner' | 'intermediate' | 'expert';
-
-const FOUNDATION_MAX_LEVEL = 4;
-const FOUNDATION_LAST_ID = QUESTIONS_PER_LEVEL * (FOUNDATION_MAX_LEVEL + 1);
 
 const KNOWN_COMMANDS = new Set([
   'ls',
@@ -120,13 +115,6 @@ const isLikelyCommandExample = (candidate: string): boolean => {
   }
 
   return true;
-};
-
-export const isFoundationQuestion = (questionId: number, level?: number): boolean => {
-  if (typeof level === 'number') {
-    return level <= FOUNDATION_MAX_LEVEL;
-  }
-  return questionId >= 1 && questionId <= FOUNDATION_LAST_ID;
 };
 
 export const extractCommandExample = (...texts: Array<string | undefined>): string | undefined => {

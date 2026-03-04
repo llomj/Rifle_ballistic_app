@@ -2,7 +2,6 @@ import type { Question } from '../types';
 import {
   buildFoundationEnglishDetailed,
   extractCommandExample,
-  isFoundationQuestion,
 } from './foundationDetailedFormatter';
 
 export type DetailedExplanationLevel = 'beginner' | 'intermediate' | 'expert';
@@ -30,7 +29,6 @@ export function getDetailedExplanationForLevel(
   })();
 
   if (!baseByLevel) return baseByLevel;
-  if (!isFoundationQuestion(q.id, q.level)) return baseByLevel;
 
   const commandExample = extractCommandExample(
     q.question,
