@@ -11,40 +11,64 @@ interface PlatformDiff {
 
 const PLATFORM_DIFFS: PlatformDiff[] = [
   {
-    command: 'sed -i',
-    linux: 'sed -i "s/old/new/" file   # in-place edit',
-    macos: "sed -i '' 's/old/new/' file   # backup suffix required (empty '' for none)",
-    notes: 'macOS sed requires a backup extension; use empty string for no backup.'
+    command: 'awk -i inplace',
+    linux: 'awk -i inplace "{print}" file   # GNU awk 4.1+',
+    macos: "awk '{print}' file > tmp && mv tmp file   # no -i",
+    notes: 'BSD awk lacks -i inplace. Use temp file.'
   },
   {
-    command: 'date',
-    linux: 'date +%Y-%m-%d   # GNU date',
-    macos: 'date +%Y-%m-%d   # BSD date (similar)',
-    notes: 'Most format strings work on both. -d (GNU) vs -v (BSD) for relative dates.'
+    command: 'cp --reflink',
+    linux: 'cp --reflink=auto src dst   # copy-on-write when possible',
+    macos: 'cp -c src dst   # -c for clone (reflink) on APFS',
+    notes: 'Linux: --reflink. macOS: -c for clone on APFS.'
   },
   {
-    command: 'xargs',
-    linux: 'echo -n "a b" | xargs -d " " -I {} echo {}',
-    macos: "echo 'a b' | xargs -I {} echo {}   # -d not available on BSD",
-    notes: 'BSD xargs lacks -d. Use different input formatting.'
+    command: 'date (relative)',
+    linux: 'date -d "yesterday"   date -d "+12 hours"',
+    macos: 'date -v-1d   date -v+12H',
+    notes: 'GNU: -d. BSD: -v with y/m/w/d/H/M/S. Install coreutils for gdate on macOS.'
+  },
+  {
+    command: 'expr vs $(( ))',
+    linux: 'expr 1 + 1   or   echo $((1 + 1))',
+    macos: 'Same; $(( )) preferred for arithmetic.',
+    notes: '$(( )) is POSIX and works everywhere.'
+  },
+  {
+    command: 'find -delete',
+    linux: 'find . -name "*.bak" -delete',
+    macos: 'find . -name "*.bak" -delete   # works on both',
+    notes: '-delete is POSIX; generally works on both.'
+  },
+  {
+    command: 'find -printf',
+    linux: 'find . -maxdepth 1 -printf "%P\\n"',
+    macos: 'find . -maxdepth 1 | xargs -I {} basename {}   # -printf not available',
+    notes: 'macOS find lacks -printf. Use xargs basename or a loop.'
   },
   {
     command: 'grep -P',
     linux: 'grep -P "\\d+" file   # Perl regex',
-    macos: 'grep -E "[0-9]+" file   # -P not available; use -E or install GNU grep',
-    notes: 'macOS grep does not support -P. Use -E for extended regex.'
+    macos: 'grep -E "[0-9]+" file   # -P not available; brew install grep for ggrep',
+    notes: 'macOS grep does not support -P. Use -E or install GNU grep.'
   },
   {
-    command: 'wc -l',
-    linux: 'wc -l file   # counts newlines',
-    macos: 'wc -l file   # same, but no newline at EOF = may undercount by 1',
-    notes: 'If file lacks trailing newline, wc -l may report one fewer line on some systems.'
+    command: 'grep -r (recursive)',
+    linux: 'grep -r pattern dir/   # skips binaries by default on some',
+    macos: 'grep -r pattern dir/   # similar; -I to skip binaries',
+    notes: 'Both support -r. Use -I to skip binary files when needed.'
   },
   {
-    command: 'readlink',
-    linux: 'readlink -f /path   # canonical absolute path',
-    macos: 'readlink -f /path   # not on macOS; use greadlink (GNU) or realpath',
-    notes: 'Install coreutils (brew install coreutils) for greadlink on macOS.'
+    command: 'head / tail -n',
+    linux: 'head -n 5 file   tail -n 5 file',
+    macos: 'head -5 file   tail -5 file   # both accept -n 5',
+    notes: 'Both work; -5 is shorthand on macOS.'
+  },
+  {
+    command: 'ls --color',
+    linux: 'ls --color=auto   ls -G on some',
+    macos: 'ls -G   # BSD ls uses -G for color',
+    notes: 'Linux: --color. macOS: -G. Many distros alias ls to ls --color.'
   },
   {
     command: 'md5sum / sha256sum',
@@ -53,10 +77,118 @@ const PLATFORM_DIFFS: PlatformDiff[] = [
     notes: 'macOS uses md5 and shasum; Linux uses md5sum and sha256sum.'
   },
   {
-    command: 'head / tail -n',
-    linux: 'head -n 5 file   tail -n 5 file',
-    macos: 'head -5 file   tail -5 file   # -n optional; both accept -n 5',
-    notes: 'Both accept -n N. On macOS, -5 is shorthand for -n 5.'
+    command: 'mktemp',
+    linux: 'mktemp   mktemp -d   mktemp -p /tmp',
+    macos: 'mktemp   mktemp -d   # -p not on macOS',
+    notes: 'BSD mktemp lacks -p. Use mktemp in desired dir: mktemp /tmp/foo.XXXXXX.'
+  },
+  {
+    command: 'ps (process list)',
+    linux: 'ps aux   ps -ef   # different columns',
+    macos: 'ps aux   ps -ef   # aux works; -ef shows different format',
+    notes: 'Output columns differ. Use ps -o pid,comm,args for portability.'
+  },
+  {
+    command: 'readlink -f',
+    linux: 'readlink -f /path   # canonical absolute path',
+    macos: 'readlink -f not on macOS. Use: greadlink -f (coreutils) or realpath',
+    notes: 'brew install coreutils for greadlink.'
+  },
+  {
+    command: 'realpath',
+    linux: 'realpath file   # canonical path',
+    macos: 'realpath not default; brew install coreutils or use readlink',
+    notes: 'On macOS, use greadlink -f from coreutils.'
+  },
+  {
+    command: 'sed -E (extended regex)',
+    linux: 'sed -E "s/(foo|bar)//g"   # -E works',
+    macos: "sed -E doesn't fully work; use -e 's/foo//g' -e 's/bar//g' or perl -pe",
+    notes: 'BSD sed -E can fail on | + ? \\s \\t. Use multiple -e or perl.'
+  },
+  {
+    command: 'sed -i',
+    linux: 'sed -i "s/old/new/" file   # in-place edit (no backup)',
+    macos: "sed -i '' 's/old/new/' file   # backup arg required ('' = no backup)",
+    notes: 'macOS sed requires a backup extension; use empty string for no backup.'
+  },
+  {
+    command: 'seq',
+    linux: 'seq 1 10   seq -w 1 100',
+    macos: 'seq 1 10   # -w not on BSD seq',
+    notes: 'BSD seq lacks -w (equal width). Use printf or awk.'
+  },
+  {
+    command: 'sort -V (version sort)',
+    linux: 'sort -V   # natural/version sort',
+    macos: 'sort -V not on BSD; use sort -t. -k1,1n -k2,2n or gsort (coreutils)',
+    notes: 'brew install coreutils for gsort -V on macOS.'
+  },
+  {
+    command: 'split --additional-suffix',
+    linux: 'split -b 50M log.txt chunk --additional-suffix=.log',
+    macos: 'split -b 50m log.txt chunk   # then rename; no --additional-suffix',
+    notes: 'BSD split lacks --additional-suffix. Split then rename in a loop.'
+  },
+  {
+    command: 'stat',
+    linux: 'stat -c %s file   stat --printf="%s" file',
+    macos: 'stat -f %z file   stat -x file   # different format',
+    notes: 'GNU stat uses -c/--printf; BSD stat uses -f. Output format differs.'
+  },
+  {
+    command: 'tar (extract)',
+    linux: 'tar -xvf archive.tar.gz   # -z implicit on .gz',
+    macos: 'tar -xvf archive.tar.gz   # generally same; some flag differences',
+    notes: 'Usually compatible. For BSD tar use -x -v -f; GNU allows -xvf.'
+  },
+  {
+    command: 'timeout',
+    linux: 'timeout 5 slow_command',
+    macos: 'timeout not default; use perl -e "alarm 5; exec @ARGV" or gtimeout (coreutils)',
+    notes: 'brew install coreutils for gtimeout on macOS.'
+  },
+  {
+    command: 'touch -d',
+    linux: 'touch -d "2020-01-01" file',
+    macos: 'touch -t 202001010000 file   # -t format: [[CC]YY]MMDDhhmm[.ss]',
+    notes: 'GNU touch -d accepts many formats; BSD touch -t has different format.'
+  },
+  {
+    command: 'uuidgen',
+    linux: 'uuidgen   # lowercase output',
+    macos: 'uuidgen   # uppercase output',
+    notes: 'Same command; output casing differs (Linux lowercase, macOS uppercase).'
+  },
+  {
+    command: 'wc -l',
+    linux: 'wc -l file   # counts newlines',
+    macos: 'wc -l file   # no trailing newline = may undercount by 1',
+    notes: 'If file lacks trailing newline, wc -l may report one fewer line.'
+  },
+  {
+    command: 'which',
+    linux: 'which cmd   # often built-in',
+    macos: 'which cmd   type cmd   command -v cmd   # command -v is portable',
+    notes: 'Prefer command -v for portability in scripts.'
+  },
+  {
+    command: 'xargs -d',
+    linux: 'echo -n "a b" | xargs -d " " -I {} echo {}',
+    macos: "xargs -d not available. Use: echo 'a b' | xargs -I {} echo {}",
+    notes: 'BSD xargs lacks -d. Different input formatting needed.'
+  },
+  {
+    command: 'xargs -r / --no-run-if-empty',
+    linux: 'find . -name "*.txt" | xargs -r wc -l',
+    macos: 'find . -name "*.txt" | xargs wc -l   # BSD xargs does not run with empty input anyway',
+    notes: 'GNU xargs -r avoids running command on empty input; BSD behaves differently.'
+  },
+  {
+    command: 'xargs -I (replacements)',
+    linux: 'echo x | xargs -I {} echo a-{} b-{} c-{}   # all replaced',
+    macos: 'echo x | xargs -I {} echo a-{} b-{}   # only first 5 args replaced',
+    notes: 'BSD xargs -I replaces only first 5 argument occurrences.'
   }
 ];
 

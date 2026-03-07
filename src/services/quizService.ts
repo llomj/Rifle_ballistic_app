@@ -1,22 +1,25 @@
-import { Question, PersonaStage } from "../types";
+import { Question } from "../types";
 import { QUESTIONS_BANK } from "../questionsBank";
 
 export class QuizService {
   /**
-   * Fetches a batch of questions from the Python Exercises bank.
-   * Logic: Filters by level, excludes already completed IDs,
+   * Fetches a batch of questions from the CLI question bank.
+   * Logic: Filters by level (or drillLevels), excludes already completed IDs,
    * and returns a randomized slice.
    */
   async getBatch(
     level: number, 
     count: number = 15,
     completedIds: number[] = [],
-    randomMode: boolean = false
+    randomMode: boolean = false,
+    drillLevels?: number[]
   ): Promise<Question[]> {
-    // 1. Filter by requested level OR all levels if random mode
-    const levelQuestions = randomMode 
-      ? QUESTIONS_BANK // Get questions from all levels in random mode
-      : QUESTIONS_BANK.filter(q => q.level === level);
+    // 1. Filter by requested level, drill levels, or all levels if random mode
+    const levelQuestions = drillLevels && drillLevels.length > 0
+      ? QUESTIONS_BANK.filter(q => drillLevels.includes(q.level))
+      : randomMode
+        ? QUESTIONS_BANK // Get questions from all levels in random mode
+        : QUESTIONS_BANK.filter(q => q.level === level);
     
     // 2. Exclude already completed questions to prevent repeats
     const available = levelQuestions.filter(q => !completedIds.includes(q.id));

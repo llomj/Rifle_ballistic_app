@@ -1,4 +1,4 @@
-const CACHE_NAME = 'python-exercises-learn-offline-v14';
+const CACHE_NAME = 'cli-exercises-learn-offline-v15';
 // Don't pre-cache index.html — install-time fetch can get stale HTML; we cache it only after network-first fetch
 const STATIC_ASSETS = ['./manifest.json'];
 

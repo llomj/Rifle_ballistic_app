@@ -139,18 +139,18 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         onClick: () => { onShowOperations(); onClose(); }
       });
     }
-    if (onShowWeakSpotDrills) {
-      rulesSubItems.push({
-        icon: 'fa-bullseye',
-        label: t('rules.weakSpotDrills'),
-        onClick: () => { onShowWeakSpotDrills(); onClose(); }
-      });
-    }
     if (onShowPlatform) {
       rulesSubItems.push({
         icon: 'fa-laptop',
         label: t('rules.platform'),
         onClick: () => { onShowPlatform(); onClose(); }
+      });
+    }
+    if (onShowWeakSpotDrills) {
+      rulesSubItems.push({
+        icon: 'fa-bullseye',
+        label: t('rules.weakSpotDrills'),
+        onClick: () => { onShowWeakSpotDrills(); onClose(); }
       });
     }
     if (rulesSubItems.length > 0) {

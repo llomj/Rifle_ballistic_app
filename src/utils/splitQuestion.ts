@@ -3,21 +3,20 @@
  * Used by QuizView, IdSearchModal, IdLogView.
  */
 
+/** CLI-focused: only matches terminal commands, flags, etc. Not Python prose. */
 export const hasCodeLikeContent = (text: string): boolean => {
   if (!text || text.length < 2) return false;
   return (
-    /f["']/.test(text) ||                    // f-strings f"..." f'...'
-    /["'][^"']*["']/.test(text) ||           // String literals
-    /[a-zA-Z_]\w*\s*\(/.test(text) ||         // Function/method calls
-    /[\[\(\{]/.test(text) ||                  // Brackets
-    /\.[a-zA-Z_]\w*\s*\(/.test(text) ||       // Method calls .name(
-    /\b(def|class|for|while|if|with|import|from|print)\s+/.test(text) ||  // Keywords
-    /\b(and|or|not)\b/.test(text) ||          // Boolean operators
-    /[=!<>]=|[<>]/.test(text) ||             // Comparison operators ==, !=, <=, >=, <, >
-    /\[\d*:?-?\d*:?-?\d*\]/.test(text) ||     // Indexing/slicing [0], [0:3]
-    /[\+\-\*\/\%]/.test(text) ||             // Arithmetic operators
-    /\*\*/.test(text) ||                      // Power operator
-    /\b(True|False|None)\b/.test(text)        // Python literals
+    /`[^`]+`/.test(text) ||                   // Backtick-wrapped commands
+    /\$\s*[a-zA-Z_][\w-]*/.test(text) ||      // $var or $ command
+    /^\s*[#!].*[\w]/.test(text) ||            // Shebang or comment line
+    /[a-zA-Z_][\w-]*\s+-[\w-]/.test(text) ||  // Command with flag: grep -n, ls -la
+    /\b(for\s+\w+\s+in|while|if|then|do|done)\s+/.test(text) ||  // Bash keywords (not bare "for")
+    /\[\[.*\]\]/.test(text) ||                // [[ condition ]]
+    /\$\{[\w@*#?-]+\}/.test(text) ||          // ${var}
+    /[<>|&;]/.test(text) ||                   // Redirects, pipes, etc.
+    /[\+\-\*\/\%]=/.test(text) ||             // Assignment operators
+    /[=!<>]=|[<>]/.test(text)                 // Comparison operators
   );
 };
 
@@ -40,7 +39,7 @@ export const splitQuestion = (
       const lines = enhancedText.split('\n');
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (/^\s{2,}/.test(line) || /^\s*(def|class|for|while|if|with|import|from)\s+/.test(line)) {
+        if (/^\s{2,}/.test(line) || /^\s*(for\s+\w+\s+in|while|if|with|import|from|def|class)\s+/.test(line)) {
           return {
             prefix: lines.slice(0, i).join('\n').trim(),
             code: lines.slice(i).join('\n')
@@ -82,8 +81,8 @@ export const splitQuestion = (
         const hasQuestionMark = remainingText.endsWith('?');
         if (hasQuestionMark) remainingText = remainingText.slice(0, -1).trim();
 
-        const functionCallPattern = /[a-zA-Z_]\w*\s*\(/;
-        const codeKeywordPattern = /\b(def|class|for|while|if|with|import|from|print)\s+/;
+        const functionCallPattern = /[a-zA-Z_][\w-]*\s*\(/;
+        const codeKeywordPattern = /\b(for\s+\w+\s+in|while|if|with|import|from|print)\s+|\b(ls|grep|cat|cd|echo|chmod)\s+(-|\w)/;
         const bracketPattern = /[\[\(\{]/;
         const comparisonPattern = /[=!<>]=|[<>]/;  // ==, !=, <=, >=, <, >
         const booleanKeywordPattern = /\b(and|or|not)\b/;
@@ -103,7 +102,9 @@ export const splitQuestion = (
 
     // Fallback: look for code patterns anywhere
     const codePatterns = [
-      /\b(def|class|for|while|if|with|import|from)\s+/,
+      /\b(for\s+\w+\s+in|while|if|with|import|from)\s+/,
+      /[a-zA-Z_][\w-]*\s+-\w/,   // command -flag
+      /`[^`]+`/,
       /print\s*\(/,
       /[a-zA-Z_]\w*\s*\(/,
     ];

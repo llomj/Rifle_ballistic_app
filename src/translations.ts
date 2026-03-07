@@ -172,6 +172,17 @@ export const translations = {
       sound: "Sound",
       haptic: "Haptic",
     },
+
+    // Rules sub-items (Weak Spot Drills, Platform)
+    rules: {
+      weakSpotDrills: "Weak Spot Drills",
+      weakSpotDrillsDesc: "Focus on topics where you make the most mistakes. Start a drill to practice questions from your weakest levels.",
+      startDrill: "Start Drill",
+      noWeakSpotsYet: "No weak spots yet",
+      noWeakSpotsHint: "Answer some quiz questions first. Incorrect answers will reveal your weak spots.",
+      platform: "Platform (Linux vs macOS)",
+      platformDesc: "Commands that differ between Linux and macOS. Tap to expand.",
+    },
     
     // Reset App Modal
     resetModal: {
@@ -195,7 +206,7 @@ export const translations = {
     // ID Search & Log
     idSearch: {
       searchById: "Search by ID",
-      enterId: "ID (1-3000)",
+      enterId: "ID (1-3300)",
       search: "Search",
       saveToLog: "Save to Log",
       saved: "Saved!",
@@ -205,7 +216,7 @@ export const translations = {
       showDetailedExplanation: "Show Detailed Explanation",
       noSavedQuestions: "No saved questions yet. Search by ID and save questions for reference.",
       idLog: "ID Log",
-      invalidId: "Please enter a valid ID between 1 and 3000",
+      invalidId: "Please enter a valid ID between 1 and 3300",
       questionNotFound: "Question with ID {id} not found",
     },
     
@@ -432,6 +443,17 @@ export const translations = {
       sound: "Son",
       haptic: "Haptique",
     },
+
+    // Rules sub-items (Drills de points faibles, Plateforme)
+    rules: {
+      weakSpotDrills: "Drills points faibles",
+      weakSpotDrillsDesc: "Concentrez-vous sur les sujets où vous faites le plus d'erreurs. Lancez un drill pour pratiquer vos niveaux les plus faibles.",
+      startDrill: "Lancer le drill",
+      noWeakSpotsYet: "Aucun point faible pour l'instant",
+      noWeakSpotsHint: "Répondez à des questions de quiz d'abord. Vos erreurs révéleront vos points faibles.",
+      platform: "Plateforme (Linux vs macOS)",
+      platformDesc: "Commandes qui diffèrent entre Linux et macOS. Touchez pour développer.",
+    },
     
     // Reset App Modal
     resetModal: {
@@ -455,7 +477,7 @@ export const translations = {
     // ID Search & Log
     idSearch: {
       searchById: "Rechercher par ID",
-      enterId: "ID (1-3000)",
+      enterId: "ID (1-3300)",
       search: "Rechercher",
       saveToLog: "Enregistrer dans le Journal",
       saved: "Enregistré!",
@@ -465,7 +487,7 @@ export const translations = {
       showDetailedExplanation: "Afficher l'Explication Détaillée",
       noSavedQuestions: "Aucune question enregistrée pour le moment. Recherchez par ID et enregistrez des questions pour référence.",
       idLog: "Journal ID",
-      invalidId: "Veuillez entrer un ID valide entre 1 et 3000",
+      invalidId: "Veuillez entrer un ID valide entre 1 et 3300",
       questionNotFound: "Question avec l'ID {id} introuvable",
     },
     
