@@ -153,6 +153,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         onClick: () => { onShowWeakSpotDrills(); onClose(); }
       });
     }
+    rulesSubItems.sort((a, b) => a.label.localeCompare(b.label, language));
     if (rulesSubItems.length > 0) {
       menuItems.push({
         type: 'rules',
