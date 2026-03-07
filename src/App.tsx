@@ -3,75 +3,46 @@ import { UserStats, PersonaStage, QuestionAttempt } from './types';
 import { EvolutionHub } from './components/EvolutionHub';
 import { SettingsMenu } from './components/SettingsMenu';
 import { IdLogEntry } from './types';
-import { LEVELS, XP_PER_QUESTION, QUESTIONS_PER_LEVEL, getStarsFromProgress, getRandomModeScore, getPersonaFromRandomScore, PERSONA_EMOJI } from './constants';
+import { LEVELS, XP_PER_QUESTION, QUESTIONS_PER_LEVEL, getStarsFromProgress, getStarsFromAccuracy, getStarsFromRandomCorrect, getRandomModeScore, getPersonaFromRandomScore, PERSONA_EMOJI } from './constants';
 import { useLanguage } from './contexts/LanguageContext';
 import { formatTranslation } from './translations';
+import { playStarMelodyShort, playStarMelodyLong, triggerHaptic } from './utils/sounds';
 
 const LOCAL_STORAGE_KEY = 'cli_exercises_learn_stats_v1';
+const SOUND_STORAGE_KEY = 'cli_exercises_sound_v1';
+const HAPTIC_STORAGE_KEY = 'cli_exercises_haptic_v1';
 
-const playStarCelebrationSound = async () => {
-  if (typeof window === 'undefined') return;
-
-  const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) return;
-
-  const audioContext = new AudioContextClass();
-  if (audioContext.state === 'suspended') {
-    await audioContext.resume();
-  }
-  const now = audioContext.currentTime;
-  const masterGain = audioContext.createGain();
-
-  masterGain.connect(audioContext.destination);
-  masterGain.gain.setValueAtTime(0.0001, now);
-  masterGain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
-  masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
-
-  const scheduleTone = (
-    frequency: number,
-    startOffset: number,
-    duration: number,
-    type: OscillatorType,
-    volume = 0.12
-  ) => {
-    const osc = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    const start = now + startOffset;
-    const end = start + duration;
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(frequency, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(volume, start + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, end);
-
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.start(start);
-    osc.stop(end + 0.02);
-  };
-
-  const leadNotes = [
-    { freq: 587.33, at: 0.0, len: 0.07 },   // D5
-    { freq: 739.99, at: 0.08, len: 0.07 },  // F#5
-    { freq: 880.0, at: 0.16, len: 0.08 },   // A5
-    { freq: 1108.73, at: 0.25, len: 0.1 },  // C#6
-    { freq: 1318.51, at: 0.37, len: 0.24 }  // E6
-  ];
-
-  leadNotes.forEach((note) => {
-    scheduleTone(note.freq, note.at, note.len, 'square', 0.07);
-    scheduleTone(note.freq * 0.5, note.at, note.len, 'triangle', 0.035);
-    scheduleTone(note.freq * 1.5, note.at + 0.01, note.len * 0.55, 'triangle', 0.015);
-  });
-
-  scheduleTone(146.83, 0.0, 0.18, 'sawtooth', 0.028);
-  scheduleTone(185.0, 0.18, 0.18, 'sawtooth', 0.028);
-  scheduleTone(220.0, 0.36, 0.24, 'sawtooth', 0.028);
-
-  window.setTimeout(() => {
-    void audioContext.close();
-  }, 900);
+const FallingStars: React.FC = () => {
+  const stars = React.useMemo(
+    () =>
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        left: `${5 + (i * 4.5)}%`,
+        delay: `${(i % 5) * 0.4}s`,
+        duration: `${2.2 + (i % 4) * 0.3}s`,
+        size: 10 + (i % 6)
+      })),
+    []
+  );
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="absolute text-amber-400 animate-fall opacity-80"
+          style={{
+            left: s.left,
+            animationDelay: s.delay,
+            animationDuration: s.duration,
+            fontSize: s.size,
+            top: '-20px'
+          }}
+        >
+          <i className="fas fa-star" />
+        </div>
+      ))}
+    </div>
+  );
 };
 
 const INITIAL_STATS: UserStats = {
@@ -81,6 +52,7 @@ const INITIAL_STATS: UserStats = {
   completedQuestionIds: [],
   highestUnlockedLevel: 1,
   levelProgress: {},
+  correctPerLevel: {},
   acquiredStars: {},
   history: [],
   idLog: [],
@@ -130,6 +102,24 @@ const App: React.FC = () => {
   const [showLevelSelector, setShowLevelSelector] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem(SOUND_STORAGE_KEY) !== 'false';
+  });
+  const [hapticEnabled, setHapticEnabled] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem(HAPTIC_STORAGE_KEY) !== 'false';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
+  }, [soundEnabled]);
+  useEffect(() => {
+    localStorage.setItem(HAPTIC_STORAGE_KEY, String(hapticEnabled));
+  }, [hapticEnabled]);
+
+  const toggleSound = () => setSoundEnabled((prev) => !prev);
+  const toggleHaptic = () => setHapticEnabled((prev) => !prev);
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en');
@@ -159,13 +149,23 @@ const App: React.FC = () => {
           );
           parsed.stateVersion = 2;
         }
-        // Migration: derive acquiredStars from levelProgress when missing or partial
+        // Migration: backfill correctPerLevel from levelProgress (assume 100% for legacy users)
         const levelProgress = parsed.levelProgress || {};
+        if (!parsed.correctPerLevel) {
+          parsed.correctPerLevel = {};
+          for (const level of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+            const progress = levelProgress[level] || 0;
+            if (progress > 0) parsed.correctPerLevel[level] = progress;
+          }
+        }
+        // Migration: derive acquiredStars from correctPerLevel + levelProgress (accuracy-based)
+        const correctPerLevel = parsed.correctPerLevel || {};
         const existingStars = parsed.acquiredStars || {};
         const migratedStars: Record<number, number> = { ...existingStars };
         for (const level of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-          const progress = levelProgress[level] || 0;
-          const derivedStars = getStarsFromProgress(progress);
+          const correct = correctPerLevel[level] || 0;
+          const total = levelProgress[level] || 0;
+          const derivedStars = getStarsFromAccuracy(correct, total);
           if (derivedStars > (existingStars[level] || 0)) {
             migratedStars[level] = derivedStars;
           }
@@ -189,9 +189,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (showResult?.starEarned) {
-      void playStarCelebrationSound();
+      if (soundEnabled) {
+        if (showResult.starEarned === 5) void playStarMelodyLong();
+        else void playStarMelodyShort();
+      }
+      if (hapticEnabled) {
+        if (showResult.starEarned === 5) triggerHaptic([50, 30, 50, 30, 100]);
+        else triggerHaptic(20);
+      }
     }
-  }, [showResult?.starEarned]);
+  }, [showResult?.starEarned, soundEnabled, hapticEnabled]);
 
   const currentLevelInfo = LEVELS.find(l => l.level === stats.currentLevel) || LEVELS[0];
   const currentPersona = (stats.randomMode && stats.randomModeStats)
@@ -290,33 +297,42 @@ const App: React.FC = () => {
 
       const rm = stats.randomModeStats ?? { totalAnswered: 0, totalCorrect: 0 };
       const prevScore = getRandomModeScore(rm);
-      const newTotalAnswered = rm.totalAnswered + total;
       const newTotalCorrect = rm.totalCorrect + score;
-      const newScore = Math.floor(newTotalCorrect * (newTotalCorrect / newTotalAnswered));
+      const prevStars = getStarsFromRandomCorrect(rm.totalCorrect);
+      const newStars = getStarsFromRandomCorrect(newTotalCorrect);
+      const starEarned = newStars > prevStars ? newStars : null;
+      const newScore = Math.floor(newTotalCorrect * (newTotalCorrect / (rm.totalAnswered + total)));
 
       setShowResult({
         score,
         total,
-        starEarned: null,
+        starEarned,
         randomMode: true,
         prevScore,
         newScore,
         newPersona: getPersonaFromRandomScore(newScore)
       });
     } else {
-      // Level mode: update levelProgress, stars, currentLevel
+      // Level mode: update levelProgress, correctPerLevel, stars, currentLevel
       setStats(prev => {
         const newXp = prev.xp + xpGained;
         const currentLevelProgress = prev.levelProgress[prev.currentLevel] || 0;
         const newLevelProgress = Math.min(QUESTIONS_PER_LEVEL, currentLevelProgress + total);
+        const currentCorrect = prev.correctPerLevel?.[prev.currentLevel] || 0;
+        const newCorrect = currentCorrect + score;
 
         const updatedLevelProgress = {
           ...prev.levelProgress,
           [prev.currentLevel]: newLevelProgress
         };
 
+        const updatedCorrectPerLevel = {
+          ...(prev.correctPerLevel || {}),
+          [prev.currentLevel]: newCorrect
+        };
+
         const currentStars = prev.acquiredStars?.[prev.currentLevel] || 0;
-        const newStars = Math.max(currentStars, getStarsFromProgress(newLevelProgress));
+        const newStars = Math.max(currentStars, getStarsFromAccuracy(newCorrect, newLevelProgress));
 
         const updatedAcquiredStars = {
           ...(prev.acquiredStars || {}),
@@ -334,6 +350,7 @@ const App: React.FC = () => {
           currentLevel: newLevel,
           highestUnlockedLevel: Math.max(prev.highestUnlockedLevel, newLevel),
           levelProgress: updatedLevelProgress,
+          correctPerLevel: updatedCorrectPerLevel,
           acquiredStars: updatedAcquiredStars,
           lastSessionScore: score,
           lastSessionTotal: total
@@ -341,9 +358,11 @@ const App: React.FC = () => {
       });
 
       const currentLevelProgress = stats.levelProgress[stats.currentLevel] || 0;
+      const currentCorrect = stats.correctPerLevel?.[stats.currentLevel] || 0;
       const newLevelProgress = Math.min(QUESTIONS_PER_LEVEL, currentLevelProgress + total);
+      const newCorrect = currentCorrect + score;
       const currentStars = stats.acquiredStars?.[stats.currentLevel] || 0;
-      const newStars = Math.max(currentStars, getStarsFromProgress(newLevelProgress));
+      const newStars = Math.max(currentStars, getStarsFromAccuracy(newCorrect, newLevelProgress));
       const starEarned = newStars > currentStars ? newStars : null;
 
       setShowResult({ score, total, starEarned });
@@ -410,16 +429,20 @@ const App: React.FC = () => {
         anchorBottom
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
-          onShowGlossary={view === 'hub' ? () => setView('glossary') : undefined}
+          onShowGlossary={() => setView('glossary')}
           onShowMethods={() => setShowMethods(true)}
           onShowFlags={() => setShowFlags(true)}
           onShowFlow={() => setShowFlow(true)}
           onShowIdSearch={view === 'hub' ? () => setShowIdSearch(true) : undefined}
           onShowIdLog={() => setShowIdLog(true)}
           onShowLearningLog={() => setView('log')}
-          onShowOperations={view === 'quiz' ? () => setShowOperations(true) : undefined}
+          onShowOperations={() => setShowOperations(true)}
           onShowLevelSelector={() => setShowLevelSelector(true)}
           onToggleLanguage={toggleLanguage}
+          soundEnabled={soundEnabled}
+          onToggleSound={toggleSound}
+          hapticEnabled={hapticEnabled}
+          onToggleHaptic={toggleHaptic}
           onResetApp={() => setShowResetModal(true)}
       />
 
@@ -429,6 +452,7 @@ const App: React.FC = () => {
             <QuizView
               level={stats.currentLevel}
               currentProgress={currentProgress}
+              levelStars={randomMode ? getStarsFromRandomCorrect(stats.randomModeStats?.totalCorrect ?? 0) : (stats.acquiredStars?.[stats.currentLevel] ?? getStarsFromAccuracy(stats.correctPerLevel?.[stats.currentLevel] ?? 0, currentProgress))}
               completedIds={stats.completedQuestionIds}
               onAttempt={recordAttempt}
               onComplete={handleQuizComplete}
@@ -438,6 +462,8 @@ const App: React.FC = () => {
               randomModeStats={stats.randomModeStats}
               onSaveToIdLog={saveToIdLog}
               savedIdLogIds={stats.idLog.map(entry => entry.id)}
+              soundEnabled={soundEnabled}
+              hapticEnabled={hapticEnabled}
             />
           </Suspense>
         ) : view === 'log' ? (
@@ -450,7 +476,10 @@ const App: React.FC = () => {
           </Suspense>
         ) : showResult ? (
           <div className="max-w-md mx-auto p-10 glass rounded-3xl text-center space-y-6 animate-in zoom-in duration-500 shadow-2xl relative overflow-hidden">
-            {showResult.starEarned && (
+            {showResult.starEarned === 5 && (
+              <FallingStars />
+            )}
+            {showResult.starEarned && showResult.starEarned < 5 && (
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute inset-0 bg-amber-500/10 animate-pulse"></div>
               </div>
@@ -472,13 +501,9 @@ const App: React.FC = () => {
             <div className="relative z-10">
               {showResult.starEarned ? (
                 <>
-                  <h2 className="text-3xl font-black mb-2 text-amber-400 bg-clip-text">{t('subLevels.subLevelComplete')}</h2>
+                  <h2 className="text-3xl font-black mb-2 text-amber-400 bg-clip-text">{t('stars.starEarned')}</h2>
                   <p className="text-slate-300">
-                    {formatTranslation(t('subLevels.youEarnedStar'), {
-                      star: showResult.starEarned === 1 ? t('subLevels.beginner')
-                        : showResult.starEarned === 2 ? t('subLevels.intermediate')
-                        : t('subLevels.expert')
-                    })}
+                    {formatTranslation(t('stars.youEarnedStars'), { count: showResult.starEarned })}
                   </p>
                 </>
               ) : (
@@ -674,7 +699,10 @@ const App: React.FC = () => {
             onSelectLevel={handleLevelChange}
             onClose={() => setShowLevelSelector(false)}
             acquiredStars={stats.acquiredStars}
+            levelProgress={stats.levelProgress}
+            correctPerLevel={stats.correctPerLevel}
             randomMode={randomMode}
+            randomModeStats={stats.randomModeStats}
           />
         </Suspense>
       )}

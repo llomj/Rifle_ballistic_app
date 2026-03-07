@@ -1,6 +1,6 @@
 import React from 'react';
-import { LEVELS, PERSONA_EMOJI } from '../constants';
-import { PersonaStage } from '../types';
+import { LEVELS, PERSONA_EMOJI, getStarsFromAccuracy, getStarsFromRandomCorrect } from '../constants';
+import { PersonaStage, RandomModeStats } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatTranslation } from '../translations';
 
@@ -10,7 +10,10 @@ interface LevelSelectorModalProps {
   onSelectLevel: (level: number) => void;
   onClose: () => void;
   acquiredStars?: Record<number, number>;
+  levelProgress?: Record<number, number>;
+  correctPerLevel?: Record<number, number>;
   randomMode?: boolean;
+  randomModeStats?: RandomModeStats;
 }
 
 export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
@@ -19,7 +22,10 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
   onSelectLevel,
   onClose,
   acquiredStars = {},
-  randomMode = false
+  levelProgress = {},
+  correctPerLevel = {},
+  randomMode = false,
+  randomModeStats
 }) => {
   const { t } = useLanguage();
 
@@ -53,7 +59,9 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
             const isLocked = levelInfo.level > highestUnlockedLevel;
             const isCurrent = levelInfo.level === currentLevel;
             const isUnlocked = levelInfo.level <= highestUnlockedLevel;
-            const stars = acquiredStars[levelInfo.level] || 0;
+            const progress = levelProgress[levelInfo.level] || 0;
+            const correct = correctPerLevel[levelInfo.level] || 0;
+            const stars = acquiredStars[levelInfo.level] ?? getStarsFromAccuracy(correct, progress);
 
             return (
               <button
@@ -75,17 +83,6 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
                     <i className="fas fa-lock text-slate-500 text-xs"></i>
                   </div>
                 )}
-                {isUnlocked && (
-                  <div className="absolute top-2 right-2 flex gap-0.5">
-                    {[1, 2, 3].map(starNum => (
-                      <i
-                        key={starNum}
-                        className={`fas fa-star text-[10px] ${starNum <= stars ? 'text-amber-400' : 'text-slate-700/50'
-                          }`}
-                      ></i>
-                    ))}
-                  </div>
-                )}
                 <div className="flex flex-col items-center gap-2">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${isCurrent
                       ? 'bg-emerald-500'
@@ -97,6 +94,16 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
                       {getPersonaEmoji(levelInfo.persona)}
                     </span>
                   </div>
+                  {isUnlocked && (
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map(starNum => (
+                        <i
+                          key={starNum}
+                          className={`fas fa-star text-[9px] ${starNum <= stars ? 'text-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.4)]' : 'text-slate-700/50'}`}
+                        ></i>
+                      ))}
+                    </div>
+                  )}
                   <div className="text-center">
                     <div className={`text-sm font-black ${isCurrent ? 'text-emerald-400' : isUnlocked ? 'text-white' : 'text-slate-500'
                       }`}>
@@ -112,6 +119,31 @@ export const LevelSelectorModal: React.FC<LevelSelectorModalProps> = ({
             );
           })}
         </div>
+
+        {randomModeStats && (
+          <div className="glass rounded-2xl p-4 border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🎲</span>
+                <span className="font-bold text-white">{t('hub.randomModeLabel')}</span>
+              </div>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map(starNum => {
+                  const randomStars = getStarsFromRandomCorrect(randomModeStats.totalCorrect);
+                  return (
+                    <i
+                      key={starNum}
+                      className={`fas fa-star text-[10px] ${starNum <= randomStars ? 'text-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.4)]' : 'text-slate-700/50'}`}
+                    ></i>
+                  );
+                })}
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400">
+              {t('stars.randomStarsHint')}
+            </p>
+          </div>
+        )}
 
         <div className="pt-4 border-t border-white/10 space-y-2">
           {randomMode && (

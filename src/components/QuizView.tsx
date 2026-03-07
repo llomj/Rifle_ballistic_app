@@ -12,6 +12,7 @@ import { translateQuestionText, getQuestionDisplay } from '../utils/translateQue
 import { getTranslatedShortExplanation, SHORT_EXPLANATIONS_FR } from '../data/shortExplanationsTranslations';
 import { getDetailedExplanationForLevel, type DetailedExplanationLevel } from '../utils/detailedExplanationLevel';
 import { balanceDisplayedOptionLengths } from '../utils/optionLengthBalancer';
+import { playCorrectSound, playIncorrectSound, triggerHaptic } from '../utils/sounds';
 
 // Function to format code snippets with proper Python indentation
 // Ensures newline after : and 4-space indentation for the next line
@@ -711,6 +712,7 @@ const visualizeWhitespace = (text: string): string => {
 interface QuizViewProps {
   level: number;
   currentProgress: number;
+  levelStars?: number; // 1–5 stars for current level or random mode
   completedIds: number[];
   onAttempt: (attempt: QuestionAttempt) => void;
   onComplete: (score: number) => void;
@@ -720,11 +722,14 @@ interface QuizViewProps {
   randomizeTrigger?: number; // Add trigger to force re-randomization
   randomMode?: boolean; // Random mode: questions from all levels
   randomModeStats?: { totalAnswered: number; totalCorrect: number }; // Base stats for live score display
+  soundEnabled?: boolean; // Play correct/incorrect sounds
+  hapticEnabled?: boolean; // Play haptic feedback
 }
 
 export const QuizView: React.FC<QuizViewProps> = ({
   level,
   currentProgress,
+  levelStars = 0,
   completedIds,
   onAttempt,
   onComplete,
@@ -733,7 +738,9 @@ export const QuizView: React.FC<QuizViewProps> = ({
   savedIdLogIds = [],
   randomizeTrigger,
   randomMode = false,
-  randomModeStats
+  randomModeStats,
+  soundEnabled = true,
+  hapticEnabled = true
 }) => {
   const { t, tRaw, language } = useLanguage();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -788,7 +795,6 @@ export const QuizView: React.FC<QuizViewProps> = ({
         setIsAnswered(false);
         setScore(0);
         setShowDetailedExplanation(false);
-        setScoreJustIncreased(false);
         sessionCorrectRef.current = 0;
       } catch (err) {
         console.error("Failed to load genome batch:", err);
@@ -813,6 +819,15 @@ export const QuizView: React.FC<QuizViewProps> = ({
     if (isCorrect) {
       sessionCorrectRef.current += 1;
       setScore(s => s + 1);
+    }
+
+    if (soundEnabled) {
+      if (isCorrect) void playCorrectSound();
+      else void playIncorrectSound();
+    }
+    if (hapticEnabled) {
+      if (isCorrect) triggerHaptic(10);
+      else triggerHaptic([30, 20]);
     }
 
     onAttempt({
@@ -921,20 +936,12 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 {currentQuestion.subLevel === 'Expert' && t('subLevels.expertCaps')}
               </span>
               <div className="flex gap-0.5">
-                {[1, 2, 3].map(starNum => {
-                  let isEarned = false;
-                  if (currentQuestion.subLevel === 'Beginner') isEarned = starNum <= 1;
-                  if (currentQuestion.subLevel === 'Intermediate') isEarned = starNum <= 2;
-                  if (currentQuestion.subLevel === 'Expert') isEarned = starNum <= 3;
-
-                  return (
-                    <i
-                      key={starNum}
-                      className={`fas fa-star text-[8px] ${isEarned ? 'text-amber-400' : 'text-slate-700'
-                        }`}
-                    ></i>
-                  );
-                })}
+                {[1, 2, 3, 4, 5].map(starNum => (
+                  <i
+                    key={starNum}
+                    className={`fas fa-star text-[8px] ${starNum <= levelStars ? 'text-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.4)]' : 'text-slate-700'}`}
+                  ></i>
+                ))}
               </div>
             </div>
             <div className="flex gap-4 items-center shrink-0">

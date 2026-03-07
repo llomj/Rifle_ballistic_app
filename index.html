@@ -84,6 +84,15 @@
                 margin: 0 auto;
             }
         }
+        /* Falling stars for 5-star celebration */
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 0.9; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
+        }
+        .animate-fall {
+            animation: fall linear forwards;
+            position: absolute;
+        }
     </style>
 <script type="importmap">
 {

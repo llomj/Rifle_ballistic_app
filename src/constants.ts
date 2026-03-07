@@ -6,7 +6,31 @@ export const SUBLEVELS_PER_LEVEL = 3;
 export const QUESTIONS_PER_LEVEL = QUESTIONS_PER_SUBLEVEL * SUBLEVELS_PER_LEVEL; // 300
 export const TOTAL_QUESTIONS = 3300; // 11 levels (0–10) × 300 questions
 
-/** Derive number of stars (0–3) from progress for a level. Used for migration and display. */
+/** Star thresholds: 1 star at 10%, 2 at 40%, 3 at 65%, 4 at 80%, 5 at 95% (accuracy). */
+export const STAR_PERCENTAGE_THRESHOLDS = [10, 40, 65, 80, 95] as const;
+
+/** Derive stars (0–5) from accuracy (correct / total). Used for level mode. */
+export const getStarsFromAccuracy = (correct: number, total: number): number => {
+  if (total === 0) return 0;
+  const pct = (correct / total) * 100;
+  let stars = 0;
+  for (const t of STAR_PERCENTAGE_THRESHOLDS) {
+    if (pct >= t) stars += 1;
+  }
+  return stars;
+};
+
+/** Derive stars (0–5) for Random mode: based on correct vs TOTAL_QUESTIONS (harder). */
+export const getStarsFromRandomCorrect = (correct: number): number => {
+  const pct = (correct / TOTAL_QUESTIONS) * 100;
+  let stars = 0;
+  for (const t of STAR_PERCENTAGE_THRESHOLDS) {
+    if (pct >= t) stars += 1;
+  }
+  return stars;
+};
+
+/** Legacy: derive stars from progress (for migration). */
 export const getStarsFromProgress = (progress: number): number => {
   if (progress >= QUESTIONS_PER_SUBLEVEL * 3) return 3;
   if (progress >= QUESTIONS_PER_SUBLEVEL * 2) return 2;

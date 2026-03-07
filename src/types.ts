@@ -78,7 +78,8 @@ export interface UserStats {
   idLog: IdLogEntry[];
   lastSessionScore?: number;
   lastSessionTotal?: number;
-  acquiredStars?: Record<number, number>; // Maps level ID to number of stars (1 = Beginner, 2 = Intermediate, 3 = Expert)
+  acquiredStars?: Record<number, number>; // Maps level ID to number of stars (1–5) based on accuracy
+  correctPerLevel?: Record<number, number>; // Correct answers per level, for accuracy-based stars
   randomModeStats?: RandomModeStats;
   randomMode?: boolean; // Persisted preference: Level vs Random mode
   stateVersion?: number; // For migrations (e.g. question ID shift when adding Level 0)

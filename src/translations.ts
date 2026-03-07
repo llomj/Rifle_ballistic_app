@@ -165,9 +165,12 @@ export const translations = {
       selectLevel: "Select Level",
       switchToLevelMode: "Switch to Level Mode",
       switchToRandomMode: "Switch to Random Mode",
+      rules: "Rules",
       settings: "Settings",
       resetApp: "Reset App",
       refreshApp: "Refresh app (get latest)",
+      sound: "Sound",
+      haptic: "Haptic",
     },
     
     // Reset App Modal
@@ -210,6 +213,16 @@ export const translations = {
     idLog: {
       clickToViewCodon: "Click to view codon explanation",
       codonExplanation: "Codon Explanation",
+    },
+    
+    // 5-star rating (accuracy-based)
+    stars: {
+      starEarned: "Stars Earned!",
+      youEarnedStars: "You earned {count} star(s)!",
+      progressStart: "Start: 10% to earn 1 star",
+      progressStars: "{count} star(s) earned",
+      progressMastery: "5 stars — mastery!",
+      randomStarsHint: "Random stars based on correct answers vs total questions in app (harder).",
     },
     
     // Sub-levels (Beginner, Intermediate, Expert)
@@ -412,9 +425,12 @@ export const translations = {
       selectLevel: "Sélectionner le Niveau",
       switchToLevelMode: "Passer en Mode Niveau",
       switchToRandomMode: "Passer en Mode Aléatoire",
+      rules: "Règles",
       settings: "Paramètres",
       resetApp: "Réinitialiser l'App",
       refreshApp: "Actualiser l'app (dernière version)",
+      sound: "Son",
+      haptic: "Haptique",
     },
     
     // Reset App Modal
@@ -457,6 +473,16 @@ export const translations = {
     idLog: {
       clickToViewCodon: "Cliquez pour voir l'explication du codon",
       codonExplanation: "Explication du Codon",
+    },
+    
+    // 5-star rating (accuracy-based)
+    stars: {
+      starEarned: "Étoiles Gagnées !",
+      youEarnedStars: "Vous avez gagné {count} étoile(s) !",
+      progressStart: "Départ : 10 % pour 1 étoile",
+      progressStars: "{count} étoile(s) gagnée(s)",
+      progressMastery: "5 étoiles — maîtrise !",
+      randomStarsHint: "Étoiles aléatoires basées sur les bonnes réponses vs toutes les questions (plus difficile).",
     },
     
     // Sub-levels (Débutant, Intermédiaire, Expert)

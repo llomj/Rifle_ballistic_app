@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserStats, PersonaStage } from '../types';
-import { LEVELS, QUESTIONS_PER_LEVEL, TOTAL_QUESTIONS, getStarsFromProgress, getRandomModeScore, getPersonaFromRandomScore, getNextRandomModeThreshold } from '../constants';
+import { LEVELS, QUESTIONS_PER_LEVEL, TOTAL_QUESTIONS, getStarsFromAccuracy, getStarsFromRandomCorrect, getRandomModeScore, getPersonaFromRandomScore, getNextRandomModeThreshold } from '../constants';
 import { PersonaBadge } from './PersonaBadge';
 import { ProgressBar } from './ProgressBar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,29 +29,32 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }
     ? Math.round((stats.lastSessionScore / stats.lastSessionTotal) * 100)
     : null;
 
-  // Calculate stars earned for current level (use acquiredStars, or derive from progress for migration)
-  const earnedStars = stats.acquiredStars?.[stats.currentLevel] ?? getStarsFromProgress(progress);
+  // Stars: level mode = accuracy per level; random mode = correct vs TOTAL_QUESTIONS (harder)
+  const earnedStars = randomMode
+    ? getStarsFromRandomCorrect(rm.totalCorrect)
+    : (stats.acquiredStars?.[stats.currentLevel] ?? getStarsFromAccuracy(
+        stats.correctPerLevel?.[stats.currentLevel] || 0,
+        progress
+      ));
 
   const displayPersona = randomMode ? randomPersona : currentLevelInfo.persona;
 
-  const renderStars = () => {
-    return (
-      <div className="flex gap-2 justify-center mt-3">
-        {[1, 2, 3].map(starNum => (
-          <div
-            key={starNum}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500
-              ${starNum <= earnedStars
-                ? 'bg-amber-400 text-amber-900 shadow-[0_0_15px_rgba(251,191,36,0.5)] scale-110'
-                : 'bg-slate-800 text-slate-600 border border-white/5'
-              }`}
-          >
-            <i className={`fas fa-star ${starNum <= earnedStars ? 'animate-pulse' : ''} text-sm`}></i>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const renderStars = () => (
+    <div className="flex gap-1.5 sm:gap-2 justify-center mt-3">
+      {[1, 2, 3, 4, 5].map(starNum => (
+        <div
+          key={starNum}
+          className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-500
+            ${starNum <= earnedStars
+              ? 'bg-amber-400 text-amber-900 shadow-[0_0_12px_rgba(251,191,36,0.5)] scale-110'
+              : 'bg-slate-800 text-slate-600 border border-white/5'
+            }`}
+        >
+          <i className={`fas fa-star ${starNum <= earnedStars ? 'animate-pulse' : ''} text-[10px] sm:text-xs`}></i>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
@@ -67,7 +70,7 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }
               {displayPersona} {t('hub.class')}
             </span>
           </div>
-          {!randomMode && renderStars()}
+          {renderStars()}
         </div>
       </div>
 
@@ -135,10 +138,9 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }
               <div className="space-y-4 pt-6 border-t border-white/5">
                 <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                   <span>
-                    {earnedStars === 0 && t('subLevels.beginnerProgress')}
-                    {earnedStars === 1 && t('subLevels.intermediateProgress')}
-                    {earnedStars === 2 && t('subLevels.expertProgress')}
-                    {earnedStars === 3 && t('subLevels.masteryProgress')}
+                    {earnedStars === 0 && t('stars.progressStart')}
+                    {earnedStars >= 1 && earnedStars < 5 && formatTranslation(t('stars.progressStars'), { count: earnedStars })}
+                    {earnedStars === 5 && t('stars.progressMastery')}
                   </span>
                   <span>{progress} / {QUESTIONS_PER_LEVEL}</span>
                 </div>
