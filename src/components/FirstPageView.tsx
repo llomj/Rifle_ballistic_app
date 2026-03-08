@@ -122,19 +122,21 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       smoothedHeading.current = null;
       return;
     }
-    const SMOOTH = 0.06; // Lower = smoother, less flicker
-    const DEAD_ZONE = 1.5; // Ignore tiny jitter (degrees)
+    const SMOOTH = 0.08; // Lower = smoother, higher = more responsive
     const handler = (e: DeviceOrientationEvent) => {
       const a = e.alpha;
       if (a == null || Number.isNaN(a)) return;
       const raw = (a + 360) % 360;
       const prev = smoothedHeading.current;
-      let diff = prev == null ? 0 : raw - prev;
-      if (diff > 180) diff -= 360;
-      if (diff < -180) diff += 360;
-      if (Math.abs(diff) < DEAD_ZONE && prev != null) return; // Skip tiny changes
       const next =
-        prev == null ? raw : (prev + diff * SMOOTH + 360) % 360;
+        prev == null
+          ? raw
+          : (() => {
+              let diff = raw - prev;
+              if (diff > 180) diff -= 360;
+              if (diff < -180) diff += 360;
+              return (prev + diff * SMOOTH + 360) % 360;
+            })();
       smoothedHeading.current = next;
       if (rafId.current == null) {
         rafId.current = requestAnimationFrame(() => {
@@ -238,7 +240,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
             transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
-            transition: compassMode ? 'transform 0.18s ease-out' : 'none',
+            transition: compassMode ? 'transform 0.12s ease-out' : 'none',
           }}
         >
           {/* North arrow ^ */}
