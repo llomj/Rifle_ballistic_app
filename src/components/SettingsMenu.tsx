@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
+
+export type BallisticTab = 'rifles' | 'ballistics' | 'targets' | 'environment';
 
 interface SettingsMenuProps {
   isOpen: boolean;
   onClose: () => void;
   view: 'hub' | 'quiz' | 'log' | 'glossary';
+  ballisticTab?: BallisticTab;
+  onNavigateToBallistic?: (tab: BallisticTab) => void;
+  onNavigateToProfile?: () => void;
   randomMode?: boolean;
   anchorBottom?: boolean; // When true, menu opens near top-right (mobile-friendly placement)
   onToggleRandomMode?: () => void;
@@ -29,7 +35,7 @@ interface SettingsMenuProps {
 }
 
 interface MenuItem {
-  type: 'item' | 'rules' | 'toggle';
+  type: 'item' | 'rules' | 'user' | 'users' | 'toggle' | 'divider';
   icon?: string;
   label?: string;
   onClick?: () => void;
@@ -42,6 +48,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   isOpen,
   onClose,
   view,
+  ballisticTab = 'ballistics',
+  onNavigateToBallistic,
+  onNavigateToProfile,
   randomMode = false,
   anchorBottom = false,
   onToggleRandomMode,
@@ -65,43 +74,72 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const { playTapSound } = useSound();
+  const { currentProfile, savedProfiles, loadProfile, deleteSavedProfile } = useBallisticProfile();
   const [rulesExpanded, setRulesExpanded] = useState(false);
+  const [userExpanded, setUserExpanded] = useState(false);
+  const [usersExpanded, setUsersExpanded] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) setRulesExpanded(false);
+    if (!isOpen) {
+      setRulesExpanded(false);
+      setUserExpanded(false);
+      setUsersExpanded(false);
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const menuItems: MenuItem[] = [];
 
-  // 1. Switch to random (TOP)
-  if (onToggleRandomMode) {
+  // 0. Users — saved profiles (from main page Save), above User
+  if (view === 'hub') {
+    menuItems.push({ type: 'users' } as MenuItem);
+  }
+
+  // 1. User (Profile + calculator, clicks, mildot reference, etc.)
+  if ((onNavigateToProfile || onNavigateToBallistic) && view === 'hub') {
+    const userSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
+    if (onNavigateToProfile) {
+      userSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
+    }
+    if (onNavigateToBallistic) {
+      userSubItems.push(
+        { icon: 'fa-calculator', label: t('ballistic.calculator'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-list', label: t('ballistic.clicksSection'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-table-cells', label: t('ballistic.mildotReference'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-compress-arrows-alt', label: t('ballistic.panelCompensation'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-search', label: t('ballistic.panelOptics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-wind', label: t('ballistic.panelWind'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-ruler-combined', label: t('ballistic.panelTargetHeights'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+      );
+    }
     menuItems.push({
-      type: 'item',
-      icon: 'fa-shuffle',
-      label: randomMode ? t('settings.switchToLevelMode') : t('settings.switchToRandomMode'),
-      onClick: () => {
-        onToggleRandomMode();
-        onClose();
-      }
+      type: 'user',
+      icon: 'fa-user',
+      label: t('settings.user'),
+      subItems: userSubItems,
     });
   }
 
-  // 2. Select level (under switch to random)
-  if (onShowLevelSelector) {
-    menuItems.push({
-      type: 'item',
-      icon: 'fa-layer-group',
-      label: t('settings.selectLevel'),
-      onClick: () => {
-        onShowLevelSelector();
-        onClose();
-      }
+  // 1. Rifles, Ballistics, Targets, Environment — at top
+  if (onNavigateToBallistic && view === 'hub') {
+    const ballisticTabs: { id: BallisticTab; icon: string; labelKey: string }[] = [
+      { id: 'ballistics', icon: 'fa-bullseye', labelKey: 'ballistic.tabBallistics' },
+      { id: 'environment', icon: 'fa-wind', labelKey: 'ballistic.tabEnvironment' },
+    ];
+    ballisticTabs.forEach(({ id, icon, labelKey }) => {
+      menuItems.push({
+        type: 'item',
+        icon,
+        label: t(labelKey),
+        onClick: () => onNavigateToBallistic(id),
+        active: ballisticTab === id,
+      });
     });
+    menuItems.push({ type: 'divider' } as MenuItem);
   }
 
-  // 3. Rules (expandable: Commands, Flags, Flow, Glossary, Operations & Math)
+  // 1. Rules (expandable: Commands, Flags, Flow, Glossary, Operations & Math)
   if (onShowMethods || onShowFlags || onShowFlow || onShowGlossary || onShowOperations) {
     const rulesSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onShowMethods) {
@@ -181,22 +219,13 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       onClick: () => { onShowIdLog(); onClose(); }
     });
   }
-  if (onShowLearningLog) {
-    menuItems.push({
-      type: 'item',
-      icon: 'fa-book-open',
-      label: t('app.learningLog'),
-      onClick: () => { onShowLearningLog(); onClose(); },
-      active: view === 'log'
-    });
-  }
 
   // Language
   if (onToggleLanguage) {
     menuItems.push({
       type: 'item',
       icon: 'fa-language',
-      label: language === 'en' ? 'Français' : 'English',
+      label: language === 'en' ? t('settings.french') : t('settings.english'),
       onClick: () => { onToggleLanguage(); onClose(); }
     });
   }
@@ -235,6 +264,96 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   });
 
   const renderItem = (item: MenuItem, index: number) => {
+    if (item.type === 'divider') {
+      return <div key={index} className="my-2 border-t border-white/10" />;
+    }
+    if (item.type === 'users') {
+      return (
+        <div key={index}>
+          <button
+            onClick={() => { playTapSound(); setUsersExpanded((prev) => !prev); }}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-left text-slate-300 hover:bg-white/10 hover:text-white"
+          >
+            <div className="flex items-center gap-3">
+              <i className="fas fa-users text-sm w-5 flex-shrink-0" />
+              <span className="text-sm font-medium">{t('settings.users')}</span>
+            </div>
+            <i className={`fas fa-chevron-down text-xs transition-transform ${usersExpanded ? 'rotate-180' : ''}`} />
+          </button>
+          {usersExpanded && (
+            <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5 pb-2">
+              {/* Default user — always shown, restores default metrics */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { playTapSound(); loadProfile('default'); onClose(); }}
+                  className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    currentProfile.id === 'default'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {t('ballistic.defaultUser')}
+                </button>
+              </div>
+              {savedProfiles.length === 0 ? null : (
+                savedProfiles.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2">
+                    <button
+                      onClick={() => { playTapSound(); loadProfile(p.id); onClose(); }}
+                      className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        currentProfile.id === p.id
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {p.userName}
+                    </button>
+                    <button
+                      onClick={() => { playTapSound(); deleteSavedProfile(p.id); }}
+                      className="p-2 text-slate-500 hover:text-red-400"
+                      title={t('ballistic.delete')}
+                      aria-label={t('ballistic.delete')}
+                    >
+                      <i className="fas fa-trash-alt text-xs" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (item.type === 'user' && item.subItems && item.subItems.length > 0) {
+      return (
+        <div key={index}>
+          <button
+            onClick={() => { playTapSound(); setUserExpanded(prev => !prev); }}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-left text-slate-300 hover:bg-white/10 hover:text-white"
+          >
+            <div className="flex items-center gap-3">
+              <i className={`fas ${item.icon} text-sm w-5 flex-shrink-0`}></i>
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+            <i className={`fas fa-chevron-down text-xs transition-transform ${userExpanded ? 'rotate-180' : ''}`}></i>
+          </button>
+          {userExpanded && (
+            <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5">
+              {item.subItems.map((sub, i) => (
+                <button
+                  key={i}
+                  onClick={() => { playTapSound(); sub.onClick(); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <i className={`fas ${sub.icon} text-sm w-5 flex-shrink-0`}></i>
+                  <span className="text-sm font-medium">{sub.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
     if (item.type === 'rules' && item.subItems && item.subItems.length > 0) {
       return (
         <div key={index}>
@@ -313,7 +432,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
       {/* Menu - near top-right on mobile, below trigger on desktop */}
       <div className={`z-[110] min-w-[200px] ${anchorBottom ? 'fixed top-[max(4rem,env(safe-area-inset-top))] right-4' : 'absolute top-full right-0 mt-2'}`}>
-        <div className="glass rounded-2xl p-2 shadow-2xl border border-white/10 animate-in slide-in-from-top-2 duration-200 !bg-slate-900/[0.02]">
+        <div className="glass rounded-2xl p-2 shadow-2xl border border-white/10 animate-in slide-in-from-top-2 duration-200 !bg-slate-900/[0.0009]">
           {menuItems.map((item, index) => renderItem(item, index))}
 
           {/* Reset App button - at bottom with warning styling */}

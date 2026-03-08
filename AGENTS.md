@@ -1,5 +1,53 @@
 # CLI Exercises Learn - AI Agent Operational Rules
 
+---
+
+## 0. Rifle Ballistic App — Product Definition
+
+**This is a mobile app for hunting and using a rifle.** It is a personal rifle ballistic calculator: mobile-friendly (PWA or mobile web), works offline, minimal field-friendly UI.
+
+### Goal
+Build a personal rifle ballistic app that allows the user to input rifle specifications, scope data, and bullet information, then calculate **shooting distance**, **bullet drop**, and **scope adjustments**.
+
+### Scope & Unit Support
+- **MIL / Milliradian** scopes
+- **MOA / Minute of Angle** scopes  
+The app automatically chooses the correct formula from the scope unit selected in settings.
+
+### Core Distance Formulas
+- **MIL:** `distance = (target_height * 1000) / mils`
+- **MOA:** `distance = (target_height * 95.5) / moa`
+
+### Languages
+- **English** and **French**. User can switch language instantly from Settings.
+
+### Platform
+- Mobile-friendly (PWA or simple mobile web app)
+- Works on phone, fast interface, **works completely offline**, minimal field-friendly UI
+
+### Features (current / planned)
+- **Rifle profiles:** name, caliber, barrel length, twist rate, scope height, zero distance
+- **Scope settings:** FFP/SFP, unit (MIL/MOA), click value, turret clicks/rev, magnification calibration (SFP)
+- **Ammunition:** bullet weight (g/gr), type, BC (G1/G7), muzzle velocity, diameter
+- **Distance calculator:** target height + mils or MOA → distance
+- **Bullet drop calculator:** drop, elevation adjustment, turret clicks, holdover
+- **Target height library:** Human, Deer, Pig, Bird, Steel plate, Custom (editable)
+- **Environment (optional):** wind speed/direction, temperature, altitude, humidity → influence ballistics
+- **Quick Range mode:** target height + mils/MOA → instant distance, holdover, clicks
+- **Ballistic table generator:** Distance | Drop | Holdover | Clicks (100–500 m etc.)
+- **Holdover display:** in MIL or MOA per scope system
+- **Data storage:** rifle profiles stored locally; quick switch between rifles
+
+### UI Layout
+- **Main:** Quick Range Calculator + Rifle Selector
+- **Tabs:** Rifles | Ballistics | Targets | Environment | Settings
+- **Settings:** Language (EN/FR), Measurement (Metric/Imperial), Scope unit (MIL/MOA)
+
+### Future (architecture ready)
+Wind drift, angle compensation, GPS elevation, shot logging, camera mil measurement, reticle simulation, import/export profiles, range card generator.
+
+---
+
 ## 1. Genome Checkpoint (STRICT STATE)
 - **Target**: 3000 Questions (300 per level × 10 levels).
 - **Current Progress**: 3000 / 3000 Questions (CLI content; genome fulfilled)
@@ -10,6 +58,7 @@
 ## 2. Consent & Modification Rules
 - **Explicit Consent**: No changes shall be made to the source code without explicit user approval.
 - **Layout Preservation**: Do not deviate from the existing visual identity.
+- **Never Change Layout Unless Asked**: Do not change layout, remove UI elements, or reorganize panels unless the user explicitly requests it.
 - **Incremental Updates**: Keep updates as minimal as possible while satisfying requirements.
 - **Strict Scope Control**: When the user asks for a specific change, implement only that request. Do not add extra UI elements, display changes, or additional features unless explicitly requested.
 
@@ -46,3 +95,101 @@
 ## 9. Scope and Restraint
 - **Do not do things the user never asked for.** Implement only what is explicitly requested. Do not add extra features, change unrelated code, or "improve" things without being asked.
 - **Flags/Commands reference:** Keep syntax highlighting aesthetic (bash colors). Avoid half-sections in green—override comment color to neutral so `#` headers and descriptions blend with the rest.
+
+---
+
+## 10. Rifle Ballistic App — Basic layout (reference)
+
+The rifle ballistic screens (Distance / Height) use the following **reference layout** as the canonical baseline. Keep this structure and syntax-highlight it in columns.
+
+**Turret table (column layout: distance | drop | mrad | clicks)**
+
+```
+150m    2.8cm   -0.20    ^2 clicks
+171m    9.5cm   -0.50    ^5 clicks
+201m    20cm   -0.80    ^8 clicks
+251m    35cm   -1.2    ^12 clicks
+301m    55cm   -1.6    ^16 clicks
+351m    80cm   -2    ^20 clicks
+401m    110cm   -2.5    ^25 clicks
+451m    150cm   -3    ^30 clicks
+501m    195cm   -3.5    ^35 clicks
+551m    250cm   -4    ^40 clicks
+601m    300cm   -5    ^50 clicks
+651m    370cm   -5.8    ^58 clicks
+701m    460cm   -6.5    ^66 clicks
+751m    540cm   -7.5    ^75 clicks
+```
+
+**(tal du Cerf 1m epaule/pied, 1.75 homme)** — cyan note
+
+**Mildot reference (cerf / homme = distance)**
+
+```
+mildot:10(cerf)=100	16(homme)=100m
+mildot:6(cerf)=150	12.5(homme)=150m
+mildot:4.8(cerf)=200	8.3(homme)=200m
+mildot:4(cerf)=250	7(homme)=250m
+mildot:3.3(cerf)=300	6(homme)=300m
+mildot:2.9(cerf)=350	5(homme)=350m
+mildot:2.5(cerf)=400	4.3(homme)=400m
+mildot:2.2(cerf)=450	3.9(homme)=450m
+mildot:2(cerf)=500	3.5(homme)=500m
+mildot:1.8(cerf)=550	3.2(homme)=550m
+mildot:1.68(cerf)=600	2.9(homme)=600m
+mildot:1.6(cerf)=650	2.7(homme)=650m
+mildot:1.4(cerf)=700	2.5(homme)=700m
+mildot:1.3(cerf)=750	2.3(homme)=750m
+mildot:1.25(cerf)=800	2.2(homme)=800m
+mildot:1.15(cerf)=850	2.1(homme)=850m
+mildot:1.1(cerf)=900	2(homme)=900m
+```
+
+**10/1000=1mil(10mm at 100m)   Compensation**
+
+```
+mils: 0.01	100 meters =  0cm
+mils: 0.00667	150 meters =  2.8cm
+mils: 0.005	200 meters =  9.5cm
+mils: 0.004	250 meters =  20cm
+mils: 0.00333	300 meters =  35cm
+mils: 0.00286	350 meters =  55cm
+mils: 0.0025	400 meters =  80cm
+mils: 0.00222	450 meters =  110cm
+mils: 0.002	500 meters =  150cm
+mils: 0.00182	550 meters =  195cm
+mils: 0.00167	600 meters =  250cm
+mils: 0.00154	650 meters =  300cm
+mils: 0.00143	700 meters =  370cm
+mils: 0.00133	750 meters =  460cm
+mils: 0.00125	800 meters =  540cm
+```
+
+**10x optics (100y/3.6 Inch, 100m/10cm)**
+
+```
+200y  7.2 Inch   	200m	20cm
+300y  10.8 Inch   	300m	30cm
+400y  14.4 Inch   	400m	40cm
+500y  18.0 Inch   	500m	50cm
+600y  21.6 Inch   	600m	60cm
+700y  25.2 Inch   	700m	70cm
+800y  28.8 Inch   	800m	80cm
+900y  32.4 Inch   	900m	90cm
+1000y  36.0 Inch   	1000m	100cm/1m
+```
+
+**Comment calculer le mirage du vent**
+
+```
+22 degrees angle environ 4  kph
+45 degrees angle environ 8  kph
+90 degrees angle environ 16 kph
+```
+
+- **Display:** Use column layout and syntax highlighting (yellow titles/formula, cyan notes, white body, green/red for results). Keep this layout as the basic starting point for the ballistic app.
+
+- **Metrics color scheme:** The color scheme for ballistic metrics must remain consistent throughout the app.
+  - **Blue (sky):** meters, yards (e.g. 150m, 200y)
+  - **Yellow (amber):** cm, inch
+  - **White:** clicks, mrad (e.g. -0.20), mils

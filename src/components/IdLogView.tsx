@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSound } from '../contexts/SoundContext';
-import { IdLogEntry } from '../types';
+import { IdLogEntry, IdLogRifle } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTranslatedShortExplanation } from '../data/shortExplanationsTranslations';
 import { QUESTIONS_BANK } from '../questionsBank';
@@ -87,14 +87,53 @@ const splitQuestionForDisplay = (text: string, lang: string) =>
 
 interface IdLogViewProps {
   entries: IdLogEntry[];
+  rifles: IdLogRifle[];
   onClose: () => void;
+  onAddRifle: (name: string) => void;
+  onRemoveRifle: (rifleId: string) => void;
+  onRenameRifle: (rifleId: string, name: string) => void;
+  onSetEntryRifle: (entryId: number, entryTimestamp: number, rifleId: string | undefined) => void;
 }
 
-export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
+export const IdLogView: React.FC<IdLogViewProps> = ({
+  entries,
+  rifles,
+  onClose,
+  onAddRifle,
+  onRemoveRifle,
+  onRenameRifle,
+  onSetEntryRifle,
+}) => {
   const { t, language } = useLanguage();
   const { playTapSound } = useSound();
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
+  const [newRifleName, setNewRifleName] = useState('');
+  const [editingRifleId, setEditingRifleId] = useState<string | null>(null);
+  const [editingRifleName, setEditingRifleName] = useState('');
   const sortedEntries = [...entries].sort((a, b) => b.timestamp - a.timestamp);
+
+  const handleAddRifle = () => {
+    const name = newRifleName.trim();
+    if (name) {
+      playTapSound();
+      onAddRifle(name);
+      setNewRifleName('');
+    }
+  };
+
+  const startEditRifle = (r: IdLogRifle) => {
+    setEditingRifleId(r.id);
+    setEditingRifleName(r.name);
+  };
+
+  const saveEditRifle = () => {
+    if (editingRifleId) {
+      playTapSound();
+      onRenameRifle(editingRifleId, editingRifleName);
+      setEditingRifleId(null);
+      setEditingRifleName('');
+    }
+  };
 
   const toggleCodonExplanation = (entryKey: string) => {
     setExpandedEntries(prev => {
@@ -129,6 +168,60 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
           >
             <i className="fas fa-times"></i>
           </button>
+        </div>
+
+        {/* My rifles: register and name rifles */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
+            <i className="fas fa-person-military-rifle text-amber-400"></i>
+            {t('idLog.myRifles')}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {rifles.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center gap-1.5 rounded-lg bg-slate-800/80 border border-white/10 px-2.5 py-1.5"
+              >
+                {editingRifleId === r.id ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editingRifleName}
+                      onChange={(e) => setEditingRifleName(e.target.value)}
+                      onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') saveEditRifle(); if (e.key === 'Escape') { setEditingRifleId(null); setEditingRifleName(''); } }}
+                      className="bg-slate-900 border border-white/20 rounded px-2 py-0.5 text-sm text-white w-32"
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                    <button type="button" onClick={(e) => { e.stopPropagation(); saveEditRifle(); }} className="text-emerald-400 hover:text-emerald-300 text-xs">✓</button>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-sm text-slate-200">{r.name}</span>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); startEditRifle(r); }} className="text-slate-500 hover:text-amber-400 text-xs" title={t('idLog.editRifle')}><i className="fas fa-pen"></i></button>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); onRemoveRifle(r.id); }} className="text-slate-500 hover:text-red-400 text-xs" title={t('idLog.deleteRifle')}><i className="fas fa-trash-can"></i></button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={newRifleName}
+              onChange={(e) => setNewRifleName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAddRifle(); }}
+              placeholder={t('idLog.rifleNamePlaceholder')}
+              className="flex-1 rounded-lg bg-slate-800 border border-white/20 px-3 py-2 text-sm text-white placeholder-slate-500"
+            />
+            <button
+              type="button"
+              onClick={() => { playTapSound(); handleAddRifle(); }}
+              className="rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 px-3 py-2 text-sm font-medium hover:bg-emerald-500/30"
+            >
+              {t('idLog.addRifle')}
+            </button>
+          </div>
         </div>
 
         {sortedEntries.length === 0 ? (
@@ -172,11 +265,29 @@ export const IdLogView: React.FC<IdLogViewProps> = ({ entries, onClose }) => {
                 title={t('idLog.clickToViewCodon')}
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-xs font-bold flex items-center gap-2 group">
                       ID: {entry.id}
                       <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-[8px] transition-transform group-hover:scale-110`}></i>
                     </span>
+                    <label className="flex items-center gap-1.5 text-[10px] text-slate-500" onClick={(e) => e.stopPropagation()}>
+                      <span>{t('idLog.assignRifle')}:</span>
+                      <select
+                        value={entry.rifleId ?? ''}
+                        onChange={(e) => {
+                          playTapSound();
+                          const v = e.target.value;
+                          onSetEntryRifle(entry.id, entry.timestamp, v ? v : undefined);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-slate-800 border border-white/20 rounded px-2 py-0.5 text-slate-300 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      >
+                        <option value="">{t('idLog.noRifle')}</option>
+                        {rifles.map((r) => (
+                          <option key={r.id} value={r.id}>{r.name}</option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
                   <span className="text-[10px] text-slate-500 font-mono">
                     {new Date(entry.timestamp).toLocaleDateString()}

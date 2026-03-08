@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { BallisticSettingsProvider } from './contexts/BallisticSettingsContext';
+import { BallisticProfileProvider } from './contexts/BallisticProfileContext';
 
 // Service Worker: register only in production; in dev, unregister so preview always gets latest (stars, etc.)
 if ('serviceWorker' in navigator) {
@@ -32,7 +34,11 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <LanguageProvider>
-      <App />
+      <BallisticSettingsProvider>
+        <BallisticProfileProvider>
+          <App />
+        </BallisticProfileProvider>
+      </BallisticSettingsProvider>
     </LanguageProvider>
   </React.StrictMode>
 );

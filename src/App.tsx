@@ -1,9 +1,9 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { UserStats, PersonaStage, QuestionAttempt } from './types';
 import { TadpoleIcon } from './components/TadpoleIcon';
 import { EvolutionHub } from './components/EvolutionHub';
 import { SettingsMenu } from './components/SettingsMenu';
-import { IdLogEntry } from './types';
+import { IdLogEntry, IdLogRifle } from './types';
 import { LEVELS, XP_PER_QUESTION, QUESTIONS_PER_LEVEL, getStarsFromProgress, getStarsFromAccuracy, getStarsFromRandomCorrect, getRandomModeScore, getPersonaFromRandomScore, PERSONA_EMOJI } from './constants';
 import { useLanguage } from './contexts/LanguageContext';
 import { formatTranslation } from './translations';
@@ -58,6 +58,7 @@ const INITIAL_STATS: UserStats = {
   acquiredStars: {},
   history: [],
   idLog: [],
+  idLogRifles: [],
   randomModeStats: { totalAnswered: 0, totalCorrect: 0 },
   randomMode: false
 };
@@ -74,7 +75,12 @@ const PlatformView = lazy(() => import('./components/PlatformView').then((module
 const IdSearchModal = lazy(() => import('./components/IdSearchModal').then((module) => ({ default: module.IdSearchModal })));
 const IdLogView = lazy(() => import('./components/IdLogView').then((module) => ({ default: module.IdLogView })));
 const LevelSelectorModal = lazy(() => import('./components/LevelSelectorModal').then((module) => ({ default: module.LevelSelectorModal })));
-
+const BallisticHub = lazy(() => import('./components/BallisticHub').then((m) => ({ default: m.BallisticHub })));
+const FirstPageView = lazy(() => import('./components/FirstPageView').then((m) => ({ default: m.FirstPageView })));
+const DistanceView = lazy(() => import('./components/DistanceView').then((m) => ({ default: m.DistanceView })));
+const HeightView = lazy(() => import('./components/HeightView').then((m) => ({ default: m.HeightView })));
+const ReferenceView = lazy(() => import('./components/ReferenceView').then((m) => ({ default: m.ReferenceView })));
+const RifleScopeSection = lazy(() => import('./components/RifleScopeSection').then((m) => ({ default: m.RifleScopeSection })));
 const ViewLoading: React.FC = () => (
   <div className="max-w-md mx-auto p-8 glass rounded-3xl text-center text-slate-400">
     <i className="fas fa-spinner fa-spin"></i>
@@ -107,6 +113,8 @@ const App: React.FC = () => {
   const [showWeakSpotDrills, setShowWeakSpotDrills] = useState(false);
   const [showPlatform, setShowPlatform] = useState(false);
   const [drillLevels, setDrillLevels] = useState<number[] | null>(null);
+  const [ballisticView, setBallisticView] = useState<'first' | 'hub' | 'ballistics' | 'distance' | 'height'>('first');
+  const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets' | 'environment'>('ballistics');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -117,6 +125,19 @@ const App: React.FC = () => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem(HAPTIC_STORAGE_KEY) !== 'false';
   });
+  const lastSwipeNavRef = useRef(0);
+  const SWIPE_COOLDOWN_MS = 600;
+
+  const handleOpenCalculate = () => {
+    if (Date.now() - lastSwipeNavRef.current < SWIPE_COOLDOWN_MS) return;
+    lastSwipeNavRef.current = Date.now();
+    setBallisticView('distance');
+  };
+  const handleBackToFirstPage = () => {
+    if (Date.now() - lastSwipeNavRef.current < SWIPE_COOLDOWN_MS) return;
+    lastSwipeNavRef.current = Date.now();
+    setBallisticView('first');
+  };
 
   useEffect(() => {
     localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
@@ -147,6 +168,7 @@ const App: React.FC = () => {
         if (!parsed.history) parsed.history = [];
         if (!parsed.completedQuestionIds) parsed.completedQuestionIds = [];
         if (!parsed.idLog) parsed.idLog = [];
+        if (!Array.isArray(parsed.idLogRifles)) parsed.idLogRifles = [];
         if (parsed.totalAttempts === undefined) parsed.totalAttempts = parsed.history.length || 0;
         // Migration: shift question IDs when Level 0 was added (old 1–3000 → 301–3300)
         const stateVersion = parsed.stateVersion ?? 0;
@@ -252,6 +274,7 @@ const App: React.FC = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     setStats(INITIAL_STATS);
     setView('hub');
+    setBallisticView('first');
     setShowResetModal(false);
     setShowSettingsMenu(false);
     setShowResult(null);
@@ -278,6 +301,38 @@ const App: React.FC = () => {
     setStats(prev => ({
       ...prev,
       idLog: [idLogEntry, ...prev.idLog.filter(e => e.id !== entry.id)].slice(0, 1000)
+    }));
+  };
+
+  const addIdLogRifle = (name: string) => {
+    const id = `rifle-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    setStats(prev => ({
+      ...prev,
+      idLogRifles: [...(prev.idLogRifles ?? []), { id, name: name.trim() || 'Rifle' }]
+    }));
+  };
+
+  const removeIdLogRifle = (rifleId: string) => {
+    setStats(prev => ({
+      ...prev,
+      idLogRifles: (prev.idLogRifles ?? []).filter(r => r.id !== rifleId),
+      idLog: prev.idLog.map(e => (e.rifleId === rifleId ? { ...e, rifleId: undefined } : e))
+    }));
+  };
+
+  const renameIdLogRifle = (rifleId: string, name: string) => {
+    setStats(prev => ({
+      ...prev,
+      idLogRifles: (prev.idLogRifles ?? []).map(r => (r.id === rifleId ? { ...r, name: name.trim() || r.name } : r))
+    }));
+  };
+
+  const setEntryRifle = (entryId: number, entryTimestamp: number, rifleId: string | undefined) => {
+    setStats(prev => ({
+      ...prev,
+      idLog: prev.idLog.map(e =>
+        e.id === entryId && e.timestamp === entryTimestamp ? { ...e, rifleId } : e
+      )
     }));
   };
 
@@ -388,49 +443,8 @@ const App: React.FC = () => {
 
   return (
     <SoundProvider soundEnabled={soundEnabled} onPlay={() => void playUITapSound()}>
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28">
-      <nav className="pt-[env(safe-area-inset-top)] px-2 pb-1.5 flex items-center justify-between border-b border-white/5 sticky top-0 z-50 glass">
-        <div className="flex w-full items-center gap-4">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { if (soundEnabled) void playUITapSound(); setView('hub'); }}>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <i className="fas fa-terminal text-white text-xs"></i>
-            </div>
-            <span className="font-bold text-lg tracking-tight hidden sm:inline">{t('app.title')}<span className="text-emerald-400">{t('app.subtitle')}</span></span>
-          </div>
-
-          <div className="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-2xl border border-white/10">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-sm text-white">
-                {currentPersona === PersonaStage.TADPOLE
-                  ? <TadpoleIcon size={22} className="fill-current" />
-                  : <span>{PERSONA_EMOJI[currentPersona] ?? '🐟'}</span>}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">{t('app.rank')}</span>
-                <span className="text-sm font-bold text-slate-200 leading-tight">{currentPersona}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <i className="fas fa-bolt text-amber-400 text-sm"></i>
-              <span className="text-sm font-bold text-emerald-400">{stats.xp.toLocaleString()}</span>
-            </div>
-          </div>
-
-          <div
-            className="ml-auto flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10"
-            title="Answer Count"
-          >
-            <i className="fas fa-hashtag text-slate-400 text-sm"></i>
-            <span className="text-sm font-bold text-slate-200">{(stats.totalAttempts ?? stats.history.length).toLocaleString()}</span>
-          </div>
-        </div>
-
-      </nav>
-
-      {/* Settings at bottom - z-[110] so gear stays above modals (z-[100]); always accessible */}
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]">
+      {/* Settings at bottom centre */}
       <div className="fixed bottom-0 left-0 right-0 z-[110] flex justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
         <button
           onClick={() => {
@@ -448,6 +462,18 @@ const App: React.FC = () => {
         onClose={() => setShowSettingsMenu(false)}
         view={view}
         anchorBottom
+          ballisticTab={ballisticTab}
+          onNavigateToBallistic={(tab) => {
+            setView('hub');
+            setBallisticView(tab === 'ballistics' ? 'ballistics' : 'hub');
+            setBallisticTab(tab);
+            setShowSettingsMenu(false);
+          }}
+          onNavigateToProfile={() => {
+            setView('hub');
+            setBallisticView('hub');
+            setShowSettingsMenu(false);
+          }}
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
           onShowGlossary={() => setView('glossary')}
@@ -570,11 +596,40 @@ const App: React.FC = () => {
               {showResult.starEarned ? t('subLevels.continueEvolution') : t('result.backToHub')}
             </button>
           </div>
+        ) : ballisticView === 'first' ? (
+          <Suspense fallback={<ViewLoading />}>
+            <FirstPageView
+              onOpenHub={() => setBallisticView('hub')}
+              onOpenCalculate={handleOpenCalculate}
+            />
+          </Suspense>
+        ) : ballisticView === 'ballistics' ? (
+          <Suspense fallback={<ViewLoading />}>
+            <ReferenceView onBack={() => setBallisticView('hub')} />
+          </Suspense>
+        ) : ballisticView === 'distance' ? (
+          <Suspense fallback={<ViewLoading />}>
+            <DistanceView
+              onBack={() => setBallisticView('hub')}
+              onSwitchToHeight={() => setBallisticView('height')}
+              onBackToFirstPage={handleBackToFirstPage}
+            />
+          </Suspense>
+        ) : ballisticView === 'height' ? (
+          <Suspense fallback={<ViewLoading />}>
+            <HeightView
+              onBack={() => setBallisticView('hub')}
+              onSwitchToDistance={() => setBallisticView('distance')}
+              onBackToFirstPage={handleBackToFirstPage}
+            />
+          </Suspense>
         ) : (
-          <EvolutionHub
-            stats={stats}
-            onStartQuiz={handleStartEvolution}
-          />
+          <Suspense fallback={<ViewLoading />}>
+            <BallisticHub
+              onOpenBallistics={() => setBallisticView('ballistics')}
+              onBackToFirstPage={() => setBallisticView('first')}
+            />
+          </Suspense>
         )}
       </main>
 
@@ -738,7 +793,12 @@ const App: React.FC = () => {
         <Suspense fallback={<ViewLoading />}>
           <IdLogView
             entries={stats.idLog}
+            rifles={stats.idLogRifles ?? []}
             onClose={() => setShowIdLog(false)}
+            onAddRifle={addIdLogRifle}
+            onRemoveRifle={removeIdLogRifle}
+            onRenameRifle={renameIdLogRifle}
+            onSetEntryRifle={setEntryRifle}
           />
         </Suspense>
       )}

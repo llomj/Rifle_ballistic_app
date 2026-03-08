@@ -52,12 +52,20 @@ export enum PersonaStage {
   GOD_WHALE = "God Whale"
 }
 
+/** Named rifle profile for ID Log (user can register and name rifles). */
+export interface IdLogRifle {
+  id: string;
+  name: string;
+}
+
 export interface IdLogEntry {
   id: number;
   question: string;
   correctAnswer: string;
   explanation: string;
   timestamp: number;
+  /** Optional: link to a named rifle in idLogRifles. */
+  rifleId?: string;
 }
 
 export interface RandomModeStats {
@@ -76,6 +84,8 @@ export interface UserStats {
   levelProgress: Record<number, number>;
   history: QuestionAttempt[];
   idLog: IdLogEntry[];
+  /** Named rifles for ID Log (user-registered, each with a name). */
+  idLogRifles?: IdLogRifle[];
   lastSessionScore?: number;
   lastSessionTotal?: number;
   acquiredStars?: Record<number, number>; // Maps level ID to number of stars (1–5) based on accuracy
