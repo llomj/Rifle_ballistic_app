@@ -1,8 +1,9 @@
-#deployment
-https://llomj.github.io/python-exercises-learn/
+# Rifle Ballistic App
 
-#App type(offline).
+Personal rifle ballistic calculator: distance, bullet drop, scope adjustments (MIL/MOA). PWA for mobile.
 
-#This phone app is a python exercise app multiple-choice where user can level up 10 levels learning python.
+## PWA App URL (Add to Home Screen on Phone)
 
-#AI agent tools used to build app. Google AI studio, Antigravity, cursor, opencode.
+**https://llomj.github.io/Rifle_ballistic_app/**
+
+Works offline. Open on your phone → Add to Home Screen for app icon.
