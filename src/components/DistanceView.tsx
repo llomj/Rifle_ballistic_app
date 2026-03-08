@@ -3,7 +3,7 @@ import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
-import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
+import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
 import { mToYd, cmToIn, ftToM, formatTurretLine } from '../utils/ballisticUnits';
@@ -80,7 +80,10 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
 
   return (
     <div className="flex flex-col items-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y pb-8">
-      <div className="flex-1 min-h-[min(55vh,400px)] flex-shrink-0 flex items-center justify-center w-full">
+      <div
+        className="flex-shrink-0 flex items-center justify-center w-full"
+        style={{ height: CIRCLE_SLOT_HEIGHT }}
+      >
         <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
