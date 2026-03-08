@@ -202,7 +202,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
           </div>
           {compassMode && heading != null && (
-            <span className="text-[10px] text-amber-400/90 font-mono tabular-nums mt-1">
+            <span className="text-sm text-amber-400/90 font-mono tabular-nums mt-2">
               {Math.round(heading)}° · {Math.round(heading * 60)} MOA
             </span>
           )}
@@ -254,25 +254,6 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           >
             N
           </span>
-          {/* Degrees 0–360 (no ring, labels only) */}
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
-            const r = radius - 28;
-            const rad = (deg * Math.PI) / 180;
-            const x = Math.sin(rad) * r;
-            const yy = -Math.cos(rad) * r;
-            return (
-              <span
-                key={`deg-${deg}`}
-                className="absolute left-1/2 top-1/2 font-mono font-medium text-amber-400/80 text-[10px] -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${yy}px))`,
-                }}
-                aria-hidden
-              >
-                {deg}
-              </span>
-            );
-          })}
         </div>
       </button>
     </div>

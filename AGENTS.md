@@ -197,3 +197,8 @@ mils: 0.00125	800 meters =  540cm
 ### Circle Size Consistency
 - **Single source of truth:** All ballistic circles (clicks compass, Distance calculator, Height calculator) use `CIRCLE_SIZE_PX` from `src/constants/ballisticUI.ts`.
 - **If the user asks to change the size of one circle, all circles must change and remain identical.** Update only `CIRCLE_SIZE_PX`; never size circles separately.
+
+### Degrees and MOA / MRAD Display (DO NOT MOVE)
+- **First page (clicks compass):** Degrees (°) and MOA must always appear in the **centre** of the circle, **under** the distance input (m/yd). Never place degrees or MOA labels around the ring. Format: `{deg}° · {moa} MOA`. Use `text-sm` or larger for readability.
+- **Calculate pages (Distance / Height):** MRAD must always appear in the **centre** of the circle, under the calculator icon. Never place mrad labels around the ring. Format: `{mrad} mrad`. Use `text-sm` or larger.
+- **Rule:** Never move the degrees/MOA or mrad display function from the centre position under the main input.

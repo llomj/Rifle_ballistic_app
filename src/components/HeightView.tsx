@@ -6,9 +6,6 @@ import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
-const MRAD_LABELS = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) =>
-  Math.round(deg * DEG_TO_MRAD)
-);
 import { cmToIn, ydToM, mToFt, formatTurretLine } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
@@ -80,8 +77,9 @@ export const HeightView: React.FC<HeightViewProps> = ({
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
-      <button
+    <div className="flex flex-col items-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y pb-8">
+      <div className="flex-1 min-h-[min(55vh,400px)] flex-shrink-0 flex items-center justify-center w-full">
+        <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
         className="relative rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
@@ -92,7 +90,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
           <i className="fas fa-calculator text-amber-300 text-3xl" />
           {compassMode && heading != null && (
-            <span className="text-[10px] text-amber-400/90 font-mono tabular-nums mt-1">
+            <span className="text-sm text-amber-400/90 font-mono tabular-nums mt-2">
               {Math.round(heading * DEG_TO_MRAD)} mrad
             </span>
           )}
@@ -121,7 +119,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
           aria-hidden
         />
 
-        {/* Rotating dial with north arrow and mrad labels */}
+        {/* Rotating dial: north arrow + N only (mrad in fixed centre) */}
         <div
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
@@ -142,29 +140,11 @@ export const HeightView: React.FC<HeightViewProps> = ({
           >
             N
           </span>
-          {MRAD_LABELS.map((mrad, i) => {
-            const deg = i * 30;
-            const r = radius - 28;
-            const rad = (deg * Math.PI) / 180;
-            const x = Math.sin(rad) * r;
-            const yy = -Math.cos(rad) * r;
-            return (
-              <span
-                key={`mrad-${mrad}`}
-                className="absolute left-1/2 top-1/2 font-mono font-medium text-amber-400/80 text-[10px] -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${yy}px))`,
-                }}
-                aria-hidden
-              >
-                {mrad}
-              </span>
-            );
-          })}
         </div>
       </button>
+      </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-4 pb-4 space-y-3 pt-3">
+        <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-4 pb-4 space-y-3 pt-3 flex-shrink-0">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetDistanceLabelYd') : t('ballistic.targetDistanceLabel')}</CliLine>
