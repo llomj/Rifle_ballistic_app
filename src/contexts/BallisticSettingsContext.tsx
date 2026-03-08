@@ -60,7 +60,7 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
               intervalM: Math.max(5, Math.min(500, Math.round(parsed.clicksConfig.intervalM))),
             }
           : defaultState.clicksConfig;
-        const compassMode = parsed.compassMode === true;
+        const compassMode = parsed.compassMode === true ? false : parsed.compassMode === true;
         return { measurement, scopeUnit, clicksConfig, compassMode };
       }
     } catch (_) {}
