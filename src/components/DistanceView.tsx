@@ -149,7 +149,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
       </button>
       </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-4 pb-4 space-y-3 pt-3 flex-shrink-0">
+        <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetHeightLabelFt') : t('ballistic.targetHeightLabel')}</CliLine>
@@ -160,7 +160,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
                 step={0.01}
                 value={heightStr}
                 onChange={(e) => setHeightStr(e.target.value)}
-                className="mt-1 w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-xs"
+                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
                 placeholder={measurement === 'imperial' ? 'e.g. 5.74' : 'e.g. 1.75'}
               />
             </label>
@@ -173,27 +173,27 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
                 step="0.1"
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
-                className="mt-1 w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-xs"
+                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
                 placeholder={isMIL ? 'e.g. 4' : 'e.g. 2'}
               />
             </label>
           </section>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               disabled
-              className="flex-1 py-2 rounded border border-amber-400/30 bg-amber-500/10 text-amber-300 font-medium cursor-default"
+              className="flex-1 py-3 rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300 font-medium cursor-default text-sm"
             >
               {t('ballistic.hubDistance')}
             </button>
             <button
               onClick={() => { playTapSound(); onSwitchToHeight(); }}
-              className="flex-1 py-2 rounded border border-white/10 bg-white/5 text-slate-400 hover:text-white font-medium"
+              className="flex-1 py-3 rounded-lg border border-white/10 bg-white/5 text-slate-400 hover:text-white font-medium text-sm"
             >
               {t('ballistic.hubHeight')}
             </button>
           </div>
           {hasResult ? (
-            <section className="mt-3 pt-3 border-t border-white/10 space-y-1 max-h-[12rem] overflow-y-auto">
+            <section className="mt-4 pt-4 border-t border-white/10 space-y-1.5 max-h-[14.5rem] overflow-y-auto text-[1.2em]">
               {turret &&
                 (turret.outOfRange ? (
                   <CliLine role="white">{t('ballistic.targetTooFar')}</CliLine>
