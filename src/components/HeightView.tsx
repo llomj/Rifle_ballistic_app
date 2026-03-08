@@ -3,6 +3,7 @@ import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
 import { cmToIn, ydToM, mToFt, formatTurretLine } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
@@ -58,14 +59,15 @@ export const HeightView: React.FC<HeightViewProps> = ({
   useSwipeLeft(onBackToFirstPage ? () => { playTapSound(); onBackToFirstPage(); } : undefined);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
       <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
-        className="w-48 h-48 rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        className="rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('ballistic.calculate')}
       >
-        <i className="fas fa-calculator text-amber-300 text-2xl" />
+        <i className="fas fa-calculator text-amber-300 text-3xl" />
         <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">{t('ballistic.calculate')}</span>
         <i className={`fas fa-chevron-${inputsSectionExpanded ? 'up' : 'down'} text-slate-500 text-[10px]`} />
       </button>

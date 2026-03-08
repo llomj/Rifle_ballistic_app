@@ -235,66 +235,58 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
           onClick={() => { playTapSound(); setShowConfigModal(false); }}
         >
           <div
-            className="w-full max-w-lg rounded-t-2xl bg-zinc-900 border-t border-white/10 p-4 pb-safe animate-in slide-in-from-bottom duration-300"
+            className="w-full max-w-lg rounded-t-2xl border-t border-white/10 p-4 pb-safe animate-in slide-in-from-bottom duration-300 bg-slate-950/[0.009] backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="table-config-title" className="text-amber-400 font-medium mb-3">
-              {t('ballistic.tableConfig')}
-            </h2>
-            <p className="text-xs text-slate-500 mb-4">{t('ballistic.configAffectsTurretMildotComp')}</p>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
-                  {t('ballistic.maxMeters')}
-                </label>
-                <input
-                  type="number"
-                  min={400}
-                  max={1500}
-                  step={50}
-                  value={clicksConfig.maxM}
-                  onChange={(e) => {
-                    const v = Math.round(parseFloat(e.target.value) || 800);
-                    setClicksConfig({ maxM: Math.max(400, Math.min(1500, v)) });
-                  }}
-                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
-                  {t('ballistic.incrementMeters')}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {CLICKS_INTERVAL_PRESETS.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => {
-                        playTapSound();
-                        setClicksConfig({ intervalM: preset });
-                      }}
-                      className={`px-3 py-2 rounded-lg border text-sm font-mono transition-colors ${
-                        clicksConfig.intervalM === preset
-                          ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
-                          : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+            <div className="max-h-[70vh] overflow-y-auto overscroll-contain">
+              <h2 id="table-config-title" className="text-amber-400 font-medium mb-3">
+                {t('ballistic.tableConfig')}
+              </h2>
+              <p className="text-xs text-slate-500 mb-4">{t('ballistic.configAffectsTurretMildotComp')}</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.maxMeters')}
+                  </label>
+                  <input
+                    type="number"
+                    min={400}
+                    max={1500}
+                    step={50}
+                    value={clicksConfig.maxM}
+                    onChange={(e) => {
+                      const v = Math.round(parseFloat(e.target.value) || 800);
+                      setClicksConfig({ maxM: Math.max(400, Math.min(1500, v)) });
+                    }}
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.incrementMeters')}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {CLICKS_INTERVAL_PRESETS.map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => {
+                          playTapSound();
+                          setClicksConfig({ intervalM: preset });
+                        }}
+                        className={`px-3 py-2 rounded-lg border text-sm font-mono transition-colors ${
+                          clicksConfig.intervalM === preset
+                            ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                            : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                        }`}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                playTapSound();
-                setShowConfigModal(false);
-              }}
-              className="mt-4 w-full py-3 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-300 font-medium"
-            >
-              {t('ballistic.configDone')}
-            </button>
           </div>
         </div>
       )}

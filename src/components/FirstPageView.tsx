@@ -3,6 +3,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
+import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -55,6 +56,9 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       if (start == null || e.changedTouches.length === 0) return;
       checkSwipeRight(start.x, start.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     };
+    const handleTouchCancel = () => {
+      touchStart.current = null;
+    };
     const handleMouseDown = (e: MouseEvent) => {
       if (e.button === 0) {
         touchStart.current = { x: e.clientX, y: e.clientY };
@@ -93,12 +97,14 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
 
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchCancel, { passive: true });
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchCancel);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('wheel', handleWheel);
@@ -115,15 +121,46 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     onOpenHub();
   };
 
+  const TICK_COUNT = 32;
+  const radius = CIRCLE_SIZE_PX / 2;
+  const ticks = Array.from({ length: TICK_COUNT }, (_, i) => {
+    const deg = (i / TICK_COUNT) * 360;
+    const isNESW = i % 8 === 0; // N, E, S, W only
+    const isIntercardinal = i % 8 === 4; // NE, SE, SW, NW
+    const tickLen = isNESW ? 18 : isIntercardinal ? 12 : 6; // lensatic: cardinal longest
+    return { deg, tickLen };
+  });
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
+      {/* Lensatic-style compass with cardinal ticks and ^ north */}
       <button
         type="button"
         onClick={handleOpenHub}
-        className="w-48 h-48 rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        className="relative rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('firstPage.openHub')}
       >
-        <span className="font-mono font-bold text-amber-300 tabular-nums text-2xl leading-none">
+        {/* North indicator ^ at top (lensatic style) */}
+        <span
+          className="absolute left-1/2 top-2 z-20 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+          aria-hidden
+        >
+          ^
+        </span>
+        {/* Compass tick marks around rim (cardinal bigger, point inward) */}
+        {ticks.map(({ deg, tickLen }) => (
+          <div
+            key={deg}
+            className="absolute left-1/2 top-1/2 w-px origin-bottom"
+            style={{
+              height: tickLen,
+              backgroundColor: 'rgba(251, 191, 36, 0.5)',
+              transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-${radius}px)`,
+            }}
+          />
+        ))}
+        <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none relative z-10">
           {clicksMeters.trim() !== ''
             ? (() => {
                 const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
@@ -135,7 +172,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             : '^—'}
         </span>
         <div
-          className="flex items-baseline gap-0.5"
+          className="flex items-baseline gap-0.5 relative z-10"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -145,11 +182,11 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             value={clicksMeters}
             onChange={(e) => setClicksMeters(e.target.value)}
             placeholder={measurement === 'imperial' ? 'yd' : 'm'}
-            className="w-20 bg-transparent border-none text-center font-mono text-2xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0"
+            className="w-28 bg-transparent border-none text-center font-mono text-4xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0"
           />
-          <span className="font-mono text-xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
+          <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
         </div>
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider pt-1">{t('firstPage.tapToOpen')}</span>
+        <span className="text-[10px] text-slate-500 uppercase tracking-wider pt-1 relative z-10">{t('firstPage.tapToOpen')}</span>
       </button>
     </div>
   );

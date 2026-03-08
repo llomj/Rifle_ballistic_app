@@ -30,6 +30,9 @@ export function useSwipeLeft(onSwipe: (() => void) | undefined): void {
         checkSwipeLeft(start.x, start.y, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
       }
     };
+    const handleTouchCancel = () => {
+      touchStart.current = null;
+    };
     const handleMouseDown = (e: MouseEvent) => {
       touchStart.current = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
     };
@@ -63,12 +66,14 @@ export function useSwipeLeft(onSwipe: (() => void) | undefined): void {
 
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchCancel, { passive: true });
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchCancel);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('wheel', handleWheel);

@@ -193,3 +193,7 @@ mils: 0.00125	800 meters =  540cm
   - **Blue (sky):** meters, yards (e.g. 150m, 200y)
   - **Yellow (amber):** cm, inch
   - **White:** clicks, mrad (e.g. -0.20), mils
+
+### Circle Size Consistency
+- **Single source of truth:** All ballistic circles (clicks compass, Distance calculator, Height calculator) use `CIRCLE_SIZE_PX` from `src/constants/ballisticUI.ts`.
+- **If the user asks to change the size of one circle, all circles must change and remain identical.** Update only `CIRCLE_SIZE_PX`; never size circles separately.
