@@ -147,7 +147,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
       </button>
       </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md mt-1 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+        <div className="w-full max-w-md mt-0 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetDistanceLabelYd') : t('ballistic.targetDistanceLabel')}</CliLine>
