@@ -3,7 +3,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
+import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -162,7 +162,11 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
+    <div className="flex flex-col items-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
+      <div
+        className="flex-shrink-0 flex items-center justify-center w-full"
+        style={{ height: CIRCLE_SLOT_HEIGHT }}
+      >
       {/* Lensatic-style compass with cardinal ticks and ^ north */}
       <button
         type="button"
@@ -254,6 +258,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           </span>
         </div>
       </button>
+      </div>
     </div>
   );
 };
