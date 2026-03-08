@@ -81,7 +81,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   return (
     <div className="flex flex-col items-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y pb-8">
       <div
-        className="flex-shrink-0 flex items-center justify-center w-full"
+        className="flex-shrink-0 flex flex-col items-center justify-center w-full gap-1"
         style={{ height: CIRCLE_SLOT_HEIGHT }}
       >
         <button
@@ -147,9 +147,8 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
           </span>
         </div>
       </button>
-      </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md mt-1 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+        <div className="w-full max-w-md rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetHeightLabelFt') : t('ballistic.targetHeightLabel')}</CliLine>
