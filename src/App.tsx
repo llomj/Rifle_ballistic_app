@@ -6,6 +6,7 @@ import { SettingsMenu } from './components/SettingsMenu';
 import { IdLogEntry, IdLogRifle } from './types';
 import { LEVELS, XP_PER_QUESTION, QUESTIONS_PER_LEVEL, getStarsFromProgress, getStarsFromAccuracy, getStarsFromRandomCorrect, getRandomModeScore, getPersonaFromRandomScore, PERSONA_EMOJI } from './constants';
 import { useLanguage } from './contexts/LanguageContext';
+import { useBallisticSettings } from './contexts/BallisticSettingsContext';
 import { formatTranslation } from './translations';
 import { playStarMelodyShort, playStarMelodyLong, playUITapSound, triggerHaptic } from './utils/sounds';
 import { SoundProvider } from './contexts/SoundContext';
@@ -89,6 +90,7 @@ const ViewLoading: React.FC = () => (
 
 const App: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
+  const { compassMode, setCompassMode } = useBallisticSettings();
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [view, setView] = useState<'hub' | 'quiz' | 'log' | 'glossary'>('hub');
   const [showResult, setShowResult] = useState<{
@@ -148,6 +150,19 @@ const App: React.FC = () => {
 
   const toggleSound = () => setSoundEnabled((prev) => !prev);
   const toggleHaptic = () => setHapticEnabled((prev) => !prev);
+
+  const handleToggleCompass = () => {
+    if (compassMode) {
+      setCompassMode(false);
+      return;
+    }
+    const req = typeof DeviceOrientationEvent !== 'undefined' && 'requestPermission' in DeviceOrientationEvent
+      ? (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission()
+      : Promise.resolve('granted');
+    req.then((result) => {
+      if (result === 'granted') setCompassMode(true);
+    }).catch(() => {});
+  };
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en');
@@ -492,6 +507,8 @@ const App: React.FC = () => {
           onToggleSound={toggleSound}
           hapticEnabled={hapticEnabled}
           onToggleHaptic={toggleHaptic}
+          compassEnabled={compassMode}
+          onToggleCompass={handleToggleCompass}
           onResetApp={() => setShowResetModal(true)}
       />
 

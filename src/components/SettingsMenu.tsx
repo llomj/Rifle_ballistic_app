@@ -31,6 +31,8 @@ interface SettingsMenuProps {
   onToggleSound?: () => void;
   hapticEnabled?: boolean;
   onToggleHaptic?: () => void;
+  compassEnabled?: boolean;
+  onToggleCompass?: () => void;
   onResetApp?: () => void;
 }
 
@@ -70,6 +72,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onToggleSound,
   hapticEnabled = true,
   onToggleHaptic,
+  compassEnabled = false,
+  onToggleCompass,
   onResetApp
 }) => {
   const { t, language } = useLanguage();
@@ -248,6 +252,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       label: t('settings.haptic'),
       toggled: hapticEnabled,
       onClick: () => { onToggleHaptic(); }
+    });
+  }
+  // Compass / magnetometer (under Haptic)
+  if (onToggleCompass) {
+    menuItems.push({
+      type: 'toggle',
+      icon: compassEnabled ? 'fa-compass' : 'fa-compass',
+      label: t('settings.compass'),
+      toggled: compassEnabled,
+      onClick: () => { onToggleCompass(); }
     });
   }
 

@@ -20,7 +20,8 @@ const WHEEL_SWIPE_THRESHOLD = 50; // Accumulated |deltaX| for trackpad two-finge
 export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenCalculate }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { measurement } = useBallisticSettings();
+  const { measurement, compassMode } = useBallisticSettings();
+  const [heading, setHeading] = useState<number | null>(null);
   const { getTurretForExactDistance } = useTrajectoryTables();
   const [clicksMeters, setClicksMeters] = useState('');
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -112,6 +113,19 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     };
   }, [onOpenCalculate]);
 
+  useEffect(() => {
+    if (!compassMode) {
+      setHeading(null);
+      return;
+    }
+    const handler = (e: DeviceOrientationEvent) => {
+      const a = e.alpha;
+      if (a != null && !Number.isNaN(a)) setHeading(a);
+    };
+    window.addEventListener('deviceorientation', handler);
+    return () => window.removeEventListener('deviceorientation', handler);
+  }, [compassMode]);
+
   const handleOpenHub = () => {
     if (swipeJustFired.current) {
       swipeJustFired.current = false;
@@ -141,14 +155,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('firstPage.openHub')}
       >
-        {/* North indicator ^ at top (lensatic style) */}
-        <span
-          className="absolute left-1/2 top-2 z-20 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
-          aria-hidden
-        >
-          ^
-        </span>
-        {/* Compass tick marks around rim (cardinal bigger, point inward) */}
+        {/* Compass tick marks around rim (fixed bezel, cardinal bigger) */}
         {ticks.map(({ deg, tickLen }) => (
           <div
             key={deg}
@@ -160,7 +167,21 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             }}
           />
         ))}
-        <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none relative z-10">
+        {/* Inner compass (rotates when compassMode) so ^ points north */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none"
+          style={{
+            transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
+            transition: compassMode ? 'transform 0.1s ease-out' : 'none',
+          }}
+        >
+          <span
+            className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+            aria-hidden
+          >
+            ^
+          </span>
+        <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none">
           {clicksMeters.trim() !== ''
             ? (() => {
                 const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
@@ -172,7 +193,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             : '^—'}
         </span>
         <div
-          className="flex items-baseline gap-0.5 relative z-10"
+          className="flex items-baseline gap-0.5 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -186,7 +207,8 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           />
           <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
         </div>
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider pt-1 relative z-10">{t('firstPage.tapToOpen')}</span>
+        <span className="text-[10px] text-slate-500 uppercase tracking-wider pt-1">{t('firstPage.tapToOpen')}</span>
+        </div>
       </button>
     </div>
   );

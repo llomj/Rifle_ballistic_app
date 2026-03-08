@@ -22,21 +22,25 @@ interface BallisticSettingsState {
   measurement: MeasurementSystem;
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
+  compassMode: boolean;
 }
 
 interface BallisticSettingsContextType {
   measurement: MeasurementSystem;
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
+  compassMode: boolean;
   setMeasurement: (m: MeasurementSystem) => void;
   setScopeUnit: (u: ScopeUnit) => void;
   setClicksConfig: (c: Partial<ClicksConfig>) => void;
+  setCompassMode: (on: boolean) => void;
 }
 
 const defaultState: BallisticSettingsState = {
   measurement: 'metric',
   scopeUnit: 'MIL',
   clicksConfig: DEFAULT_CLICKS_CONFIG,
+  compassMode: false,
 };
 
 const BallisticSettingsContext = createContext<BallisticSettingsContextType | undefined>(undefined);
@@ -56,7 +60,8 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
               intervalM: Math.max(5, Math.min(500, Math.round(parsed.clicksConfig.intervalM))),
             }
           : defaultState.clicksConfig;
-        return { measurement, scopeUnit, clicksConfig };
+        const compassMode = parsed.compassMode === true;
+        return { measurement, scopeUnit, clicksConfig, compassMode };
       }
     } catch (_) {}
     return defaultState;
@@ -85,15 +90,21 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
     });
   };
 
+  const setCompassMode = (compassMode: boolean) => {
+    setState((prev) => ({ ...prev, compassMode }));
+  };
+
   return (
     <BallisticSettingsContext.Provider
       value={{
         measurement: state.measurement,
         scopeUnit: state.scopeUnit,
         clicksConfig: state.clicksConfig,
+        compassMode: state.compassMode,
         setMeasurement,
         setScopeUnit,
         setClicksConfig,
+        setCompassMode,
       }}
     >
       {children}
