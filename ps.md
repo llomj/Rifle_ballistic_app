@@ -161,3 +161,21 @@ The workflow (`.github/workflows/deploy.yml`) must match the **last successful r
    - command example relevance
    - consistency between Beginner/Intermediate/Expert depth.
 2. Tune per-topic templates if needed (networking/security/containers levels) to reduce generic examples.
+
+---
+
+## March 8, 2026 — Target panel too low on calculate page
+
+**Problem:** The target input panel appears far below the circle, not directly under it.
+
+**Root cause:** The circle is inside a container with height `CIRCLE_SLOT_HEIGHT` (55vh), but the circle is centered within this space, leaving empty space above AND below the circle. The panel was appearing below the entire container, not right under the circle.
+
+**Solution:** Use negative margin to pull the panel up to overlap with the empty space below the circle:
+
+```tsx
+// Instead of mt-0 or mt-1, use:
+<div className="w-full max-w-md -mt-[20vh] ...">
+```
+
+This pulls the panel UP by 20% of the viewport height, positioning it right at the bottom edge of the circle. Adjust the percentage as needed for the desired visual overlap.
+
