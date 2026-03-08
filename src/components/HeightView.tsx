@@ -3,7 +3,7 @@ import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
-import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
+import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
 import { cmToIn, ydToM, mToFt, formatTurretLine } from '../utils/ballisticUnits';
@@ -78,10 +78,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
 
   return (
     <div className="flex flex-col items-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y pb-8">
-      <div
-        className="flex-shrink-0 flex flex-col items-center justify-center w-full gap-1"
-        style={{ height: CIRCLE_SLOT_HEIGHT }}
-      >
+      <div className="flex-1 min-h-[min(55vh,400px)] flex-shrink-0 flex items-center justify-center w-full">
         <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
@@ -145,8 +142,9 @@ export const HeightView: React.FC<HeightViewProps> = ({
           </span>
         </div>
       </button>
+      </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+        <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-4 pb-4 space-y-3 pt-3 flex-shrink-0">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetDistanceLabelYd') : t('ballistic.targetDistanceLabel')}</CliLine>
@@ -157,7 +155,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
                 step="1"
                 value={distanceStr}
                 onChange={(e) => setDistanceStr(e.target.value)}
-                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
+                className="mt-1 w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-xs"
                 placeholder={measurement === 'imperial' ? 'e.g. 329' : 'e.g. 300'}
               />
             </label>
@@ -170,27 +168,27 @@ export const HeightView: React.FC<HeightViewProps> = ({
                 step="0.1"
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
-                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
+                className="mt-1 w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-xs"
                 placeholder={isMIL ? 'e.g. 4' : 'e.g. 2'}
               />
             </label>
           </section>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={() => { playTapSound(); onSwitchToDistance(); }}
-              className="flex-1 py-3 rounded-lg border border-white/10 bg-white/5 text-slate-400 hover:text-white font-medium text-sm"
+              className="flex-1 py-2 rounded border border-white/10 bg-white/5 text-slate-400 hover:text-white font-medium"
             >
               {t('ballistic.hubDistance')}
             </button>
             <button
               disabled
-              className="flex-1 py-3 rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300 font-medium cursor-default text-sm"
+              className="flex-1 py-2 rounded border border-amber-400/30 bg-amber-500/10 text-amber-300 font-medium cursor-default"
             >
               {t('ballistic.hubHeight')}
             </button>
           </div>
           {hasResult ? (
-            <section className="mt-4 pt-4 border-t border-white/10 space-y-1.5 max-h-[14.5rem] overflow-y-auto text-[1.2em]">
+            <section className="mt-3 pt-3 border-t border-white/10 space-y-1 max-h-[12rem] overflow-y-auto">
               {turret &&
                 (turret.outOfRange ? (
                   <CliLine role="white">{t('ballistic.targetTooFar')}</CliLine>
