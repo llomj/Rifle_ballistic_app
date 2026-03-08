@@ -113,17 +113,43 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     };
   }, [onOpenCalculate]);
 
+  const smoothedHeading = useRef<number | null>(null);
+  const rafId = useRef<number | null>(null);
+
   useEffect(() => {
     if (!compassMode) {
       setHeading(null);
+      smoothedHeading.current = null;
       return;
     }
+    const SMOOTH = 0.12; // Lower = smoother, higher = more responsive
     const handler = (e: DeviceOrientationEvent) => {
       const a = e.alpha;
-      if (a != null && !Number.isNaN(a)) setHeading(a);
+      if (a == null || Number.isNaN(a)) return;
+      const raw = (a + 360) % 360;
+      const prev = smoothedHeading.current;
+      const next =
+        prev == null
+          ? raw
+          : (() => {
+              let diff = raw - prev;
+              if (diff > 180) diff -= 360;
+              if (diff < -180) diff += 360;
+              return (prev + diff * SMOOTH + 360) % 360;
+            })();
+      smoothedHeading.current = next;
+      if (rafId.current == null) {
+        rafId.current = requestAnimationFrame(() => {
+          rafId.current = null;
+          setHeading(smoothedHeading.current);
+        });
+      }
     };
     window.addEventListener('deviceorientation', handler);
-    return () => window.removeEventListener('deviceorientation', handler);
+    return () => {
+      window.removeEventListener('deviceorientation', handler);
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
+    };
   }, [compassMode]);
 
   const handleOpenHub = () => {
