@@ -135,15 +135,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     onOpenHub();
   };
 
-  const TICK_COUNT = 32;
   const radius = CIRCLE_SIZE_PX / 2;
-  const ticks = Array.from({ length: TICK_COUNT }, (_, i) => {
-    const deg = (i / TICK_COUNT) * 360;
-    const isNESW = i % 8 === 0; // N, E, S, W only
-    const isIntercardinal = i % 8 === 4; // NE, SE, SW, NW
-    const tickLen = isNESW ? 18 : isIntercardinal ? 12 : 6; // lensatic: cardinal longest
-    return { deg, tickLen };
-  });
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
@@ -155,59 +147,106 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('firstPage.openHub')}
       >
-        {/* Compass tick marks around rim (fixed bezel, cardinal bigger) */}
-        {ticks.map(({ deg, tickLen }) => (
+        {/* Fixed center: input+m at true center, clicks above, tap to open below */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+          <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none -mb-1">
+            {clicksMeters.trim() !== ''
+              ? (() => {
+                  const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
+                  const distM = measurement === 'imperial' ? raw * 0.9144 : raw;
+                  const exact = distM > 0 ? getTurretForExactDistance(distM) : null;
+                  const n = exact?.line.match(/\^(\d+)\s*clicks?/i)?.[1];
+                  return n != null ? `^${n}` : '^—';
+                })()
+              : '^—'}
+          </span>
           <div
-            key={deg}
-            className="absolute left-1/2 top-1/2 w-px origin-bottom"
-            style={{
-              height: tickLen,
-              backgroundColor: 'rgba(251, 191, 36, 0.5)',
-              transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-${radius}px)`,
-            }}
-          />
-        ))}
-        {/* Inner compass (rotates when compassMode) so ^ points north */}
+            className="flex items-baseline gap-0.5 pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <input
+              type="text"
+              inputMode="decimal"
+              value={clicksMeters}
+              onChange={(e) => setClicksMeters(e.target.value)}
+              placeholder={measurement === 'imperial' ? 'yd' : 'm'}
+              className="w-28 bg-transparent border-none text-center font-mono text-4xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0"
+            />
+            <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
+          </div>
+          {compassMode && heading != null && (
+            <span className="text-[10px] text-amber-400/90 font-mono tabular-nums mt-1">
+              {Math.round(heading)}° · {Math.round(heading * 60)} MOA
+            </span>
+          )}
+          <span className="absolute left-1/2 -translate-x-1/2 text-[10px] text-slate-500 uppercase tracking-wider" style={{ bottom: 44 }}>{t('firstPage.tapToOpen')}</span>
+        </div>
+
+        {/* Fixed bezel: serrations, sighting notch (does not rotate) */}
+        {Array.from({ length: 120 }, (_, i) => {
+          const d = (i / 120) * 360;
+          const isCardinal = i % 30 === 0;
+          return (
+            <div
+              key={`serration-${d}`}
+              className="absolute left-1/2 top-1/2 w-px origin-top z-[5]"
+              style={{
+                height: isCardinal ? 8 : 4,
+                backgroundColor: 'rgba(251, 191, 36, 0.35)',
+                transform: `translate(-50%, -50%) rotate(${d}deg) translateY(-${radius}px)`,
+              }}
+            />
+          );
+        })}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none"
+          className="absolute left-1/2 top-0 w-0.5 h-4 -translate-x-1/2 rounded-b z-[5]"
+          style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}
+          aria-hidden
+        />
+
+        {/* Rotating ring + north arrow (compass dial) — rotates so ^ points north */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
           style={{
             transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
             transition: compassMode ? 'transform 0.1s ease-out' : 'none',
           }}
         >
+          {/* North arrow ^ */}
           <span
             className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
             aria-hidden
           >
             ^
           </span>
-        <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none">
-          {clicksMeters.trim() !== ''
-            ? (() => {
-                const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
-                const distM = measurement === 'imperial' ? raw * 0.9144 : raw;
-                const exact = distM > 0 ? getTurretForExactDistance(distM) : null;
-                const n = exact?.line.match(/\^(\d+)\s*clicks?/i)?.[1];
-                return n != null ? `^${n}` : '^—';
-              })()
-            : '^—'}
-        </span>
-        <div
-          className="flex items-baseline gap-0.5 pointer-events-auto"
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <input
-            type="text"
-            inputMode="decimal"
-            value={clicksMeters}
-            onChange={(e) => setClicksMeters(e.target.value)}
-            placeholder={measurement === 'imperial' ? 'yd' : 'm'}
-            className="w-28 bg-transparent border-none text-center font-mono text-4xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0"
-          />
-          <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
-        </div>
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider pt-1">{t('firstPage.tapToOpen')}</span>
+          {/* N only (top, bigger) */}
+          <span
+            className="absolute left-1/2 top-0 font-mono font-bold text-amber-400/95 text-base -translate-x-1/2 mt-3"
+            style={{ transform: 'translateX(-50%)' }}
+            aria-hidden
+          >
+            N
+          </span>
+          {/* Degrees 0–360 (no ring, labels only) */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
+            const r = radius - 28;
+            const rad = (deg * Math.PI) / 180;
+            const x = Math.sin(rad) * r;
+            const yy = -Math.cos(rad) * r;
+            return (
+              <span
+                key={`deg-${deg}`}
+                className="absolute left-1/2 top-1/2 font-mono font-medium text-amber-400/80 text-[10px] -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${yy}px))`,
+                }}
+                aria-hidden
+              >
+                {deg}
+              </span>
+            );
+          })}
         </div>
       </button>
     </div>

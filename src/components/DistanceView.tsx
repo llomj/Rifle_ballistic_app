@@ -1,9 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { CIRCLE_SIZE_PX } from '../constants/ballisticUI';
+
+const DEG_TO_MRAD = (1000 * Math.PI) / 180;
+const MRAD_LABELS = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) =>
+  Math.round(deg * DEG_TO_MRAD)
+);
 import { mToYd, cmToIn, ftToM, formatTurretLine } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
@@ -24,7 +29,8 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { scopeUnit, measurement } = useBallisticSettings();
+  const { scopeUnit, measurement, compassMode } = useBallisticSettings();
+  const [heading, setHeading] = useState<number | null>(null);
   const [heightStr, setHeightStr] = useState('');
   const [valueStr, setValueStr] = useState('');
   const [inputsSectionExpanded, setInputsSectionExpanded] = useState(false);
@@ -60,18 +66,104 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
 
   useSwipeLeft(onBackToFirstPage ? () => { playTapSound(); onBackToFirstPage(); } : undefined);
 
+  useEffect(() => {
+    if (!compassMode) {
+      setHeading(null);
+      return;
+    }
+    const handler = (e: DeviceOrientationEvent) => {
+      const a = e.alpha;
+      if (a != null && !Number.isNaN(a)) setHeading(a);
+    };
+    window.addEventListener('deviceorientation', handler);
+    return () => window.removeEventListener('deviceorientation', handler);
+  }, [compassMode]);
+
+  const radius = CIRCLE_SIZE_PX / 2;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100dvh-200px)] px-4 font-mono text-xs touch-pan-y">
       <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
-        className="rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        className="relative rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
         style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('ballistic.calculate')}
       >
-        <i className="fas fa-calculator text-amber-300 text-3xl" />
-        <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">{t('ballistic.calculate')}</span>
-        <i className={`fas fa-chevron-${inputsSectionExpanded ? 'up' : 'down'} text-slate-500 text-[10px]`} />
+        {/* Fixed center: calculator + Calculate + chevron */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+          <i className="fas fa-calculator text-amber-300 text-3xl" />
+          {compassMode && heading != null && (
+            <span className="text-[10px] text-amber-400/90 font-mono tabular-nums mt-1">
+              {Math.round(heading * DEG_TO_MRAD)} mrad
+            </span>
+          )}
+          <i className={`fas fa-chevron-${inputsSectionExpanded ? 'up' : 'down'} text-slate-500 text-[10px] mt-0.5`} />
+        </div>
+
+        {/* Fixed bezel: serrations */}
+        {Array.from({ length: 120 }, (_, i) => {
+          const d = (i / 120) * 360;
+          const isCardinal = i % 30 === 0;
+          return (
+            <div
+              key={`serration-${d}`}
+              className="absolute left-1/2 top-1/2 w-px origin-top z-[5]"
+              style={{
+                height: isCardinal ? 8 : 4,
+                backgroundColor: 'rgba(251, 191, 36, 0.35)',
+                transform: `translate(-50%, -50%) rotate(${d}deg) translateY(-${radius}px)`,
+              }}
+            />
+          );
+        })}
+        <div
+          className="absolute left-1/2 top-0 w-0.5 h-4 -translate-x-1/2 rounded-b z-[5]"
+          style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}
+          aria-hidden
+        />
+
+        {/* Rotating dial with north arrow and mrad labels */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
+            transition: compassMode ? 'transform 0.1s ease-out' : 'none',
+          }}
+        >
+          <span
+            className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+            aria-hidden
+          >
+            ^
+          </span>
+          <span
+            className="absolute left-1/2 top-0 font-mono font-bold text-amber-400/95 text-base -translate-x-1/2 mt-3"
+            style={{ transform: 'translateX(-50%)' }}
+            aria-hidden
+          >
+            N
+          </span>
+          {MRAD_LABELS.map((mrad, i) => {
+            const deg = i * 30;
+            const r = radius - 28;
+            const rad = (deg * Math.PI) / 180;
+            const x = Math.sin(rad) * r;
+            const yy = -Math.cos(rad) * r;
+            return (
+              <span
+                key={`mrad-${mrad}`}
+                className="absolute left-1/2 top-1/2 font-mono font-medium text-amber-400/80 text-[10px] -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${yy}px))`,
+                }}
+                aria-hidden
+              >
+                {mrad}
+              </span>
+            );
+          })}
+        </div>
       </button>
       {inputsSectionExpanded && (
         <div className="w-full max-w-md mt-4 rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-4 pb-4 space-y-3 pt-3">
