@@ -202,3 +202,8 @@ mils: 0.00125	800 meters =  540cm
 - **First page (clicks compass):** Degrees (°) and MOA must always appear in the **centre** of the circle, **under** the distance input (m/yd). Never place degrees or MOA labels around the ring. Format: `{deg}° · {moa} MOA`. Use `text-sm` or larger for readability.
 - **Calculate pages (Distance / Height):** MRAD must always appear in the **centre** of the circle, under the calculator icon. Never place mrad labels around the ring. Format: `{mrad} mrad`. Use `text-sm` or larger.
 - **Rule:** Never move the degrees/MOA or mrad display function from the centre position under the main input.
+
+### Circle Position Consistency Across Pages
+- **Fixed circle position:** The compass circle must remain at the **exact same position** on all pages (main page, Distance calculator, Height calculator).
+- **Implementation:** All pages must use `CIRCLE_SLOT_HEIGHT` (from `src/constants/ballisticUI.ts`) with the same structure: `style={{ height: CIRCLE_SLOT_HEIGHT }}`.
+- **The circle never moves** — only the panel below expands/collapses. The circle position is identical whether swiping between pages or expanding/collapsing the input panel.
