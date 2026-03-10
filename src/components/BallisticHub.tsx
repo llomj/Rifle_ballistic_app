@@ -156,10 +156,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                min="25"
-                max={measurement === 'imperial' ? 1100 : 1000}
-                step={measurement === 'imperial' ? 25 : 25}
-                inputMode="numeric"
+                inputMode="decimal"
                 value={
                   measurement === 'imperial'
                     ? Math.round(mToYd(currentProfile.zeroDistanceM ?? 100))
@@ -168,7 +165,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 onChange={(e) => {
                   const raw = parseFloat(e.target.value) || 0;
                   const m = measurement === 'imperial' ? ydToM(raw) : raw;
-                  updateCurrentProfile({ zeroDistanceM: Math.max(25, Math.min(1000, Math.round(m))) });
+                  updateCurrentProfile({ zeroDistanceM: Math.max(1, Math.min(2000, m)) });
                 }}
                 className="w-24 rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
               />
