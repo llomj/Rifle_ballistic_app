@@ -16,7 +16,7 @@ export const DEFAULT_CLICKS_CONFIG: ClicksConfig = {
   intervalM: 50,
 };
 
-export const CLICKS_INTERVAL_PRESETS = [10, 15, 20, 25, 30, 45, 50, 60, 100, 200, 300] as const;
+export const CLICKS_INTERVAL_PRESETS = [10, 15, 20, 25, 30, 33, 45, 50, 60, 66, 100, 150, 200, 300] as const;
 
 interface BallisticSettingsState {
   measurement: MeasurementSystem;
@@ -55,8 +55,8 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
         const scopeUnit = parsed.scopeUnit === 'MIL' || parsed.scopeUnit === 'MOA' ? parsed.scopeUnit : defaultState.scopeUnit;
         const clicksConfig: ClicksConfig = parsed.clicksConfig && typeof parsed.clicksConfig.minM === 'number' && typeof parsed.clicksConfig.maxM === 'number' && typeof parsed.clicksConfig.intervalM === 'number'
           ? {
-              minM: Math.max(50, Math.min(200, Math.round(parsed.clicksConfig.minM))),
-              maxM: Math.max(400, Math.min(1300, Math.round(parsed.clicksConfig.maxM))),
+              minM: Math.max(0, Math.min(1000, Math.round(parsed.clicksConfig.minM))),
+              maxM: Math.max(100, Math.min(3000, Math.round(parsed.clicksConfig.maxM))),
               intervalM: Math.max(5, Math.min(500, Math.round(parsed.clicksConfig.intervalM))),
             }
           : defaultState.clicksConfig;
@@ -83,9 +83,10 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
   const setClicksConfig = (partial: Partial<ClicksConfig>) => {
     setState((prev) => {
       const next = { ...prev.clicksConfig, ...partial };
-      next.minM = Math.max(50, Math.min(200, Math.round(next.minM)));
-      next.maxM = Math.max(400, Math.min(1300, Math.round(next.maxM)));
+      next.minM = Math.max(0, Math.min(1000, Math.round(next.minM)));
+      next.maxM = Math.max(100, Math.min(3000, Math.round(next.maxM)));
       next.intervalM = Math.max(5, Math.min(500, Math.round(next.intervalM)));
+      if (next.maxM < next.minM) next.maxM = next.minM;
       return { ...prev, clicksConfig: next };
     });
   };

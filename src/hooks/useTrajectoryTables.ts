@@ -4,8 +4,6 @@ import { getScopeById, getBulletById } from '../data/catalogs';
 import {
   TURRET_TABLE,
   COMPENSATION_TABLE,
-  getTurretRow,
-  getTurretRowFromTable,
   getTurretForExactDistance,
   interpolateDropFromCompensation,
   buildTurretTableFromTrajectory,
@@ -68,12 +66,14 @@ export function useTrajectoryTables(): {
         customDistances.length > 0
           ? buildCompensationTableFromTrajectory(dropAtRange, customDistances)
           : COMPENSATION_TABLE;
+      const maxM = clicksConfig.maxM;
       return {
         turretTable,
         compensationTable,
-        getTurretRowForDistance: getTurretRow,
+        getTurretRowForDistance: (distanceM: number) =>
+          getTurretForExactDistance(distanceM, dropAtRange, clickVal, unit, maxM),
         getTurretForExactDistance: (distanceM: number) =>
-          getTurretForExactDistance(distanceM, dropAtRange, clickVal, unit),
+          getTurretForExactDistance(distanceM, dropAtRange, clickVal, unit, maxM),
       };
     }
 
@@ -97,13 +97,14 @@ export function useTrajectoryTables(): {
       customDistances.length > 0 ? customDistances : undefined
     );
 
+    const maxM = clicksConfig.maxM;
     return {
       turretTable,
       compensationTable,
       getTurretRowForDistance: (distanceM: number) =>
-        getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit),
+        getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit, maxM),
       getTurretForExactDistance: (distanceM: number) =>
-        getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit),
+        getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit, maxM),
     };
   }, [
     currentProfile.scopeId,

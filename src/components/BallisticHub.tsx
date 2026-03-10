@@ -3,6 +3,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { CLICKS_INTERVAL_PRESETS } from '../contexts/BallisticSettingsContext';
 import { ydToM, mToYd } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
 import { SearchCombobox } from './SearchCombobox';
@@ -28,9 +29,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const { playTapSound } = useSound();
   const { t } = useLanguage();
   const { currentProfile, updateCurrentProfile, saveCurrentAs } = useBallisticProfile();
-  const { scopeUnit, setScopeUnit, measurement, setMeasurement } = useBallisticSettings();
+  const { scopeUnit, setScopeUnit, measurement, setMeasurement, clicksConfig, setClicksConfig } = useBallisticSettings();
   const [setupExpanded, setSetupExpanded] = useState(false);
   const [targetsExpanded, setTargetsExpanded] = useState(false);
+  const [turretExpanded, setTurretExpanded] = useState(false);
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
 
@@ -171,6 +173,76 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 className="w-24 rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
               />
               <span className="text-slate-500 text-sm">{measurement === 'imperial' ? 'yd' : 'm'}</span>
+            </div>
+
+            {/* Turret — table range: min, max, increment. Affects ballistic tables and holdover/clicks. */}
+            <div className="pt-3 mt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => { playTapSound(); setTurretExpanded((e) => !e); }}
+                className="w-full flex items-center justify-between gap-2 py-2 text-left text-slate-400 hover:text-white transition-colors"
+              >
+                <span className="text-sm font-medium">{t('ballistic.panelTurret')}</span>
+                <i className={`fas fa-chevron-down text-xs transition-transform ${turretExpanded ? 'rotate-180' : ''}`} />
+              </button>
+              {turretExpanded && (
+                <div className="space-y-3 pt-2">
+                  <p className="text-xs text-slate-500">{t('ballistic.configAffectsTurretMildotComp')}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.clicksMinM')}</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={1000}
+                        step={25}
+                        value={clicksConfig.minM}
+                        onChange={(e) => {
+                          const v = Math.round(parseFloat(e.target.value) || 0);
+                          setClicksConfig({ minM: Math.max(0, Math.min(1000, v)) });
+                        }}
+                        className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.maxMeters')}</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={100}
+                        max={3000}
+                        step={50}
+                        value={clicksConfig.maxM}
+                        onChange={(e) => {
+                          const v = Math.round(parseFloat(e.target.value) || 800);
+                          setClicksConfig({ maxM: Math.max(100, Math.min(3000, v)) });
+                        }}
+                        className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.incrementMeters')}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {CLICKS_INTERVAL_PRESETS.map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => { playTapSound(); setClicksConfig({ intervalM: preset }); }}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors ${
+                            clicksConfig.intervalM === preset
+                              ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                              : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

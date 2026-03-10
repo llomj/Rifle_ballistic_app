@@ -303,13 +303,13 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                   <input
                     type="number"
                     inputMode="numeric"
-                    min={400}
-                    max={1500}
+                    min={100}
+                    max={3000}
                     step={50}
                     value={clicksConfig.maxM}
                     onChange={(e) => {
                       const v = Math.round(parseFloat(e.target.value) || 800);
-                      setClicksConfig({ maxM: Math.max(400, Math.min(1500, v)) });
+                      setClicksConfig({ maxM: Math.max(100, Math.min(3000, v)) });
                     }}
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
                   />

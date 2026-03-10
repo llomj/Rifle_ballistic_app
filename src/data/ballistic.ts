@@ -442,7 +442,7 @@ export function getTurretRowFromTable(
   distanceM: number,
   table: TurretRow[]
 ): TurretResult | null {
-  if (!Number.isFinite(distanceM) || distanceM < 0) return null;
+  if (!Number.isFinite(distanceM) || distanceM < 0 || table.length === 0) return null;
   const row = table.find((r) => distanceM >= r.distanceMin && distanceM <= r.distanceMax);
   if (row) {
     return {
@@ -451,16 +451,19 @@ export function getTurretRowFromTable(
       outOfRange: false,
     };
   }
-  if (distanceM >= 150 && distanceM <= 800) return null;
-  return { line: '', inRange: false, outOfRange: true };
+  const minD = table[0].distanceMin;
+  const maxD = table[table.length - 1].distanceMax;
+  const outOfRange = distanceM < minD || distanceM > maxD;
+  return { line: '', inRange: false, outOfRange };
 }
 
-/** Compute turret (drop, mrad, clicks) for an exact distance (meter-precise). */
+/** Compute turret (drop, mrad, clicks) for an exact distance (meter-precise). maxM optional; used for outOfRange when beyond table range. */
 export function getTurretForExactDistance(
   distanceM: number,
   dropAtRangeCm: (rangeM: number) => number,
   scopeClickValue: number,
-  scopeUnit: ScopeUnit
+  scopeUnit: ScopeUnit,
+  maxM: number = 800
 ): TurretResult | null {
   if (!Number.isFinite(distanceM) || distanceM <= 0 || scopeClickValue <= 0) return null;
   const dropCm = dropAtRangeCm(distanceM);
@@ -471,7 +474,7 @@ export function getTurretForExactDistance(
   const value = scopeUnit === 'MIL' ? mradRounded : moa;
   const clicks = Math.round(Math.abs(value) / scopeClickValue);
   const inRange = distanceM <= 400;
-  const outOfRange = distanceM > 800;
+  const outOfRange = distanceM > maxM;
   return {
     line: `Turret: ${Math.round(dropCm)}cm ${scopeUnit === 'MIL' ? -mradRounded.toFixed(2) : -moa.toFixed(2)} ^${clicks} clicks`,
     inRange,
