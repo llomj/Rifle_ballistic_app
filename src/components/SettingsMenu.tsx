@@ -43,7 +43,7 @@ interface MenuItem {
   onClick?: () => void;
   active?: boolean;
   toggled?: boolean;
-  subItems?: Array<{ icon: string; label: string; onClick: () => void }>;
+  subItems?: Array<{ icon: string; label: string; onClick: () => void; active?: boolean }>;
 }
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({
@@ -110,14 +110,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     }
     if (onNavigateToBallistic) {
       customizeSubItems.push(
-        { icon: 'fa-calculator', label: t('ballistic.calculator'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-list', label: t('ballistic.clicksSection'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-table-cells', label: t('ballistic.mildotReference'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-compress-arrows-alt', label: t('ballistic.panelCompensation'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-search', label: t('ballistic.panelOptics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-wind', label: t('ballistic.panelWind'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-ruler-combined', label: t('ballistic.panelTargetHeights'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
-        { icon: 'fa-bullseye', label: t('ballistic.tabBallistics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-bullseye', label: t('ballistic.tabBallistics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); }, active: true },
         { icon: 'fa-wind', label: t('ballistic.tabEnvironment'), onClick: () => { onNavigateToBallistic('environment'); onClose(); } },
       );
     }
@@ -326,7 +319,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 <button
                   key={i}
                   onClick={() => { playTapSound(); sub.onClick(); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${sub.active ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
                 >
                   <i className={`fas ${sub.icon} text-sm w-5 flex-shrink-0`}></i>
                   <span className="text-sm font-medium">{sub.label}</span>
