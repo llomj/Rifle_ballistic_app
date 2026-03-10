@@ -85,13 +85,17 @@ const formatCodeSnippet = (text: string): string => {
 const splitQuestionForDisplay = (text: string, lang: string) =>
   splitQuestion(text, lang, translateQuestionText);
 
+const rifleDisplayLabel = (r: IdLogRifle): string =>
+  r.userName ? `${r.userName} — ${r.name}` : r.name;
+
 interface IdLogViewProps {
   entries: IdLogEntry[];
   rifles: IdLogRifle[];
   onClose: () => void;
-  onAddRifle: (name: string) => void;
+  onAddRifle: (name: string, userName?: string) => void;
   onRemoveRifle: (rifleId: string) => void;
   onRenameRifle: (rifleId: string, name: string) => void;
+  onSetRifleUserName: (rifleId: string, userName: string) => void;
   onSetEntryRifle: (entryId: number, entryTimestamp: number, rifleId: string | undefined) => void;
 }
 
@@ -102,36 +106,43 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
   onAddRifle,
   onRemoveRifle,
   onRenameRifle,
+  onSetRifleUserName,
   onSetEntryRifle,
 }) => {
   const { t, language } = useLanguage();
   const { playTapSound } = useSound();
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
   const [newRifleName, setNewRifleName] = useState('');
+  const [newRifleUserName, setNewRifleUserName] = useState('');
   const [editingRifleId, setEditingRifleId] = useState<string | null>(null);
   const [editingRifleName, setEditingRifleName] = useState('');
+  const [editingRifleUserName, setEditingRifleUserName] = useState('');
   const sortedEntries = [...entries].sort((a, b) => b.timestamp - a.timestamp);
 
   const handleAddRifle = () => {
     const name = newRifleName.trim();
     if (name) {
       playTapSound();
-      onAddRifle(name);
+      onAddRifle(name, newRifleUserName.trim() || undefined);
       setNewRifleName('');
+      setNewRifleUserName('');
     }
   };
 
   const startEditRifle = (r: IdLogRifle) => {
     setEditingRifleId(r.id);
     setEditingRifleName(r.name);
+    setEditingRifleUserName(r.userName ?? '');
   };
 
   const saveEditRifle = () => {
     if (editingRifleId) {
       playTapSound();
       onRenameRifle(editingRifleId, editingRifleName);
+      onSetRifleUserName(editingRifleId, editingRifleUserName);
       setEditingRifleId(null);
       setEditingRifleName('');
+      setEditingRifleUserName('');
     }
   };
 
@@ -186,9 +197,19 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
                   <>
                     <input
                       type="text"
+                      value={editingRifleUserName}
+                      onChange={(e) => setEditingRifleUserName(e.target.value)}
+                      placeholder={t('idLog.userNamePlaceholder')}
+                      onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') saveEditRifle(); if (e.key === 'Escape') { setEditingRifleId(null); setEditingRifleName(''); setEditingRifleUserName(''); } }}
+                      className="bg-slate-900 border border-white/20 rounded px-2 py-0.5 text-sm text-white w-24"
+                      onClick={(e) => e.stopPropagation()}
+                      title={t('idLog.userName')}
+                    />
+                    <input
+                      type="text"
                       value={editingRifleName}
                       onChange={(e) => setEditingRifleName(e.target.value)}
-                      onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') saveEditRifle(); if (e.key === 'Escape') { setEditingRifleId(null); setEditingRifleName(''); } }}
+                      onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') saveEditRifle(); if (e.key === 'Escape') { setEditingRifleId(null); setEditingRifleName(''); setEditingRifleUserName(''); } }}
                       className="bg-slate-900 border border-white/20 rounded px-2 py-0.5 text-sm text-white w-32"
                       onClick={(e) => e.stopPropagation()}
                       autoFocus
@@ -197,7 +218,7 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
                   </>
                 ) : (
                   <>
-                    <span className="text-sm text-slate-200">{r.name}</span>
+                    <span className="text-sm text-slate-200">{rifleDisplayLabel(r)}</span>
                     <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); startEditRifle(r); }} className="text-slate-500 hover:text-amber-400 text-xs" title={t('idLog.editRifle')}><i className="fas fa-pen"></i></button>
                     <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); onRemoveRifle(r.id); }} className="text-slate-500 hover:text-red-400 text-xs" title={t('idLog.deleteRifle')}><i className="fas fa-trash-can"></i></button>
                   </>
@@ -205,15 +226,26 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
               </div>
             ))}
           </div>
-          <div className="flex gap-2 items-center">
-            <input
-              type="text"
-              value={newRifleName}
-              onChange={(e) => setNewRifleName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAddRifle(); }}
-              placeholder={t('idLog.rifleNamePlaceholder')}
-              className="flex-1 rounded-lg bg-slate-800 border border-white/20 px-3 py-2 text-sm text-white placeholder-slate-500"
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={newRifleUserName}
+                onChange={(e) => setNewRifleUserName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddRifle(); }}
+                placeholder={t('idLog.userNamePlaceholder')}
+                className="w-32 rounded-lg bg-slate-800 border border-white/20 px-3 py-2 text-sm text-white placeholder-slate-500"
+              />
+              <input
+                type="text"
+                value={newRifleName}
+                onChange={(e) => setNewRifleName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddRifle(); }}
+                placeholder={t('idLog.rifleNamePlaceholder')}
+                className="flex-1 rounded-lg bg-slate-800 border border-white/20 px-3 py-2 text-sm text-white placeholder-slate-500"
+              />
+            </div>
+            <div className="flex gap-2 items-center">
             <button
               type="button"
               onClick={() => { playTapSound(); handleAddRifle(); }}
@@ -221,6 +253,7 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
             >
               {t('idLog.addRifle')}
             </button>
+          </div>
           </div>
         </div>
 
@@ -284,7 +317,7 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
                       >
                         <option value="">{t('idLog.noRifle')}</option>
                         {rifles.map((r) => (
-                          <option key={r.id} value={r.id}>{r.name}</option>
+                          <option key={r.id} value={r.id}>{rifleDisplayLabel(r)}</option>
                         ))}
                       </select>
                     </label>

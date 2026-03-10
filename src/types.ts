@@ -56,6 +56,8 @@ export enum PersonaStage {
 export interface IdLogRifle {
   id: string;
   name: string;
+  /** Optional user/shooter name; more users = more logs. */
+  userName?: string;
 }
 
 export interface IdLogEntry {

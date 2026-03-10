@@ -9,6 +9,7 @@ import { generateDistancesFromInterval } from '../data/ballistic';
 import { OPTICS_10X } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
+import { QuickRangeView } from './QuickRangeView';
 
 interface ReferenceViewProps {
   onBack: () => void;
@@ -60,6 +61,8 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const { t } = useLanguage();
   const { playTapSound } = useSound();
   const [rifleExpanded, setRifleExpanded] = useState(false);
+  const [calculatorExpanded, setCalculatorExpanded] = useState(false);
+  const [clicksExpanded, setClicksExpanded] = useState(false);
   const [turretExpanded, setTurretExpanded] = useState(false);
   const [mildotExpanded, setMildotExpanded] = useState(false);
   const [compensationExpanded, setCompensationExpanded] = useState(false);
@@ -67,7 +70,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const [targetHeightsExpanded, setTargetHeightsExpanded] = useState(false);
   const [windExpanded, setWindExpanded] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const { measurement, clicksConfig, setClicksConfig } = useBallisticSettings();
+  const { measurement, scopeUnit, clicksConfig, setClicksConfig } = useBallisticSettings();
   const { turretTable, compensationTable } = useTrajectoryTables();
 
   const turretLines = useMemo(
@@ -125,6 +128,28 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
     [t]
   );
 
+  const clicksHeader = useMemo(
+    () => [
+      t('ballistic.clicksHeaderDistance'),
+      t('ballistic.clicksHeaderDrop'),
+      scopeUnit === 'MOA' ? t('ballistic.clicksHeaderMoa') : t('ballistic.clicksHeaderMrad'),
+      t('ballistic.clicksHeaderClicks'),
+    ],
+    [t, scopeUnit]
+  );
+
+  const clicksRows = useMemo(
+    () =>
+      turretTable.map((r) => {
+        const dist = measurement === 'imperial' ? `${Math.round(mToYd(r.distanceMin))} yd` : `${r.distanceMin}m`;
+        const drop = measurement === 'imperial'
+          ? `${(cmToIn(parseFloat(String(r.dropCm).replace(/[^\d.-]/g, '')) || 0)).toFixed(1)} in`
+          : r.dropCm;
+        return [dist, drop, r.mrad, r.clicks];
+      }),
+    [turretTable, measurement]
+  );
+
   return (
     <div className="space-y-3 animate-in fade-in duration-300 pb-8">
       <div className="flex items-center justify-between border-b border-white/5 pb-3">
@@ -145,6 +170,41 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       <CliSep />
 
       <CollapsiblePanel
+        title={t('ballistic.rifleAndScope')}
+        expanded={rifleExpanded}
+        onToggle={() => { playTapSound(); setRifleExpanded((e) => !e); }}
+      >
+        <RifleScopeSection editable={false} />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.calculator')}
+        expanded={calculatorExpanded}
+        onToggle={() => { playTapSound(); setCalculatorExpanded((e) => !e); }}
+      >
+        <QuickRangeView />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.clicksSection')}
+        expanded={clicksExpanded}
+        onToggle={() => { playTapSound(); setClicksExpanded((e) => !e); }}
+        onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
+      >
+        <CliLine role="yellow">{t('ballistic.tableConfig')}</CliLine>
+        <CliLine role="white">{`${t('ballistic.clicksMaxM')}: ${clicksConfig.maxM}m`}</CliLine>
+        <CliLine role="white">{`${t('ballistic.clicksIntervalM')}: ${clicksConfig.intervalM}m`}</CliLine>
+        <CliSep />
+        <CliTable
+          header={clicksHeader}
+          columnRoles={['sky', 'amber', 'white', 'cyan']}
+          headerRoles={['sky', 'amber', 'white', 'cyan']}
+          rows={clicksRows}
+          colWidths={['7rem', '7rem', '7rem', '8rem']}
+        />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
         title={t('ballistic.panelTurret')}
         expanded={turretExpanded}
         onToggle={() => { playTapSound(); setTurretExpanded((e) => !e); }}
@@ -152,6 +212,60 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       >
         <CliLine role="yellow">{t('ballistic.milliradianNote')}</CliLine>
         <CliPre lines={turretLines} />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.mildotReference')}
+        expanded={mildotExpanded}
+        onToggle={() => { playTapSound(); setMildotExpanded((e) => !e); }}
+        onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
+      >
+        <CliLine role="yellow">{t('ballistic.deerShoulderNote')}</CliLine>
+        <CliLine role="yellow">{t('ballistic.mildot10xNote')}</CliLine>
+        <CliTable
+          columnRoles={['sky', 'white', 'white']}
+          rows={mildotRows}
+          header={mildotHeader}
+          colWidths={['8rem', '10rem', '10rem']}
+        />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.panelCompensation')}
+        expanded={compensationExpanded}
+        onToggle={() => { playTapSound(); setCompensationExpanded((e) => !e); }}
+        onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
+      >
+        <CliLine role="yellow">{t('ballistic.tenPer1000Comp')}</CliLine>
+        <CliPre lines={compensationLines} />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.panelOptics')}
+        expanded={opticsExpanded}
+        onToggle={() => { playTapSound(); setOpticsExpanded((e) => !e); }}
+      >
+        <CliLine role="yellow">{t('ballistic.optics10x')}</CliLine>
+        <CliPre lines={opticsLines.slice(1)} />
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.panelTargetHeights')}
+        expanded={targetHeightsExpanded}
+        onToggle={() => { playTapSound(); setTargetHeightsExpanded((e) => !e); }}
+      >
+        <CliLine role="yellow">{t('ballistic.targetHeightsNote')}</CliLine>
+      </CollapsiblePanel>
+
+      <CollapsiblePanel
+        title={t('ballistic.panelWind')}
+        expanded={windExpanded}
+        onToggle={() => { playTapSound(); setWindExpanded((e) => !e); }}
+      >
+        <CliLine role="yellow">{t('ballistic.windMirageCalc')}</CliLine>
+        <CliLine role="white">{`${'22 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  4 kph</CliLine>
+        <CliLine role="white">{`${'45 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  8 kph</CliLine>
+        <CliLine role="white">{`${'90 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  16 kph</CliLine>
       </CollapsiblePanel>
 
       <button
@@ -184,18 +298,18 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
               <div className="space-y-4">
                 <div>
                   <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
-                    Range (m)
+                    {t('ballistic.maxMeters')}
                   </label>
                   <input
                     type="number"
                     inputMode="numeric"
-                    min={100}
+                    min={400}
                     max={1500}
-                    step={1}
+                    step={50}
                     value={clicksConfig.maxM}
                     onChange={(e) => {
                       const v = Math.round(parseFloat(e.target.value) || 800);
-                      setClicksConfig({ maxM: Math.max(100, Math.min(1500, v)) });
+                      setClicksConfig({ maxM: Math.max(400, Math.min(1500, v)) });
                     }}
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
                   />

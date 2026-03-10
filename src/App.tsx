@@ -319,11 +319,18 @@ const App: React.FC = () => {
     }));
   };
 
-  const addIdLogRifle = (name: string) => {
+  const addIdLogRifle = (name: string, userName?: string) => {
     const id = `rifle-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     setStats(prev => ({
       ...prev,
-      idLogRifles: [...(prev.idLogRifles ?? []), { id, name: name.trim() || 'Rifle' }]
+      idLogRifles: [...(prev.idLogRifles ?? []), { id, name: name.trim() || 'Rifle', userName: userName?.trim() || undefined }]
+    }));
+  };
+
+  const setRifleUserName = (rifleId: string, userName: string) => {
+    setStats(prev => ({
+      ...prev,
+      idLogRifles: (prev.idLogRifles ?? []).map(r => (r.id === rifleId ? { ...r, userName: userName.trim() || undefined } : r))
     }));
   };
 
@@ -815,6 +822,7 @@ const App: React.FC = () => {
             onAddRifle={addIdLogRifle}
             onRemoveRifle={removeIdLogRifle}
             onRenameRifle={renameIdLogRifle}
+            onSetRifleUserName={setRifleUserName}
             onSetEntryRifle={setEntryRifle}
           />
         </Suspense>
