@@ -37,7 +37,7 @@ interface SettingsMenuProps {
 }
 
 interface MenuItem {
-  type: 'item' | 'rules' | 'user' | 'users' | 'toggle' | 'divider';
+  type: 'item' | 'rules' | 'users' | 'toggle' | 'divider' | 'customize' | 'settings';
   icon?: string;
   label?: string;
   onClick?: () => void;
@@ -80,14 +80,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   const { playTapSound } = useSound();
   const { currentProfile, savedProfiles, loadProfile, deleteSavedProfile } = useBallisticProfile();
   const [rulesExpanded, setRulesExpanded] = useState(false);
-  const [userExpanded, setUserExpanded] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(false);
+  const [customizeExpanded, setCustomizeExpanded] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setRulesExpanded(false);
-      setUserExpanded(false);
       setUsersExpanded(false);
+      setCustomizeExpanded(false);
+      setSettingsExpanded(false);
     }
   }, [isOpen]);
 
@@ -100,14 +102,14 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     menuItems.push({ type: 'users' } as MenuItem);
   }
 
-  // 1. User (Profile + calculator, clicks, mildot reference, etc.)
+  // 1. Customize — Profile, calculator, clicks, mildot, Ballistics, Environment (hub only)
   if ((onNavigateToProfile || onNavigateToBallistic) && view === 'hub') {
-    const userSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
+    const customizeSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onNavigateToProfile) {
-      userSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
+      customizeSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
     }
     if (onNavigateToBallistic) {
-      userSubItems.push(
+      customizeSubItems.push(
         { icon: 'fa-calculator', label: t('ballistic.calculator'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
         { icon: 'fa-list', label: t('ballistic.clicksSection'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
         { icon: 'fa-table-cells', label: t('ballistic.mildotReference'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
@@ -115,32 +117,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         { icon: 'fa-search', label: t('ballistic.panelOptics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
         { icon: 'fa-wind', label: t('ballistic.panelWind'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
         { icon: 'fa-ruler-combined', label: t('ballistic.panelTargetHeights'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-bullseye', label: t('ballistic.tabBallistics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); } },
+        { icon: 'fa-wind', label: t('ballistic.tabEnvironment'), onClick: () => { onNavigateToBallistic('environment'); onClose(); } },
       );
     }
     menuItems.push({
-      type: 'user',
-      icon: 'fa-user',
-      label: t('settings.user'),
-      subItems: userSubItems,
+      type: 'customize',
+      icon: 'fa-sliders-h',
+      label: t('settings.customize'),
+      subItems: customizeSubItems,
     });
-  }
-
-  // 1. Rifles, Ballistics, Targets, Environment — at top
-  if (onNavigateToBallistic && view === 'hub') {
-    const ballisticTabs: { id: BallisticTab; icon: string; labelKey: string }[] = [
-      { id: 'ballistics', icon: 'fa-bullseye', labelKey: 'ballistic.tabBallistics' },
-      { id: 'environment', icon: 'fa-wind', labelKey: 'ballistic.tabEnvironment' },
-    ];
-    ballisticTabs.forEach(({ id, icon, labelKey }) => {
-      menuItems.push({
-        type: 'item',
-        icon,
-        label: t(labelKey),
-        onClick: () => onNavigateToBallistic(id),
-        active: ballisticTab === id,
-      });
-    });
-    menuItems.push({ type: 'divider' } as MenuItem);
   }
 
   // 1. Rules (expandable: Commands, Flags, Flow, Glossary, Operations & Math)
@@ -224,58 +210,15 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     });
   }
 
-  // Language
-  if (onToggleLanguage) {
+  // Settings — Language, Sound, Haptic, Compass, Refresh (general app preferences)
+  const hasSettings = onToggleLanguage || onToggleSound || onToggleHaptic || onToggleCompass;
+  if (hasSettings) {
     menuItems.push({
-      type: 'item',
-      icon: 'fa-language',
-      label: language === 'en' ? t('settings.french') : t('settings.english'),
-      onClick: () => { onToggleLanguage(); onClose(); }
-    });
+      type: 'settings',
+      icon: 'fa-gear',
+      label: t('settings.settings'),
+    } as MenuItem);
   }
-
-  // Sound (under Language)
-  if (onToggleSound) {
-    menuItems.push({
-      type: 'toggle',
-      icon: soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark',
-      label: t('settings.sound'),
-      toggled: soundEnabled,
-      onClick: () => { onToggleSound(); }
-    });
-  }
-  // Haptic (under Sound)
-  if (onToggleHaptic) {
-    menuItems.push({
-      type: 'toggle',
-      icon: hapticEnabled ? 'fa-hand-pointer' : 'fa-hand',
-      label: t('settings.haptic'),
-      toggled: hapticEnabled,
-      onClick: () => { onToggleHaptic(); }
-    });
-  }
-  // Compass / magnetometer (under Haptic)
-  if (onToggleCompass) {
-    menuItems.push({
-      type: 'toggle',
-      icon: compassEnabled ? 'fa-compass' : 'fa-compass',
-      label: t('settings.compass'),
-      toggled: compassEnabled,
-      onClick: () => { onToggleCompass(); }
-    });
-  }
-
-  // Refresh app
-  const basePath = typeof window !== 'undefined' ? (import.meta.env.BASE_URL || '/') : '/';
-  menuItems.push({
-    type: 'item',
-    icon: 'fa-arrows-rotate',
-    label: t('settings.refreshApp'),
-    onClick: () => {
-      onClose();
-      window.location.href = `${basePath}clear-sw.html`;
-    }
-  });
 
   const renderItem = (item: MenuItem, index: number) => {
     if (item.type === 'divider') {
@@ -338,36 +281,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         </div>
       );
     }
-    if (item.type === 'user' && item.subItems && item.subItems.length > 0) {
-      return (
-        <div key={index}>
-          <button
-            onClick={() => { playTapSound(); setUserExpanded(prev => !prev); }}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-left text-slate-300 hover:bg-white/10 hover:text-white"
-          >
-            <div className="flex items-center gap-3">
-              <i className={`fas ${item.icon} text-sm w-5 flex-shrink-0`}></i>
-              <span className="text-sm font-medium">{item.label}</span>
-            </div>
-            <i className={`fas fa-chevron-down text-xs transition-transform ${userExpanded ? 'rotate-180' : ''}`}></i>
-          </button>
-          {userExpanded && (
-            <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5">
-              {item.subItems.map((sub, i) => (
-                <button
-                  key={i}
-                  onClick={() => { playTapSound(); sub.onClick(); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
-                >
-                  <i className={`fas ${sub.icon} text-sm w-5 flex-shrink-0`}></i>
-                  <span className="text-sm font-medium">{sub.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
     if (item.type === 'rules' && item.subItems && item.subItems.length > 0) {
       return (
         <div key={index}>
@@ -393,6 +306,115 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   <span className="text-sm font-medium">{sub.label}</span>
                 </button>
               ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (item.type === 'customize' && item.subItems && item.subItems.length > 0) {
+      return (
+        <div key={index}>
+          <button
+            onClick={() => { playTapSound(); setCustomizeExpanded(prev => !prev); }}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-left text-slate-300 hover:bg-white/10 hover:text-white"
+          >
+            <div className="flex items-center gap-3">
+              <i className={`fas ${item.icon} text-sm w-5 flex-shrink-0`}></i>
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+            <i className={`fas fa-chevron-down text-xs transition-transform ${customizeExpanded ? 'rotate-180' : ''}`}></i>
+          </button>
+          {customizeExpanded && (
+            <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5">
+              {item.subItems.map((sub, i) => (
+                <button
+                  key={i}
+                  onClick={() => { playTapSound(); sub.onClick(); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <i className={`fas ${sub.icon} text-sm w-5 flex-shrink-0`}></i>
+                  <span className="text-sm font-medium">{sub.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (item.type === 'settings') {
+      const basePath = typeof window !== 'undefined' ? (import.meta.env.BASE_URL || '/') : '/';
+      return (
+        <div key={index}>
+          <button
+            onClick={() => { playTapSound(); setSettingsExpanded(prev => !prev); }}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-left text-slate-300 hover:bg-white/10 hover:text-white"
+          >
+            <div className="flex items-center gap-3">
+              <i className={`fas ${item.icon} text-sm w-5 flex-shrink-0`}></i>
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+            <i className={`fas fa-chevron-down text-xs transition-transform ${settingsExpanded ? 'rotate-180' : ''}`}></i>
+          </button>
+          {settingsExpanded && (
+            <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5">
+              {onToggleLanguage && (
+                <button
+                  onClick={() => { playTapSound(); onToggleLanguage(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <i className="fas fa-language text-sm w-5 flex-shrink-0" />
+                  <span className="text-sm font-medium">{language === 'en' ? t('settings.french') : t('settings.english')}</span>
+                </button>
+              )}
+              {onToggleSound && (
+                <button
+                  onClick={() => { playTapSound(); onToggleSound(); }}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex items-center gap-3">
+                    <i className={`fas ${soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'} text-sm w-5 flex-shrink-0`} />
+                    <span className="text-sm font-medium">{t('settings.sound')}</span>
+                  </div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${soundEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'left-5' : 'left-0.5'}`} />
+                  </div>
+                </button>
+              )}
+              {onToggleHaptic && (
+                <button
+                  onClick={() => { playTapSound(); onToggleHaptic(); }}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex items-center gap-3">
+                    <i className={`fas ${hapticEnabled ? 'fa-hand-pointer' : 'fa-hand'} text-sm w-5 flex-shrink-0`} />
+                    <span className="text-sm font-medium">{t('settings.haptic')}</span>
+                  </div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${hapticEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${hapticEnabled ? 'left-5' : 'left-0.5'}`} />
+                  </div>
+                </button>
+              )}
+              {onToggleCompass && (
+                <button
+                  onClick={() => { playTapSound(); onToggleCompass(); }}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex items-center gap-3">
+                    <i className="fas fa-compass text-sm w-5 flex-shrink-0" />
+                    <span className="text-sm font-medium">{t('settings.compass')}</span>
+                  </div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${compassEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${compassEnabled ? 'left-5' : 'left-0.5'}`} />
+                  </div>
+                </button>
+              )}
+              <button
+                onClick={() => { playTapSound(); onClose(); window.location.href = `${basePath}clear-sw.html`; }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+              >
+                <i className="fas fa-arrows-rotate text-sm w-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{t('settings.refreshApp')}</span>
+              </button>
             </div>
           )}
         </div>

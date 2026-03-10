@@ -132,6 +132,25 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         {targetsExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
             <p className="text-xs text-slate-500">{t('ballistic.zeroDistanceNote')}</p>
+            <div className="flex flex-wrap gap-2">
+              {[50, 100, 150, 200].map((val) => {
+                const displayVal = measurement === 'imperial' ? Math.round(mToYd(val)) : val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => { playTapSound(); updateCurrentProfile({ zeroDistanceM: val }); }}
+                    className={`py-1.5 px-3 rounded-lg text-xs font-medium transition-colors ${
+                      (currentProfile.zeroDistanceM ?? 100) === val
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                        : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 hover:text-white'
+                    }`}
+                  >
+                    {displayVal}{measurement === 'imperial' ? ' yd' : ' m'}
+                  </button>
+                );
+              })}
+            </div>
             <div className="flex items-center gap-2">
               <input
                 type="number"

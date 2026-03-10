@@ -161,6 +161,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     onOpenHub();
   };
 
+  const [showInfo, setShowInfo] = useState(false);
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
@@ -261,6 +262,36 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
+      {/* Info icon — bottom centre */}
+      <div className="mt-auto pt-4 pb-2 flex justify-center w-full">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setShowInfo(true); }}
+          className="p-2 rounded-full text-slate-500 hover:text-amber-400/80 hover:bg-white/5 transition-colors"
+          aria-label={t('firstPage.infoTitle')}
+        >
+          <i className="fas fa-circle-info text-lg" />
+        </button>
+      </div>
+      {/* Info modal */}
+      {showInfo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60" onClick={() => setShowInfo(false)}>
+          <div
+            className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-amber-300 font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
+            <p className="text-slate-300 text-xs leading-relaxed mb-4">{t('firstPage.infoText')}</p>
+            <button
+              type="button"
+              onClick={() => { playTapSound(); setShowInfo(false); }}
+              className="w-full py-2 rounded-lg bg-amber-500/20 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-colors"
+            >
+              {t('ballistic.configDone')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
