@@ -56,8 +56,8 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
         const clicksConfig: ClicksConfig = parsed.clicksConfig && typeof parsed.clicksConfig.minM === 'number' && typeof parsed.clicksConfig.maxM === 'number' && typeof parsed.clicksConfig.intervalM === 'number'
           ? {
               minM: Math.max(0, Math.min(1000, Math.round(parsed.clicksConfig.minM))),
-              maxM: Math.max(100, Math.min(3000, Math.round(parsed.clicksConfig.maxM))),
-              intervalM: Math.max(5, Math.min(500, Math.round(parsed.clicksConfig.intervalM))),
+              maxM: Math.max(100, Math.min(2000, Math.round(parsed.clicksConfig.maxM))),
+              intervalM: Math.max(1, Math.min(2000, Math.round(parsed.clicksConfig.intervalM))),
             }
           : defaultState.clicksConfig;
         const compassMode = parsed.compassMode === true ? false : parsed.compassMode === true;
@@ -84,8 +84,8 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
     setState((prev) => {
       const next = { ...prev.clicksConfig, ...partial };
       next.minM = Math.max(0, Math.min(1000, Math.round(next.minM)));
-      next.maxM = Math.max(100, Math.min(3000, Math.round(next.maxM)));
-      next.intervalM = Math.max(5, Math.min(500, Math.round(next.intervalM)));
+      next.maxM = Math.max(100, Math.min(2000, Math.round(next.maxM)));
+      next.intervalM = Math.max(1, Math.min(2000, Math.round(next.intervalM)));
       if (next.maxM < next.minM) next.maxM = next.minM;
       return { ...prev, clicksConfig: next };
     });
