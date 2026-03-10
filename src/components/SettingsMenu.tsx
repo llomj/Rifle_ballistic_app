@@ -167,6 +167,20 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         onClick: () => { onShowOperations(); onClose(); }
       });
     }
+    if (onShowIdSearch) {
+      rulesSubItems.push({
+        icon: 'fa-id-badge',
+        label: t('settings.searchById'),
+        onClick: () => { onShowIdSearch(); onClose(); }
+      });
+    }
+    if (onShowIdLog) {
+      rulesSubItems.push({
+        icon: 'fa-id-badge',
+        label: t('settings.idLog'),
+        onClick: () => { onShowIdLog(); onClose(); }
+      });
+    }
     if (onShowPlatform) {
       rulesSubItems.push({
         icon: 'fa-laptop',
@@ -190,24 +204,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         subItems: rulesSubItems
       });
     }
-  }
-
-  // Search, ID Log, Learning Log — show in all views for consistent access
-  if (onShowIdSearch) {
-    menuItems.push({
-      type: 'item',
-      icon: 'fa-hashtag',
-      label: t('settings.searchById'),
-      onClick: () => { onShowIdSearch(); onClose(); }
-    });
-  }
-  if (onShowIdLog) {
-    menuItems.push({
-      type: 'item',
-      icon: 'fa-list',
-      label: t('settings.idLog'),
-      onClick: () => { onShowIdLog(); onClose(); }
-    });
   }
 
   // Settings — Language, Sound, Haptic, Compass, Refresh (general app preferences)
