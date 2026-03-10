@@ -59,7 +59,7 @@ const INITIAL_STATS: UserStats = {
   acquiredStars: {},
   history: [],
   idLog: [],
-  idLogRifles: [],
+  idLogRifles: [{ id: 'default', name: 'Default (Tikka .300)' }],
   randomModeStats: { totalAnswered: 0, totalCorrect: 0 },
   randomMode: false
 };
@@ -184,6 +184,10 @@ const App: React.FC = () => {
         if (!parsed.completedQuestionIds) parsed.completedQuestionIds = [];
         if (!parsed.idLog) parsed.idLog = [];
         if (!Array.isArray(parsed.idLogRifles)) parsed.idLogRifles = [];
+        // Migration: ensure ID Log has a non-deletable default rifle (matches rifle profile default label)
+        if (!parsed.idLogRifles.some((r: { id?: string }) => r?.id === 'default')) {
+          parsed.idLogRifles = [{ id: 'default', name: 'Default (Tikka .300)' }, ...parsed.idLogRifles];
+        }
         if (parsed.totalAttempts === undefined) parsed.totalAttempts = parsed.history.length || 0;
         // Migration: shift question IDs when Level 0 was added (old 1–3000 → 301–3300)
         const stateVersion = parsed.stateVersion ?? 0;
@@ -335,6 +339,7 @@ const App: React.FC = () => {
   };
 
   const removeIdLogRifle = (rifleId: string) => {
+    if (rifleId === 'default') return;
     setStats(prev => ({
       ...prev,
       idLogRifles: (prev.idLogRifles ?? []).filter(r => r.id !== rifleId),

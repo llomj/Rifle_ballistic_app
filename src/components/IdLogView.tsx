@@ -193,7 +193,7 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
                 key={r.id}
                 className="flex items-center gap-1.5 rounded-lg bg-slate-800/80 border border-white/10 px-2.5 py-1.5"
               >
-                {editingRifleId === r.id ? (
+                {editingRifleId === r.id && r.id !== 'default' ? (
                   <>
                     <input
                       type="text"
@@ -219,8 +219,12 @@ export const IdLogView: React.FC<IdLogViewProps> = ({
                 ) : (
                   <>
                     <span className="text-sm text-slate-200">{rifleDisplayLabel(r)}</span>
-                    <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); startEditRifle(r); }} className="text-slate-500 hover:text-amber-400 text-xs" title={t('idLog.editRifle')}><i className="fas fa-pen"></i></button>
-                    <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); onRemoveRifle(r.id); }} className="text-slate-500 hover:text-red-400 text-xs" title={t('idLog.deleteRifle')}><i className="fas fa-trash-can"></i></button>
+                    {r.id !== 'default' && (
+                      <>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); startEditRifle(r); }} className="text-slate-500 hover:text-amber-400 text-xs" title={t('idLog.editRifle')}><i className="fas fa-pen"></i></button>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); playTapSound(); onRemoveRifle(r.id); }} className="text-slate-500 hover:text-red-400 text-xs" title={t('idLog.deleteRifle')}><i className="fas fa-trash-can"></i></button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
