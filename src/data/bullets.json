@@ -4,10 +4,10 @@
   {"id":"300winmag-200gr-g1","name":".300 Win Mag 200 gr ELD-X G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":12.96,"bcG1":0.636,"bcG7":0.325},
   {"id":"300winmag-150gr-g1","name":".300 Win Mag 150 gr SST G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":9.72,"bcG1":0.415,"bcG7":0.212},
   {"id":"308-168gr-g1","name":".308 Win 168 gr BTHP Match G1","caliber":".308 Win","caliberKey":"308","diameterMm":7.82,"weightGrams":10.89,"bcG1":0.462,"bcG7":0.237},
-  {"id":"308-175gr-g1","name":".308 Win 175 gr SMK G1","caliber":".308 Win","caliberKey":"308","diameterMm":7.82,"weightGrams":11.34,"bcG1":0.505,"bcG7":0.258},
+  {"id":"308-175gr-g1","name":".308 Win 175 gr SMK G1","caliber":".308 Win","caliberKey":"308","diameterMm":7.82,"weightGrams":11.34,"bcG1":0.505,"bcG7":0.258,"manufacturer":"Sierra","bulletType":"Sierra MatchKing","bulletShape":"Boat tail hollow point","dragModel":"G1"},
   {"id":"308-150gr-g1","name":".308 Win 150 gr SP G1","caliber":".308 Win","caliberKey":"308","diameterMm":7.82,"weightGrams":9.72,"bcG1":0.415,"bcG7":0.212},
   {"id":"308-180gr-g1","name":".308 Win 180 gr SP G1","caliber":".308 Win","caliberKey":"308","diameterMm":7.82,"weightGrams":11.66,"bcG1":0.439,"bcG7":0.225},
-  {"id":"65creedmoor-143gr-g1","name":"6.5 Creedmoor 143 gr ELD-X G1","caliber":"6.5 Creedmoor","caliberKey":"65creedmoor","diameterMm":6.71,"weightGrams":9.27,"bcG1":0.625,"bcG7":0.315},
+  {"id":"65creedmoor-143gr-g1","name":"6.5 Creedmoor 143 gr ELD-X G1","caliber":"6.5 Creedmoor","caliberKey":"65creedmoor","diameterMm":6.71,"weightGrams":9.27,"bcG1":0.625,"bcG7":0.315,"manufacturer":"Hornady","bulletType":"ELD-X","bulletShape":"Boat tail","dragModel":"G1"},
   {"id":"65creedmoor-140gr-g1","name":"6.5 Creedmoor 140 gr BTHP G1","caliber":"6.5 Creedmoor","caliberKey":"65creedmoor","diameterMm":6.71,"weightGrams":9.07,"bcG1":0.585,"bcG7":0.295},
   {"id":"65creedmoor-129gr-g1","name":"6.5 Creedmoor 129 gr SST G1","caliber":"6.5 Creedmoor","caliberKey":"65creedmoor","diameterMm":6.71,"weightGrams":8.36,"bcG1":0.505,"bcG7":0.255},
   {"id":"65creedmoor-147gr-g1","name":"6.5 Creedmoor 147 gr ELD-M G1","caliber":"6.5 Creedmoor","caliberKey":"65creedmoor","diameterMm":6.71,"weightGrams":9.53,"bcG1":0.697,"bcG7":0.352},
@@ -16,5 +16,7 @@
   {"id":"223-69gr-g1","name":".223 Rem 69 gr SMK G1","caliber":".223 Rem","caliberKey":"223","diameterMm":5.69,"weightGrams":4.47,"bcG1":0.301,"bcG7":0.152},
   {"id":"223-77gr-g1","name":".223 Rem 77 gr OTM G1","caliber":".223 Rem","caliberKey":"223","diameterMm":5.69,"weightGrams":4.99,"bcG1":0.362,"bcG7":0.182},
   {"id":"223-75gr-g1","name":".223 Rem 75 gr BTHP G1","caliber":".223 Rem","caliberKey":"223","diameterMm":5.69,"weightGrams":4.86,"bcG1":0.395,"bcG7":0.198},
-  {"id":"300weatherby-180gr-g1","name":".300 Weatherby 180 gr Accubond G1","caliber":".300 Weatherby Mag","caliberKey":"300weatherby","diameterMm":7.82,"weightGrams":11.66,"bcG1":0.507,"bcG7":0.260}
+  {"id":"300weatherby-180gr-g1","name":".300 Weatherby 180 gr Accubond G1","caliber":".300 Weatherby Mag","caliberKey":"300weatherby","diameterMm":7.82,"weightGrams":11.66,"bcG1":0.507,"bcG7":0.260},
+  {"id":"3030-150gr-g1","name":".30-30 Win 150 gr SP G1","caliber":".30-30 Winchester","caliberKey":"30-30","diameterMm":7.82,"weightGrams":9.72,"bcG1":0.278,"bcG7":0.142,"manufacturer":"Remington","bulletType":"SP","bulletShape":"Flat base","dragModel":"G1"},
+  {"id":"3030-170gr-g1","name":".30-30 Win 170 gr FP G1","caliber":".30-30 Winchester","caliberKey":"30-30","diameterMm":7.82,"weightGrams":11.02,"bcG1":0.304,"bcG7":0.155,"manufacturer":"Winchester","bulletType":"SP","bulletShape":"Flat base","dragModel":"G1"}
 ]

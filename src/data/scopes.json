@@ -1,11 +1,11 @@
 [
-  {"id":"hawke-sidewinder-30-4-16x50","name":"HAWKE SideWinder 30 4-16x50 10x 1/2 mil dot+","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-16x"},
+  {"id":"hawke-sidewinder-30-4-16x50","name":"HAWKE SideWinder 30 4-16x50 10x 1/2 mil dot+","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-16x","brand":"Hawke","tubeDiameterMm":30,"reticleType":"Half Mil Dot"},
   {"id":"hawke-vantage-4-12x50","name":"Hawke Vantage 4-12x50 AO Mil Dot","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-12x"},
   {"id":"hawke-frontier-3-9x50","name":"Hawke Frontier 3-9x50 Mil Dot","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"3-9x"},
   {"id":"hawke-airmax-4-12x50","name":"Hawke Airmax 4-12x50 AMX IR","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-12x"},
   {"id":"hawke-endurance-6-24x50","name":"Hawke Endurance 6-24x50 30mm SF","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x"},
   {"id":"vortex-diamondback-4-12x40","name":"Vortex Diamondback 4-12x40 Dead-Hold BDC","unit":"MOA","clickValue":0.25,"ffpOrSfp":"SFP","magnificationRange":"4-12x"},
-  {"id":"vortex-viper-pst-6-24x50","name":"Vortex Viper PST Gen II 6-24x50 EBR-2C MRAD","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x"},
+  {"id":"vortex-viper-pst-6-24x50","name":"Vortex Viper PST Gen II 6-24x50 EBR-2C MRAD","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x","brand":"Vortex","tubeDiameterMm":30,"reticleType":"EBR-2C","zeroStop":true},
   {"id":"vortex-viper-pst-5-25x50-moa","name":"Vortex Viper PST Gen II 5-25x50 EBR-2C MOA","unit":"MOA","clickValue":0.25,"ffpOrSfp":"FFP","magnificationRange":"5-25x"},
   {"id":"vortex-razor-hd-4-5-27","name":"Vortex Razor HD Gen III 4.5-27x56 EBR-7C MRAD","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"4.5-27x"},
   {"id":"vortex-strike-eagle-5-25x56","name":"Vortex Strike Eagle 5-25x56 EBR-7C MRAD","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"5-25x"},

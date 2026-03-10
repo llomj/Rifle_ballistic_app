@@ -24,6 +24,16 @@ export interface ScopeCatalogItem {
   clickValue: number;
   ffpOrSfp?: 'FFP' | 'SFP';
   magnificationRange?: string;
+  /** Optional: brand for database / reference. */
+  brand?: string;
+  /** Optional: model for database / reference. */
+  model?: string;
+  /** Optional: tube diameter in mm (e.g. 25.4 = 1 inch, 30, 34). */
+  tubeDiameterMm?: number;
+  /** Optional: reticle type (e.g. TMR, Mil-Dot, EBR-2C). */
+  reticleType?: string;
+  /** Optional: zero stop. */
+  zeroStop?: boolean;
 }
 
 /** Catalog item: bullet from bullets.json */
@@ -36,6 +46,14 @@ export interface BulletCatalogItem {
   weightGrams: number;
   bcG1: number;
   bcG7?: number;
+  /** Optional: manufacturer for database / reference. */
+  manufacturer?: string;
+  /** Optional: bullet construction type (e.g. SP, ELD-X, Sierra MatchKing). */
+  bulletType?: string;
+  /** Optional: bullet shape (e.g. Boat tail, Spitzer). */
+  bulletShape?: string;
+  /** Optional: drag model (G1, G7, etc.). Default G1 for bcG1. */
+  dragModel?: string;
 }
 
 /** User ballistic setup: rifle + scope + bullet + inputs. Saved with userName. */

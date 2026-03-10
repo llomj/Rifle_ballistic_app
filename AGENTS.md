@@ -207,3 +207,117 @@ mils: 0.00125	800 meters =  540cm
 - **Fixed circle position:** The compass circle must remain at the **exact same position** on all pages (main page, Distance calculator, Height calculator).
 - **Implementation:** All pages must use `CIRCLE_SLOT_HEIGHT` (from `src/constants/ballisticUI.ts`) with the same structure: `style={{ height: CIRCLE_SLOT_HEIGHT }}`.
 - **The circle never moves** — only the panel below expands/collapses. The circle position is identical whether swiping between pages or expanding/collapsing the input panel.
+
+---
+
+## 11. Database Structure — Hunting Rifle Ballistic Calculator
+
+This section defines the comprehensive database structure for the ballistic app. It supports rifle profiles, scope systems, bullet libraries, atmospheric calculations, and reticle holdovers. Reference data lives in `src/data/databaseConstants.ts`. Existing app logic uses compatible subsets; new fields are optional.
+
+### SCOPE ADJUSTMENT SYSTEMS
+
+Supported angular measurement systems used in rifle scopes:
+- **MOA** (Minute Of Angle)
+- **TMOA** (True MOA)
+- **SMOA** (Shooter MOA)
+- **MIL** (Milliradian)
+- **MRAD** (Milliradian)
+- **IPHY** (Inch per 100 yards)
+
+Typical click values: 1/4 MOA, 1/8 MOA, 0.1 MIL, 0.05 MIL.
+Key conversion: **1 MIL = 3.438 MOA**.
+
+### RETICLE TYPES
+
+**Classic hunting:** Duplex, German #1, German #4, Fine Crosshair, Post.
+**Rangefinding:** Mil-Dot, Half Mil Dot, TMR, MSR, H59, Tremor3.
+**Grid / Christmas tree:** Horus, EBR-2C, SCR, MSR2.
+**BDC:** BDC 600, BDC 800, Rapid-Z, Dead-Hold.
+
+### SCOPE TYPES (per entry)
+
+- scope, brand, model
+- magnification_min, magnification_max
+- tube_diameter
+- reticle_type
+- focal_plane (FFP / SFP)
+- adjustment_system
+- click_value
+- zero_stop
+
+### FOCAL PLANES
+
+- **FFP** (First Focal Plane)
+- **SFP** (Second Focal Plane)
+
+### SCOPE TUBE DIAMETERS
+
+1 inch, 30mm, 34mm, 35mm, 36mm, 40mm
+
+### SCOPE BRANDS
+
+**Premium:** Swarovski, Zeiss, Schmidt & Bender, Kahles, Tangent Theta, Hensoldt.
+**High-end:** Nightforce, Leica, Steiner.
+**Popular hunting:** Vortex, Leupold, Burris, Meopta, Athlon, Trijicon.
+**Budget:** Bushnell, Hawke, Primary Arms, Sig Sauer.
+
+### COMMON HUNTING RIFLES (GLOBAL)
+
+**Bolt-action:** Remington 700, Tikka T3/T3X, Howa 1500, Ruger American, Savage 110, Weatherby Vanguard, Sako 85, Browning X-Bolt, Winchester Model 70, CZ 527.
+**Lever-action:** Winchester 1894, Marlin 336, Henry Long Ranger.
+**Straight-pull:** Blaser R8, Merkel Helix.
+
+### RIFLES — PACIFIC / AUSTRALIA / NEW CALEDONIA
+
+Typical calibers: .223 Rem, .243 Win, .270 Win, .308 Win, 30-06, 7mm-08, 6.5 Creedmoor.
+Typical platforms: Tikka T3, Ruger American, Howa 1500, Savage Axis, Browning X-Bolt.
+
+### BULLET TYPES (CONSTRUCTION)
+
+Soft point (SP, JSP, PSP), Hollow point (HP, HPBT), Polymer tip (Ballistic Tip, SST, AccuTip, ELD-X), Bonded (Accubond, Swift A-Frame, InterBond), Monolithic copper (Barnes TSX, Barnes TTSX, Hornady CX), Match (Sierra MatchKing, ELD-Match, Berger Hybrid).
+
+### BULLET SHAPE TYPES
+
+Flat base, Boat tail, Boat tail hollow point, Spitzer, Round nose, Wadcutter.
+
+### DRAG MODELS
+
+G1, G2, G5, G6, G7, G8, GL. Most rifle bullets use G1 or G7 BC.
+
+### BULLET DATABASE STRUCTURE
+
+- bullet, manufacturer, model
+- caliber, weight_grains
+- ballistic_coefficient (G1/G7)
+- drag_model
+- bullet_type, bullet_shape
+- muzzle_velocity (optional; user can override)
+
+### BALLISTIC SOLVER INPUT PARAMETERS
+
+caliber, bullet weight, BC, drag model, muzzle velocity, barrel length, twist rate, scope height above bore, zero distance, temperature, pressure, altitude, wind speed, wind direction.
+
+### BALLISTIC OUTPUT VALUES
+
+bullet drop, wind drift, velocity, energy, time of flight, MOA adjustments, MIL adjustments, reticle holdover.
+
+### RIFLE PROFILE STRUCTURE
+
+caliber, barrel_length, twist_rate, muzzle_velocity, scope_height, zero_distance.
+
+### SCOPE PROFILE STRUCTURE
+
+brand, model, magnification_range, tube_diameter, reticle_type, focal_plane, adjustment_system, click_value, zero_stop.
+
+### ADVANCED FEATURES (architecture ready)
+
+- Reticle holdover visualization
+- Scope turret click simulator
+- Range estimation using MIL relation formula
+- Multiple rifle profiles
+- Custom bullet entry
+- Atmospheric compensation
+- MOA and MIL switching
+- Offline ballistic calculations
+
+The system supports both preloaded ballistic libraries and user-defined entries for rifles, scopes, and bullets. The ballistic solver is optimized for mobile and works offline.
