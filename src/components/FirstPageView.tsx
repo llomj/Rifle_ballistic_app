@@ -3,6 +3,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
+import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 interface FirstPageViewProps {
@@ -162,6 +163,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   };
 
   const [showInfo, setShowInfo] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
@@ -262,8 +264,16 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
-      {/* Info icon — bottom centre */}
-      <div className="mt-auto pt-4 pb-2 flex justify-center w-full">
+      {/* Profile and Info icons — bottom centre, profile above info */}
+      <div className="mt-auto pt-4 pb-2 flex flex-col items-center gap-0.5 w-full">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setShowProfile(true); }}
+          className="p-2 rounded-full text-slate-500 hover:text-amber-400/80 hover:bg-white/5 transition-colors"
+          aria-label={t('ballistic.rifleProfile')}
+        >
+          <i className="fas fa-user text-lg" />
+        </button>
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}
@@ -273,6 +283,34 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           <i className="fas fa-circle-info text-lg" />
         </button>
       </div>
+      {/* Profile modal — rifle profile section, customizable, transparent overlay */}
+      {showProfile && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center px-4 overflow-y-auto"
+          style={{ backgroundColor: 'rgba(0,0,0,0.009)', paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          onClick={() => setShowProfile(false)}
+        >
+          <div
+            className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 my-4"
+            style={{ opacity: 0.99 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-amber-300 font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
+              <button
+                type="button"
+                onClick={() => { playTapSound(); setShowProfile(false); }}
+                className="p-1.5 rounded-full text-slate-500 hover:text-amber-400 hover:bg-white/10 transition-colors"
+                aria-label={t('ballistic.configDone')}
+              >
+                <i className="fas fa-times text-sm" />
+              </button>
+            </div>
+            <RifleScopeSection editable showSaveAs />
+          </div>
+        </div>
+      )}
+
       {/* Info modal — placed just under the circle so it does not obscure it */}
       {showInfo && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center px-4 bg-black/60" style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }} onClick={() => setShowInfo(false)}>
