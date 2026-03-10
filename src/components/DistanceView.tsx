@@ -227,8 +227,9 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
           <i className="fas fa-circle-info text-lg" />
         </button>
       </div>
+      {/* Info modal — placed just under the circle so it does not obscure it */}
       {showInfo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60" onClick={() => setShowInfo(false)}>
+        <div className="fixed inset-0 z-[100] flex flex-col items-center px-4 bg-black/60" style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }} onClick={() => setShowInfo(false)}>
           <div
             className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
