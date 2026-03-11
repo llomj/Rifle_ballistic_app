@@ -306,7 +306,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     onBlur={() => {
                       const v = parseFloat(refMaxStr);
                       if (Number.isFinite(v)) {
-                        const clamped = Math.max(100, Math.min(10000, v));
+                        const clamped = Math.max(1, Math.min(10000, v));
                         setClicksConfig({ maxM: clamped });
                         setRefMaxStr(String(clamped));
                       } else {
@@ -328,7 +328,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     onBlur={() => {
                       const v = parseFloat(refIntervalStr);
                       if (Number.isFinite(v) && v >= 1) {
-                        const clamped = Math.max(1, Math.min(2000, v));
+                        const clamped = Math.max(1, Math.min(5000, v));
                         setClicksConfig({ intervalM: clamped });
                         setRefIntervalStr(String(clamped));
                       } else {

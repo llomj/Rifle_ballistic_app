@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
@@ -38,6 +38,17 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [turretTableExpanded, setTurretTableExpanded] = useState(false);
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
+  const [turretMinStr, setTurretMinStr] = useState('');
+  const [turretMaxStr, setTurretMaxStr] = useState('');
+  const [turretIntervalStr, setTurretIntervalStr] = useState('');
+
+  useEffect(() => {
+    if (turretTableExpanded) {
+      setTurretMinStr(String(clicksConfig.minM));
+      setTurretMaxStr(String(clicksConfig.maxM));
+      setTurretIntervalStr(String(clicksConfig.intervalM));
+    }
+  }, [turretTableExpanded, clicksConfig.minM, clicksConfig.maxM, clicksConfig.intervalM]);
 
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
   const caliberOptions = useMemo(() => getUniqueCalibers(), []);
@@ -206,13 +217,19 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               <div>
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.clicksMinM')}</label>
                 <input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
-                  value={clicksConfig.minM}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
-                    if (!Number.isFinite(v)) return;
-                    setClicksConfig({ minM: Math.max(0, Math.min(10000, v)) });
+                  value={turretMinStr}
+                  onChange={(e) => setTurretMinStr(e.target.value)}
+                  onBlur={() => {
+                    const v = parseFloat(turretMinStr);
+                    if (Number.isFinite(v)) {
+                      const clamped = Math.max(0, Math.min(10000, v));
+                      setClicksConfig({ minM: clamped });
+                      setTurretMinStr(String(clamped));
+                    } else {
+                      setTurretMinStr(String(clicksConfig.minM));
+                    }
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
                 />
@@ -220,13 +237,19 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               <div>
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.maxMeters')}</label>
                 <input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
-                  value={clicksConfig.maxM}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
-                    if (!Number.isFinite(v)) return;
-                    setClicksConfig({ maxM: Math.max(100, Math.min(10000, v)) });
+                  value={turretMaxStr}
+                  onChange={(e) => setTurretMaxStr(e.target.value)}
+                  onBlur={() => {
+                    const v = parseFloat(turretMaxStr);
+                    if (Number.isFinite(v)) {
+                      const clamped = Math.max(1, Math.min(10000, v));
+                      setClicksConfig({ maxM: clamped });
+                      setTurretMaxStr(String(clamped));
+                    } else {
+                      setTurretMaxStr(String(clicksConfig.maxM));
+                    }
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
                 />
@@ -235,13 +258,19 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             <div>
               <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.incrementMeters')}</label>
               <input
-                type="number"
+                type="text"
                 inputMode="decimal"
-                value={clicksConfig.intervalM}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-                  if (!Number.isFinite(v)) return;
-                  setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
+                value={turretIntervalStr}
+                onChange={(e) => setTurretIntervalStr(e.target.value)}
+                onBlur={() => {
+                  const v = parseFloat(turretIntervalStr);
+                  if (Number.isFinite(v) && v >= 1) {
+                    const clamped = Math.max(1, Math.min(5000, v));
+                    setClicksConfig({ intervalM: clamped });
+                    setTurretIntervalStr(String(clamped));
+                  } else {
+                    setTurretIntervalStr(String(clicksConfig.intervalM));
+                  }
                 }}
                 className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
               />
