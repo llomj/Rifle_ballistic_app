@@ -56,12 +56,15 @@ export function CliTable({
   columnRoles,
   rows,
   header,
+  headerSub,
   headerRoles,
   colWidths = [],
 }: {
   columnRoles: Role[];
   rows: React.ReactNode[][];
   header?: React.ReactNode[];
+  /** Optional second header row (e.g. units: "", "cm", "", "in"). Same length as header. */
+  headerSub?: React.ReactNode[];
   headerRoles?: Role[];
   colWidths?: string[];
 }) {
@@ -91,6 +94,18 @@ export function CliTable({
                 </th>
               ))}
             </tr>
+            {headerSub && headerSub.length === header.length && (
+              <tr className="border-b border-white/10">
+                {headerSub.map((cell, c) => (
+                  <th
+                    key={c}
+                    className={`text-left py-0.5 px-2 tabular-nums text-slate-400 ${roleClass[headerRoles?.[c] ?? columnRoles[c] ?? 'white']}`}
+                  >
+                    {cell}
+                  </th>
+                ))}
+              </tr>
+            )}
           </thead>
         )}
         <tbody>

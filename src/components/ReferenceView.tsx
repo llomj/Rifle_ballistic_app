@@ -177,20 +177,24 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
 
   const opticsHeader = useMemo(
     () => [
-      t('ballistic.opticsHeaderDistanceM'),
-      t('ballistic.opticsHeaderReticleCm'),
-      t('ballistic.opticsHeaderDistanceYd'),
-      t('ballistic.opticsHeaderReticleIn'),
+      t('ballistic.opticsHeaderMeter'),
+      t('ballistic.opticsHeaderCm'),
+      t('ballistic.opticsHeaderReticle'),
+      t('ballistic.opticsHeaderYard'),
+      t('ballistic.opticsHeaderIn'),
+      t('ballistic.opticsHeaderReticle'),
     ],
     [t]
   );
   const opticsRows = useMemo(() => {
-    // 1 reticle = 10 cm at 100 m; at distance d, 1 reticle = d/10 cm. yd: 3.6 in at 100 yd.
+    // 10 cm = 1 reticle, 15 cm = 1.5 reticle (reticle = cm/10). Yard: 3.6 in = 1 reticle (reticle = in/3.6).
     return mildotDistances.map((d) => {
       const yd = Math.round(mToYd(d));
       const cm = Math.round((d / 10) * 10) / 10;
+      const reticleM = Math.round((cm / 10) * 10) / 10;
       const inch = Math.round(((yd * 3.6) / 100) * 10) / 10;
-      return [`${d} m`, `${cm} cm`, `${yd} yd`, `${inch} in`];
+      const reticleYd = Math.round((inch / 3.6) * 10) / 10;
+      return [`${d} m`, String(cm), String(reticleM), `${yd} yd`, String(inch), String(reticleYd)];
     });
   }, [mildotDistances]);
 
@@ -288,10 +292,10 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
           </div>
           <CliTable
             header={opticsHeader}
-            columnRoles={['sky', 'amber', 'sky', 'amber']}
-            headerRoles={['sky', 'amber', 'sky', 'amber']}
+            columnRoles={['sky', 'amber', 'white', 'sky', 'amber', 'white']}
+            headerRoles={['sky', 'amber', 'white', 'sky', 'amber', 'white']}
             rows={opticsRows}
-            colWidths={['5rem', '8rem', '5rem', '8rem']}
+            colWidths={['5rem', '4rem', '5rem', '5rem', '4rem', '5rem']}
           />
         </div>
       </CollapsiblePanel>
