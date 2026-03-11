@@ -189,6 +189,23 @@ export const DEFAULT_TARGET_PRESETS: TargetPreset[] = [
   { id: 'custom', nameKey: 'targets.custom', heightM: 1, isCustom: true },
 ];
 
+/** Animals for mildot reference: average shoulder-to-feet height (m). Used with distance = (height × 1000) / mils. */
+export interface MildotAnimal {
+  id: string;
+  nameKey: string;
+  /** Shoulder (withers) to feet in meters. */
+  heightM: number;
+}
+
+export const MILDOT_ANIMALS: MildotAnimal[] = [
+  { id: 'deer', nameKey: 'targets.deer', heightM: 1.0 },
+  { id: 'pig', nameKey: 'targets.pig', heightM: 0.6 },
+  { id: 'boar', nameKey: 'targets.boar', heightM: 0.75 },
+  { id: 'elk', nameKey: 'targets.elk', heightM: 1.35 },
+  { id: 'bird', nameKey: 'targets.bird', heightM: 0.3 },
+  { id: 'steel', nameKey: 'targets.steel', heightM: 0.5 },
+];
+
 export interface TurretRow {
   distanceMin: number;
   distanceMax: number;

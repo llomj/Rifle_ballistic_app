@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { formatTranslation } from '../translations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { mToYd, cmToIn } from '../utils/ballisticUnits';
 import { CliSep, CliLine, CliPre, CliTable } from './CliBlock';
-import { generateDistancesFromInterval } from '../data/ballistic';
+import { generateDistancesFromInterval, MILDOT_ANIMALS } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 
@@ -65,9 +66,11 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const [targetHeightsExpanded, setTargetHeightsExpanded] = useState(false);
   const [windExpanded, setWindExpanded] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showMildotConfigModal, setShowMildotConfigModal] = useState(false);
   const [refMaxStr, setRefMaxStr] = useState('');
   const [refIntervalStr, setRefIntervalStr] = useState('');
-  const { measurement, scopeUnit, clicksConfig, setClicksConfig } = useBallisticSettings();
+  const [mildotHumanHeightStr, setMildotHumanHeightStr] = useState('');
+  const { measurement, scopeUnit, clicksConfig, setClicksConfig, mildotConfig, setMildotConfig } = useBallisticSettings();
 
   useEffect(() => {
     if (showConfigModal) {
@@ -75,11 +78,25 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       setRefIntervalStr(String(clicksConfig.intervalM));
     }
   }, [showConfigModal, clicksConfig.maxM, clicksConfig.intervalM]);
+
+  useEffect(() => {
+    if (showMildotConfigModal) {
+      setMildotHumanHeightStr(String(mildotConfig.humanHeightM));
+    }
+  }, [showMildotConfigModal, mildotConfig.humanHeightM]);
   const { turretTable, compensationTable } = useTrajectoryTables();
 
+  const mildotAnimal = useMemo(
+    () => MILDOT_ANIMALS.find((a) => a.id === mildotConfig.animalId) ?? MILDOT_ANIMALS[0],
+    [mildotConfig.animalId]
+  );
   const mildotHeader = useMemo(
-    () => [t('ballistic.mildotTableDistance'), t('ballistic.mildotTableDeer'), t('ballistic.mildotTableMan')],
-    [t]
+    () => [
+      t('ballistic.mildotTableDistance'),
+      `${t(mildotAnimal.nameKey)} (${t('ballistic.mils').toLowerCase()})`,
+      t('ballistic.mildotTableMan'),
+    ],
+    [t, mildotAnimal.nameKey]
   );
   const mildotDistances = useMemo(
     () => generateDistancesFromInterval(clicksConfig.minM, clicksConfig.maxM, clicksConfig.intervalM),
@@ -88,15 +105,15 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const mildotRows = useMemo(
     () =>
       mildotDistances.map((d) => {
-        const deerMils = d > 0 ? Math.round((1000 / d) * 100) / 100 : 0;
-        const manMils = d > 0 ? Math.round((1750 / d) * 100) / 100 : 0;
+        const animalMils = d > 0 ? Math.round((mildotAnimal.heightM * 1000 / d) * 100) / 100 : 0;
+        const humanMils = d > 0 ? Math.round((mildotConfig.humanHeightM * 1000 / d) * 100) / 100 : 0;
         return [
           measurement === 'imperial' ? `${Math.round(mToYd(d))} yd` : `${d} m`,
-          String(deerMils),
-          String(manMils),
+          String(animalMils),
+          String(humanMils),
         ];
       }),
-    [mildotDistances, measurement]
+    [mildotDistances, measurement, mildotAnimal.heightM, mildotConfig.humanHeightM]
   );
 
   const compensationLines = useMemo(
@@ -201,9 +218,9 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         title={t('ballistic.mildotReference')}
         expanded={mildotExpanded}
         onToggle={() => { playTapSound(); setMildotExpanded((e) => !e); }}
-        onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
+        onTitleClick={() => { playTapSound(); setShowMildotConfigModal(true); }}
       >
-        <CliLine role="yellow">{t('ballistic.deerShoulderNote')}</CliLine>
+        <CliLine role="yellow">{formatTranslation(t('ballistic.mildotShoulderNote'), { animal: t(mildotAnimal.nameKey), animalM: mildotAnimal.heightM, humanM: mildotConfig.humanHeightM.toFixed(2) })}</CliLine>
         <CliLine role="yellow">{t('ballistic.mildot10xNote')}</CliLine>
         <CliTable
           columnRoles={['sky', 'white', 'white']}
@@ -337,6 +354,69 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     }}
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
                   />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMildotConfigModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 animate-in fade-in duration-200 pt-[10vh]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mildot-config-title"
+          onClick={() => { playTapSound(); setShowMildotConfigModal(false); }}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-white/10 p-4 pb-safe animate-in slide-in-from-top duration-300 bg-slate-950/[0.009] backdrop-blur-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="max-h-[70vh] overflow-y-auto overscroll-contain">
+              <h2 id="mildot-config-title" className="text-theme-accent font-medium mb-3">
+                {t('ballistic.mildotConfigTitle')}
+              </h2>
+              <p className="text-xs text-slate-500 mb-4">{t('ballistic.mildotConfigDesc')}</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.mildotSelectAnimal')}
+                  </label>
+                  <select
+                    value={mildotConfig.animalId}
+                    onChange={(e) => setMildotConfig({ animalId: e.target.value })}
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
+                  >
+                    {MILDOT_ANIMALS.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {t(a.nameKey)} — {a.heightM} m {t('ballistic.mildotShoulderToFeet')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.mildotHumanShoulderHeight')}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={mildotHumanHeightStr}
+                    onChange={(e) => setMildotHumanHeightStr(e.target.value)}
+                    onBlur={() => {
+                      const v = parseFloat(mildotHumanHeightStr);
+                      if (Number.isFinite(v)) {
+                        const clamped = Math.max(0.2, Math.min(2.5, v));
+                        setMildotConfig({ humanHeightM: clamped });
+                        setMildotHumanHeightStr(String(clamped));
+                      } else {
+                        setMildotHumanHeightStr(String(mildotConfig.humanHeightM));
+                      }
+                    }}
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">{t('ballistic.mildotHumanShoulderNote')}</p>
                 </div>
               </div>
             </div>

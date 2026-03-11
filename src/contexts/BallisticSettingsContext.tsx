@@ -20,10 +20,23 @@ export const CLICKS_INTERVAL_PRESETS = [10, 15, 20, 25, 30, 33, 45, 50, 60, 66, 
 
 export type ThemeId = 'yellow' | 'green' | 'blue' | 'magenta';
 
+export interface MildotConfig {
+  /** Animal id from MILDOT_ANIMALS (e.g. 'deer'). */
+  animalId: string;
+  /** Human shoulder height (feet to shoulders) in meters for mildot table. */
+  humanHeightM: number;
+}
+
+export const DEFAULT_MILDOT_CONFIG: MildotConfig = {
+  animalId: 'deer',
+  humanHeightM: 1.4,
+};
+
 interface BallisticSettingsState {
   measurement: MeasurementSystem;
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
+  mildotConfig: MildotConfig;
   compassMode: boolean;
   theme: ThemeId;
 }
@@ -32,11 +45,13 @@ interface BallisticSettingsContextType {
   measurement: MeasurementSystem;
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
+  mildotConfig: MildotConfig;
   compassMode: boolean;
   theme: ThemeId;
   setMeasurement: (m: MeasurementSystem) => void;
   setScopeUnit: (u: ScopeUnit) => void;
   setClicksConfig: (c: Partial<ClicksConfig>) => void;
+  setMildotConfig: (c: Partial<MildotConfig>) => void;
   setCompassMode: (on: boolean) => void;
   setTheme: (t: ThemeId) => void;
 }
@@ -45,6 +60,7 @@ const defaultState: BallisticSettingsState = {
   measurement: 'metric',
   scopeUnit: 'MIL',
   clicksConfig: DEFAULT_CLICKS_CONFIG,
+  mildotConfig: DEFAULT_MILDOT_CONFIG,
   compassMode: true,
   theme: 'yellow',
 };
@@ -68,7 +84,13 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
           : defaultState.clicksConfig;
         const compassMode = parsed.compassMode === true || parsed.compassMode === false ? parsed.compassMode : defaultState.compassMode;
         const theme = ['yellow', 'green', 'blue', 'magenta'].includes(parsed.theme) ? parsed.theme : defaultState.theme;
-        return { measurement, scopeUnit, clicksConfig, compassMode, theme };
+        const mildotConfig: MildotConfig = parsed.mildotConfig && typeof parsed.mildotConfig.animalId === 'string' && typeof parsed.mildotConfig.humanHeightM === 'number'
+          ? {
+              animalId: parsed.mildotConfig.animalId,
+              humanHeightM: Math.max(0.2, Math.min(2.5, parsed.mildotConfig.humanHeightM)),
+            }
+          : defaultState.mildotConfig;
+        return { measurement, scopeUnit, clicksConfig, mildotConfig, compassMode, theme };
       }
     } catch (_) {}
     return defaultState;
@@ -98,6 +120,14 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
     });
   };
 
+  const setMildotConfig = (partial: Partial<MildotConfig>) => {
+    setState((prev) => {
+      const next = { ...prev.mildotConfig, ...partial };
+      if (next.humanHeightM != null) next.humanHeightM = Math.max(0.2, Math.min(2.5, next.humanHeightM));
+      return { ...prev, mildotConfig: next };
+    });
+  };
+
   const setCompassMode = (compassMode: boolean) => {
     setState((prev) => ({ ...prev, compassMode }));
   };
@@ -111,11 +141,13 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
         measurement: state.measurement,
         scopeUnit: state.scopeUnit,
         clicksConfig: state.clicksConfig,
+        mildotConfig: state.mildotConfig,
         compassMode: state.compassMode,
         theme: state.theme,
         setMeasurement,
         setScopeUnit,
         setClicksConfig,
+        setMildotConfig,
         setCompassMode,
         setTheme,
       }}
