@@ -294,7 +294,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       {/* Profile modal — rifle profile section, transparent like settings menu, scrolls to top */}
       {showProfile && (
         <div
-          className="fixed inset-0 z-[100] overflow-y-auto"
+          className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
           onClick={() => setShowProfile(false)}
         >
           <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">

@@ -19,11 +19,20 @@ const xs = 'text-xs';
 export function CliLine({
   children,
   role = 'white',
+  wrap = false,
 }: {
   children: React.ReactNode;
   role?: Role;
+  /** When true, text wraps to multiple lines instead of staying on one. */
+  wrap?: boolean;
 }) {
-  return <p className={`font-mono ${xs} whitespace-pre ${roleClass[role]}`}>{children}</p>;
+  return (
+    <p
+      className={`font-mono ${xs} ${wrap ? 'whitespace-normal break-words' : 'whitespace-pre'} ${roleClass[role]}`}
+    >
+      {children}
+    </p>
+  );
 }
 
 /** Separator line. */

@@ -25,11 +25,20 @@ export interface MildotConfig {
   animalId: string;
   /** Human shoulder height (feet to shoulders) in meters for mildot table. */
   humanHeightM: number;
+  /** Preset label for human height: 'small' | 'average' | 'tall' | 'custom'. */
+  humanPreset: 'small' | 'average' | 'tall' | 'custom';
+  /** Selected steel plate id from MILDOT_STEEL_PLATES. */
+  plateId: string;
+  /** Steel plate height (m). */
+  plateHeightM: number;
 }
 
 export const DEFAULT_MILDOT_CONFIG: MildotConfig = {
   animalId: 'deer',
   humanHeightM: 1.4,
+  humanPreset: 'average',
+  plateId: 'plate30cm',
+  plateHeightM: 0.3,
 };
 
 interface BallisticSettingsState {
@@ -88,6 +97,18 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
           ? {
               animalId: parsed.mildotConfig.animalId,
               humanHeightM: Math.max(0.2, Math.min(2.5, parsed.mildotConfig.humanHeightM)),
+              humanPreset:
+                parsed.mildotConfig.humanPreset === 'small' ||
+                parsed.mildotConfig.humanPreset === 'average' ||
+                parsed.mildotConfig.humanPreset === 'tall' ||
+                parsed.mildotConfig.humanPreset === 'custom'
+                  ? parsed.mildotConfig.humanPreset
+                  : 'custom',
+              plateId: typeof parsed.mildotConfig.plateId === 'string' ? parsed.mildotConfig.plateId : defaultState.mildotConfig.plateId,
+              plateHeightM:
+                typeof parsed.mildotConfig.plateHeightM === 'number'
+                  ? Math.max(0.05, Math.min(2.0, parsed.mildotConfig.plateHeightM))
+                  : defaultState.mildotConfig.plateHeightM,
             }
           : defaultState.mildotConfig;
         return { measurement, scopeUnit, clicksConfig, mildotConfig, compassMode, theme };
@@ -124,6 +145,7 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
     setState((prev) => {
       const next = { ...prev.mildotConfig, ...partial };
       if (next.humanHeightM != null) next.humanHeightM = Math.max(0.2, Math.min(2.5, next.humanHeightM));
+      if (next.plateHeightM != null) next.plateHeightM = Math.max(0.05, Math.min(2.0, next.plateHeightM));
       return { ...prev, mildotConfig: next };
     });
   };

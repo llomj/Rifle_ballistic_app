@@ -5,7 +5,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { mToYd, cmToIn } from '../utils/ballisticUnits';
 import { CliSep, CliLine, CliPre, CliTable } from './CliBlock';
-import { generateDistancesFromInterval, MILDOT_ANIMALS } from '../data/ballistic';
+import { generateDistancesFromInterval, MILDOT_ANIMALS, MILDOT_STEEL_PLATES } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 
@@ -47,7 +47,7 @@ function CollapsiblePanel({
         </button>
       </div>
       {expanded && (
-        <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-2 max-h-[60vh] overflow-y-auto overscroll-contain">
+        <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-2 max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-contain">
           {children}
         </div>
       )}
@@ -95,6 +95,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       t('ballistic.mildotTableDistance'),
       `${t(mildotAnimal.nameKey)} (${t('ballistic.mils').toLowerCase()})`,
       t('ballistic.mildotTableMan'),
+      t('ballistic.mildotTableSteel'),
     ],
     [t, mildotAnimal.nameKey]
   );
@@ -107,23 +108,43 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       mildotDistances.map((d) => {
         const animalMils = d > 0 ? Math.round((mildotAnimal.heightM * 1000 / d) * 100) / 100 : 0;
         const humanMils = d > 0 ? Math.round((mildotConfig.humanHeightM * 1000 / d) * 100) / 100 : 0;
+        const steelMils = d > 0 ? Math.round((mildotConfig.plateHeightM * 1000 / d) * 100) / 100 : 0;
         return [
           measurement === 'imperial' ? `${Math.round(mToYd(d))} yd` : `${d} m`,
           String(animalMils),
           String(humanMils),
+          String(steelMils),
         ];
       }),
-    [mildotDistances, measurement, mildotAnimal.heightM, mildotConfig.humanHeightM]
+    [mildotDistances, measurement, mildotAnimal.heightM, mildotConfig.humanHeightM, mildotConfig.plateHeightM]
   );
+
+  /** Holdover in mrad or MOA from drop and distance (same formula as turret table). */
+  const getHoldoverStr = (dropCm: number, distanceM: number): string => {
+    if (distanceM <= 0) return '—';
+    const dropM = dropCm / 100;
+    const mrad = dropM / (distanceM / 1000);
+    const mradRounded = Math.round(mrad * 100) / 100;
+    const moa = mradRounded * (180 / Math.PI) * (60 / 1000);
+    const value = scopeUnit === 'MOA' ? moa : mradRounded;
+    return `-${value.toFixed(2)}`;
+  };
 
   const compensationLines = useMemo(
     () =>
-      compensationTable.map((row) =>
-        measurement === 'imperial'
-          ? `${`mils: ${row.mils}`.padEnd(14)}  ${`${Math.round(mToYd(row.distance))} yards =`.padEnd(14)}  ${(cmToIn(row.cm)).toFixed(1)} in`
-          : `${`mils: ${row.mils}`.padEnd(14)}  ${`${row.distance} meters =`.padEnd(14)}  ${row.cm}cm`
-      ),
-    [compensationTable, measurement]
+      compensationTable.map((row) => {
+        const distStr =
+          measurement === 'imperial'
+            ? `${Math.round(mToYd(row.distance))} yd`
+            : `${row.distance} m`;
+        const dropStr =
+          measurement === 'imperial'
+            ? `${cmToIn(row.cm).toFixed(1)} in`
+            : `${row.cm} cm`;
+        const holdover = getHoldoverStr(row.cm, row.distance);
+        return `${distStr.padEnd(8)}  ${dropStr.padEnd(10)}  ${holdover} ${scopeUnit === 'MOA' ? 'MOA' : 'mrad'}`;
+      }),
+    [compensationTable, measurement, scopeUnit]
   );
 
   const clicksHeader = useMemo(
@@ -149,17 +170,21 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   );
 
   const compensationHeader = useMemo(
-    () => [t('ballistic.compHeaderMils'), t('ballistic.compHeaderDistance'), t('ballistic.compHeaderDrop')],
-    [t]
+    () => [
+      t('ballistic.compHeaderDistance'),
+      t('ballistic.compHeaderDrop'),
+      scopeUnit === 'MOA' ? t('ballistic.clicksHeaderMoa') : t('ballistic.clicksHeaderMrad'),
+    ],
+    [t, scopeUnit]
   );
   const compensationRows = useMemo(
     () =>
       compensationTable.map((row) => [
-        String(row.mils),
         measurement === 'imperial' ? `${Math.round(mToYd(row.distance))} yd` : `${row.distance} m`,
         measurement === 'imperial' ? `${cmToIn(row.cm).toFixed(1)} in` : `${row.cm} cm`,
+        getHoldoverStr(row.cm, row.distance),
       ]),
-    [compensationTable, measurement]
+    [compensationTable, measurement, scopeUnit]
   );
 
   const opticsHeader = useMemo(
@@ -207,8 +232,8 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         <CliSep />
         <CliTable
           header={clicksHeader}
-          columnRoles={['amber', 'amber', 'white', 'cyan']}
-          headerRoles={['amber', 'amber', 'white', 'cyan']}
+          columnRoles={['amber', 'amber', 'white', 'white']}
+          headerRoles={['amber', 'amber', 'white', 'white']}
           rows={clicksRows}
           colWidths={['7rem', '7rem', '7rem', '8rem']}
         />
@@ -223,10 +248,10 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         <CliLine role="yellow">{formatTranslation(t('ballistic.mildotShoulderNote'), { animal: t(mildotAnimal.nameKey), animalM: mildotAnimal.heightM, humanM: mildotConfig.humanHeightM.toFixed(2) })}</CliLine>
         <CliLine role="yellow">{t('ballistic.mildot10xNote')}</CliLine>
         <CliTable
-          columnRoles={['sky', 'white', 'white']}
+          columnRoles={['sky', 'white', 'white', 'white']}
           rows={mildotRows}
           header={mildotHeader}
-          colWidths={['8rem', '10rem', '10rem']}
+          colWidths={['7rem', '8rem', '8rem', '8rem']}
         />
       </CollapsiblePanel>
 
@@ -237,10 +262,12 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
       >
         <CliLine role="yellow">{t('ballistic.tenPer1000Comp')}</CliLine>
+        <CliLine role="white" wrap>{t('ballistic.compProfileNote')}</CliLine>
+        <CliSep />
         <CliTable
           header={compensationHeader}
-          columnRoles={['white', 'amber', 'amber']}
-          headerRoles={['white', 'amber', 'amber']}
+          columnRoles={['sky', 'amber', 'white']}
+          headerRoles={['sky', 'amber', 'white']}
           rows={compensationRows}
           colWidths={['7rem', '7rem', '7rem']}
         />
@@ -399,6 +426,31 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                   <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
                     {t('ballistic.mildotHumanShoulderHeight')}
                   </label>
+                  <div className="flex gap-2 mb-2">
+                    {(['small', 'average', 'tall'] as const).map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => {
+                          const value =
+                            preset === 'small' ? 1.3 :
+                            preset === 'tall' ? 1.6 :
+                            1.4;
+                          setMildotConfig({ humanPreset: preset, humanHeightM: value });
+                          setMildotHumanHeightStr(String(value));
+                        }}
+                        className={`flex-1 rounded-lg border px-2 py-1 text-xs font-mono ${
+                          mildotConfig.humanPreset === preset
+                            ? 'border-theme-accent text-theme-accent bg-white/5'
+                            : 'border-white/15 text-slate-400'
+                        }`}
+                      >
+                        {preset === 'small' && t('ballistic.mildotHumanSmall')}
+                        {preset === 'average' && t('ballistic.mildotHumanAverage')}
+                        {preset === 'tall' && t('ballistic.mildotHumanTall')}
+                      </button>
+                    ))}
+                  </div>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -408,7 +460,12 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                       const v = parseFloat(mildotHumanHeightStr);
                       if (Number.isFinite(v)) {
                         const clamped = Math.max(0.2, Math.min(2.5, v));
-                        setMildotConfig({ humanHeightM: clamped });
+                        const preset =
+                          Math.abs(clamped - 1.3) < 0.01 ? 'small' as const :
+                          Math.abs(clamped - 1.4) < 0.01 ? 'average' as const :
+                          Math.abs(clamped - 1.6) < 0.01 ? 'tall' as const :
+                          'custom' as const;
+                        setMildotConfig({ humanHeightM: clamped, humanPreset: preset });
                         setMildotHumanHeightStr(String(clamped));
                       } else {
                         setMildotHumanHeightStr(String(mildotConfig.humanHeightM));
@@ -417,6 +474,42 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
                   />
                   <p className="text-xs text-slate-500 mt-1">{t('ballistic.mildotHumanShoulderNote')}</p>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.mildotSteelSection')}
+                  </label>
+                  <select
+                    value={mildotConfig.plateId}
+                    onChange={(e) => {
+                      const plate = MILDOT_STEEL_PLATES.find((p) => p.id === e.target.value) ?? MILDOT_STEEL_PLATES[0];
+                      setMildotConfig({ plateId: plate.id, plateHeightM: plate.heightM });
+                    }}
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm mb-2"
+                  >
+                    {MILDOT_STEEL_PLATES.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {t(p.labelKey)} — {p.heightM} m
+                      </option>
+                    ))}
+                  </select>
+                  <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">
+                    {t('ballistic.mildotSteelCustomHeight')}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={String(mildotConfig.plateHeightM)}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const v = parseFloat(raw);
+                      if (Number.isFinite(v)) {
+                        setMildotConfig({ plateHeightM: v });
+                      }
+                    }}
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">{t('ballistic.mildotSteelNote')}</p>
                 </div>
               </div>
             </div>

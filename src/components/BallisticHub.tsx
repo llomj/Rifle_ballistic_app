@@ -283,8 +283,8 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 scopeUnit === 'MOA' ? t('ballistic.clicksHeaderMoa') : t('ballistic.clicksHeaderMrad'),
                 t('ballistic.clicksHeaderClicks'),
               ]}
-              columnRoles={['amber', 'amber', 'white', 'cyan']}
-              headerRoles={['amber', 'amber', 'white', 'cyan']}
+              columnRoles={['amber', 'amber', 'white', 'white']}
+              headerRoles={['amber', 'amber', 'white', 'white']}
               rows={turretTable.map((r) => {
                 const dist = measurement === 'imperial' ? `${Math.round(mToYd(r.distanceMin))} yd` : `${r.distanceMin}m`;
                 const drop = measurement === 'imperial'
@@ -365,7 +365,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           <i className={`fas fa-chevron-down text-xs transition-transform ${setupExpanded ? 'rotate-180' : ''}`} />
         </button>
         {setupExpanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-white/10">
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 overflow-x-hidden overflow-y-auto max-h-[60vh] overscroll-contain">
             <RifleScopeSection editable showSaveAs />
           </div>
         )}

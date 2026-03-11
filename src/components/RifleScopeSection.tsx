@@ -115,7 +115,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
   const numInputCls = 'w-20 min-w-[5rem]'; // same size as other small panels
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 min-w-0 overflow-x-hidden">
       <section className="pb-1 border-b border-white/10">
         <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 space-y-0.5">
           <CliLine role="yellow">{measureLine1}</CliLine>

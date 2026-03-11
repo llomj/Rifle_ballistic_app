@@ -202,8 +202,42 @@ export const MILDOT_ANIMALS: MildotAnimal[] = [
   { id: 'pig', nameKey: 'targets.pig', heightM: 0.6 },
   { id: 'boar', nameKey: 'targets.boar', heightM: 0.75 },
   { id: 'elk', nameKey: 'targets.elk', heightM: 1.35 },
+  { id: 'goat', nameKey: 'targets.goat', heightM: 0.9 },
+  { id: 'bear', nameKey: 'targets.bear', heightM: 1.1 },
+  { id: 'fox', nameKey: 'targets.fox', heightM: 0.35 },
+  { id: 'rabbit', nameKey: 'targets.rabbit', heightM: 0.2 },
+  { id: 'wildcat', nameKey: 'targets.wildcat', heightM: 0.35 },
   { id: 'bird', nameKey: 'targets.bird', heightM: 0.3 },
-  { id: 'steel', nameKey: 'targets.steel', heightM: 0.5 },
+];
+
+/** Steel plates for mildot reference: height (m). Used with distance = (height × 1000) / mils. */
+export interface MildotSteelPlate {
+  id: string;
+  labelKey: string;
+  heightM: number;
+}
+
+export const MILDOT_STEEL_PLATES: MildotSteelPlate[] = [
+  { id: 'plate10cm', labelKey: 'ballistic.plate10cm', heightM: 0.10 },
+  { id: 'plate15cm', labelKey: 'ballistic.plate15cm', heightM: 0.15 },
+  { id: 'plate20cm', labelKey: 'ballistic.plate20cm', heightM: 0.20 },
+  { id: 'plate25cm', labelKey: 'ballistic.plate25cm', heightM: 0.25 },
+  { id: 'plate30cm', labelKey: 'ballistic.plate30cm', heightM: 0.30 },
+  { id: 'plate35cm', labelKey: 'ballistic.plate35cm', heightM: 0.35 },
+  { id: 'plate40cm', labelKey: 'ballistic.plate40cm', heightM: 0.40 },
+  { id: 'plate45cm', labelKey: 'ballistic.plate45cm', heightM: 0.45 },
+  { id: 'plate50cm', labelKey: 'ballistic.plate50cm', heightM: 0.50 },
+  { id: 'plate55cm', labelKey: 'ballistic.plate55cm', heightM: 0.55 },
+  { id: 'plate60cm', labelKey: 'ballistic.plate60cm', heightM: 0.60 },
+  { id: 'plate65cm', labelKey: 'ballistic.plate65cm', heightM: 0.65 },
+  { id: 'plate70cm', labelKey: 'ballistic.plate70cm', heightM: 0.70 },
+  { id: 'plate75cm', labelKey: 'ballistic.plate75cm', heightM: 0.75 },
+  { id: 'plate80cm', labelKey: 'ballistic.plate80cm', heightM: 0.80 },
+  { id: 'plate85cm', labelKey: 'ballistic.plate85cm', heightM: 0.85 },
+  { id: 'plate90cm', labelKey: 'ballistic.plate90cm', heightM: 0.90 },
+  { id: 'plate95cm', labelKey: 'ballistic.plate95cm', heightM: 0.95 },
+  { id: 'plate100cm', labelKey: 'ballistic.plate100cm', heightM: 1.00 },
+  { id: 'plate45x30cm', labelKey: 'ballistic.plate45x30cm', heightM: 0.45 },
 ];
 
 export interface TurretRow {
