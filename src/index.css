@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme accent colors — default yellow; set via data-theme on root */
+[data-theme="yellow"],
+:root {
+  --theme-accent: #fbbf24;
+  --theme-accent-muted: rgba(251, 191, 36, 0.2);
+}
+[data-theme="green"] {
+  --theme-accent: #34d399;
+  --theme-accent-muted: rgba(52, 211, 153, 0.2);
+}
+[data-theme="blue"] {
+  --theme-accent: #38bdf8;
+  --theme-accent-muted: rgba(56, 189, 248, 0.2);
+}
+[data-theme="magenta"] {
+  --theme-accent: #ff00ff;
+  --theme-accent-muted: rgba(255, 0, 255, 0.2);
+}
+
+.text-theme-accent { color: var(--theme-accent); }
+.bg-theme-accent-muted { background-color: var(--theme-accent-muted); }
+.border-theme-accent { border-color: var(--theme-accent); }
+
 /* Local fonts: system stack for full offline; optional webfonts via fontsource if added */
 body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

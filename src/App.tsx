@@ -90,7 +90,7 @@ const ViewLoading: React.FC = () => (
 
 const App: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { compassMode, setCompassMode } = useBallisticSettings();
+  const { compassMode, setCompassMode, theme } = useBallisticSettings();
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [view, setView] = useState<'hub' | 'quiz' | 'log' | 'glossary'>('hub');
   const [showResult, setShowResult] = useState<{
@@ -470,7 +470,7 @@ const App: React.FC = () => {
 
   return (
     <SoundProvider soundEnabled={soundEnabled} onPlay={() => void playUITapSound()}>
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]">
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]" data-theme={theme}>
       {/* Settings at bottom centre */}
       <div className="fixed bottom-0 left-0 right-0 z-[110] flex justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
         <button

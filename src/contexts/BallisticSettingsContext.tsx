@@ -18,11 +18,14 @@ export const DEFAULT_CLICKS_CONFIG: ClicksConfig = {
 
 export const CLICKS_INTERVAL_PRESETS = [10, 15, 20, 25, 30, 33, 45, 50, 60, 66, 100, 150, 200, 300] as const;
 
+export type ThemeId = 'yellow' | 'green' | 'blue' | 'magenta';
+
 interface BallisticSettingsState {
   measurement: MeasurementSystem;
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
   compassMode: boolean;
+  theme: ThemeId;
 }
 
 interface BallisticSettingsContextType {
@@ -30,10 +33,12 @@ interface BallisticSettingsContextType {
   scopeUnit: ScopeUnit;
   clicksConfig: ClicksConfig;
   compassMode: boolean;
+  theme: ThemeId;
   setMeasurement: (m: MeasurementSystem) => void;
   setScopeUnit: (u: ScopeUnit) => void;
   setClicksConfig: (c: Partial<ClicksConfig>) => void;
   setCompassMode: (on: boolean) => void;
+  setTheme: (t: ThemeId) => void;
 }
 
 const defaultState: BallisticSettingsState = {
@@ -41,6 +46,7 @@ const defaultState: BallisticSettingsState = {
   scopeUnit: 'MIL',
   clicksConfig: DEFAULT_CLICKS_CONFIG,
   compassMode: true,
+  theme: 'yellow',
 };
 
 const BallisticSettingsContext = createContext<BallisticSettingsContextType | undefined>(undefined);
@@ -61,7 +67,8 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
             }
           : defaultState.clicksConfig;
         const compassMode = parsed.compassMode === true || parsed.compassMode === false ? parsed.compassMode : defaultState.compassMode;
-        return { measurement, scopeUnit, clicksConfig, compassMode };
+        const theme = ['yellow', 'green', 'blue', 'magenta'].includes(parsed.theme) ? parsed.theme : defaultState.theme;
+        return { measurement, scopeUnit, clicksConfig, compassMode, theme };
       }
     } catch (_) {}
     return defaultState;
@@ -94,6 +101,9 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
   const setCompassMode = (compassMode: boolean) => {
     setState((prev) => ({ ...prev, compassMode }));
   };
+  const setTheme = (theme: ThemeId) => {
+    setState((prev) => ({ ...prev, theme }));
+  };
 
   return (
     <BallisticSettingsContext.Provider
@@ -102,10 +112,12 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
         scopeUnit: state.scopeUnit,
         clicksConfig: state.clicksConfig,
         compassMode: state.compassMode,
+        theme: state.theme,
         setMeasurement,
         setScopeUnit,
         setClicksConfig,
         setCompassMode,
+        setTheme,
       }}
     >
       {children}

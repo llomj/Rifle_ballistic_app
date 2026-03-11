@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
+import { useBallisticSettings, type ThemeId } from '../contexts/BallisticSettingsContext';
 
 export type BallisticTab = 'rifles' | 'ballistics' | 'targets' | 'environment';
 
@@ -79,6 +80,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   const { t, language } = useLanguage();
   const { playTapSound } = useSound();
   const { currentProfile, savedProfiles, loadProfile, deleteSavedProfile } = useBallisticProfile();
+  const { theme, setTheme } = useBallisticSettings();
   const [rulesExpanded, setRulesExpanded] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(false);
   const [customizeExpanded, setCustomizeExpanded] = useState(false);
@@ -353,6 +355,26 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
           </button>
           {settingsExpanded && (
             <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-0.5">
+              {/* Theme: Yellow, Green, Blue, Magenta */}
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <i className="fas fa-palette text-sm w-5 flex-shrink-0 text-slate-400" />
+                <span className="text-sm font-medium text-slate-400 shrink-0">{t('settings.theme')}</span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(['yellow', 'green', 'blue', 'magenta'] as const).map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => { playTapSound(); setTheme(id); }}
+                      className={`w-8 h-8 rounded-full border-2 transition-all shrink-0 ${
+                        theme === id ? 'border-white scale-110' : 'border-white/30 hover:border-white/60'
+                      }`}
+                      style={{ backgroundColor: id === 'yellow' ? '#fbbf24' : id === 'green' ? '#34d399' : id === 'blue' ? '#38bdf8' : '#ff00ff' }}
+                      title={t(`settings.theme${id.charAt(0).toUpperCase() + id.slice(1)}`)}
+                      aria-label={t(`settings.theme${id.charAt(0).toUpperCase() + id.slice(1)}`)}
+                    />
+                  ))}
+                </div>
+              </div>
               {onToggleLanguage && (
                 <button
                   onClick={() => { playTapSound(); onToggleLanguage(); onClose(); }}

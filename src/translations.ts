@@ -185,6 +185,11 @@ export const translations = {
       scopeUnit: "Scope unit",
       mil: "MIL",
       moa: "MOA",
+      theme: "Theme",
+      themeYellow: "Yellow",
+      themeGreen: "Green",
+      themeBlue: "Blue",
+      themeMagenta: "Magenta",
     },
 
     // Rifle ballistic app (Distance / Height / Reference)
@@ -687,6 +692,11 @@ export const translations = {
       scopeUnit: "Unité lunette",
       mil: "MIL",
       moa: "MOA",
+      theme: "Thème",
+      themeYellow: "Jaune",
+      themeGreen: "Vert",
+      themeBlue: "Bleu",
+      themeMagenta: "Magenta",
     },
 
     // Rifle ballistic app (Distance / Height / Reference)
