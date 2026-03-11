@@ -286,18 +286,17 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           <i className="fas fa-circle-info text-lg" />
         </button>
       </div>
-      {/* Profile modal — rifle profile section, customizable, transparent overlay */}
+      {/* Profile modal — rifle profile section, transparent like settings menu, scrolls to top */}
       {showProfile && (
         <div
-          className="fixed inset-0 z-[100] flex flex-col items-center px-4 overflow-y-auto"
-          style={{ backgroundColor: 'rgba(0,0,0,0.0045)', paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          className="fixed inset-0 z-[100] overflow-y-auto"
           onClick={() => setShowProfile(false)}
         >
-          <div
-            className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 my-4"
-            style={{ opacity: 0.99 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-amber-300 font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
               <button
@@ -310,6 +309,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
               </button>
             </div>
             <RifleScopeSection editable showSaveAs />
+            </div>
           </div>
         </div>
       )}
