@@ -338,6 +338,14 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
                   {p.userName}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => { playTapSound(); loadProfile('default'); }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400/90 border border-dashed border-amber-400/40 hover:bg-amber-500/10 transition-all"
+              >
+                <i className="fas fa-plus text-xs" />
+                {t('ballistic.addProfile')}
+              </button>
             </div>
             <RifleScopeSection editable showSaveAs />
             </div>

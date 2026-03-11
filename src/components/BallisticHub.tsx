@@ -29,7 +29,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrentAs, loadProfile } = useBallisticProfile();
+  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrent, loadProfile } = useBallisticProfile();
   const { scopeUnit, setScopeUnit, measurement, setMeasurement, clicksConfig, setClicksConfig } = useBallisticSettings();
   const { turretTable } = useTrajectoryTables();
   const [setupExpanded, setSetupExpanded] = useState(false);
@@ -55,7 +55,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   const handleSave = () => {
     playTapSound();
-    saveCurrentAs(currentProfile.userName.trim() || 'My setup');
+    saveCurrent();
   };
 
   return (
@@ -89,6 +89,14 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               {p.userName}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => { playTapSound(); loadProfile('default'); }}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400/90 border border-dashed border-amber-400/40 hover:bg-amber-500/10 hover:border-amber-400/60 transition-all"
+          >
+            <i className="fas fa-plus text-xs" />
+            {t('ballistic.addProfile')}
+          </button>
         </div>
       </section>
 

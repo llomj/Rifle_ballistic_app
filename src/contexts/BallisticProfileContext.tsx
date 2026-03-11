@@ -14,6 +14,8 @@ interface BallisticProfileContextType {
   updateCurrentProfile: (updates: Partial<BallisticProfile>) => void;
   /** Save current setup as a new named profile. */
   saveCurrentAs: (userName: string) => void;
+  /** Save current state: if default → create new profile; if saved → update in place. */
+  saveCurrent: () => void;
   /** Load a profile by id ('default' or a saved id). */
   loadProfile: (id: string) => void;
   deleteSavedProfile: (id: string) => void;
@@ -93,6 +95,20 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
     setCurrentProfileState(newProfile);
   }, [currentProfile]);
 
+  const saveCurrent = useCallback(() => {
+    if (currentProfile.id === 'default') {
+      saveCurrentAs(currentProfile.userName.trim() || 'My setup');
+    } else {
+      setSavedProfiles((prev) =>
+        prev.map((p) =>
+          p.id === currentProfile.id
+            ? { ...currentProfile, userName: currentProfile.userName.trim() || p.userName, createdAt: p.createdAt }
+            : p
+        )
+      );
+    }
+  }, [currentProfile, saveCurrentAs]);
+
   const loadProfile = useCallback((id: string) => {
     if (id === 'default') {
       setCurrentProfileState({ ...DEFAULT_BALLISTIC_PROFILE });
@@ -117,6 +133,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
         setCurrentProfile,
         updateCurrentProfile,
         saveCurrentAs,
+        saveCurrent,
         loadProfile,
         deleteSavedProfile,
       }}
