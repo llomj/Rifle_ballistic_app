@@ -314,13 +314,17 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       )}
 
-      {/* Info modal — placed just under the circle so it does not obscure it */}
+      {/* Info modal — same design and transparency as profile modal */}
       {showInfo && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center px-4 bg-black/60" style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }} onClick={() => setShowInfo(false)}>
-          <div
-            className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div
+          className="fixed inset-0 z-[100] overflow-y-auto"
+          onClick={() => setShowInfo(false)}
+        >
+          <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
             <h3 className="text-amber-300 font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
             <p className="text-slate-300 text-xs leading-relaxed mb-4">{t('firstPage.infoText')}</p>
             <button
@@ -330,6 +334,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             >
               {t('ballistic.configDone')}
             </button>
+            </div>
           </div>
         </div>
       )}
