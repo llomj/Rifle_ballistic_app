@@ -84,7 +84,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   // 0. Users — saved profiles (from main page Save). Shown on every view so menu is consistent.
   menuItems.push({ type: 'users' } as MenuItem);
 
-  // 1. Customize — Profile, Ballistics, Environment. Shown on every view so menu is consistent.
+  // 1. Customize — Profile, Environment (Ballistics is a separate row below). Shown on every view so menu is consistent.
   if (onNavigateToProfile || onNavigateToBallistic) {
     const customizeSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onNavigateToProfile) {
@@ -92,7 +92,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     }
     if (onNavigateToBallistic) {
       customizeSubItems.push(
-        { icon: 'fa-bullseye', label: t('ballistic.tabBallistics'), onClick: () => { onNavigateToBallistic('ballistics'); onClose(); }, active: true },
         { icon: 'fa-wind', label: t('ballistic.tabEnvironment'), onClick: () => { onNavigateToBallistic('environment'); onClose(); } },
       );
     }
@@ -102,6 +101,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       label: t('settings.customize'),
       subItems: customizeSubItems,
     });
+    // Ballistics — under Customize, green, top-level (not inside Customize)
+    if (onNavigateToBallistic) {
+      menuItems.push({
+        type: 'item',
+        icon: 'fa-bullseye',
+        label: t('ballistic.tabBallistics'),
+        onClick: () => { onNavigateToBallistic('ballistics'); onClose(); },
+        active: true,
+      } as MenuItem);
+    }
   }
 
   // Rules: Glossary only (rifle/ballistic terms)
