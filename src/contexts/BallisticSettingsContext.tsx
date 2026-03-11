@@ -40,7 +40,7 @@ const defaultState: BallisticSettingsState = {
   measurement: 'metric',
   scopeUnit: 'MIL',
   clicksConfig: DEFAULT_CLICKS_CONFIG,
-  compassMode: false,
+  compassMode: true,
 };
 
 const BallisticSettingsContext = createContext<BallisticSettingsContextType | undefined>(undefined);
@@ -60,7 +60,7 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
               intervalM: Math.max(1, Math.min(2000, parsed.clicksConfig.intervalM)),
             }
           : defaultState.clicksConfig;
-        const compassMode = parsed.compassMode === true ? false : parsed.compassMode === true;
+        const compassMode = parsed.compassMode === true || parsed.compassMode === false ? parsed.compassMode : defaultState.compassMode;
         return { measurement, scopeUnit, clicksConfig, compassMode };
       }
     } catch (_) {}
