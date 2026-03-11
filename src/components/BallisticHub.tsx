@@ -3,7 +3,6 @@ import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
-import { CLICKS_INTERVAL_PRESETS } from '../contexts/BallisticSettingsContext';
 import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
 import { SearchCombobox } from './SearchCombobox';
@@ -198,22 +197,19 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             </div>
             <div>
               <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.incrementMeters')}</label>
-              <div className="flex flex-wrap gap-2">
-                {CLICKS_INTERVAL_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => { playTapSound(); setClicksConfig({ intervalM: preset }); }}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors ${
-                      clicksConfig.intervalM === preset
-                        ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
-                        : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                    }`}
-                  >
-                    {preset}
-                  </button>
-                ))}
-              </div>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={2000}
+                step={1}
+                value={clicksConfig.intervalM}
+                onChange={(e) => {
+                  const v = Math.round(parseFloat(e.target.value) || 50);
+                  setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
+                }}
+                className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+              />
             </div>
             <CliSep />
             <CliTable
