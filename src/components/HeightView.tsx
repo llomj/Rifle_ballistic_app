@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -61,17 +61,53 @@ export const HeightView: React.FC<HeightViewProps> = ({
 
   useSwipeLeft(onBackToFirstPage ? () => { playTapSound(); onBackToFirstPage(); } : undefined);
 
+  const smoothedHeading = useRef<number | null>(null);
+  const lastHeadingSet = useRef<number | null>(null);
+  const rafId = useRef<number | null>(null);
   useEffect(() => {
     if (!compassMode) {
       setHeading(null);
+      smoothedHeading.current = null;
+      lastHeadingSet.current = null;
       return;
     }
+    const SMOOTH = 0.06;
+    const MIN_DEG_CHANGE = 1.5;
     const handler = (e: DeviceOrientationEvent) => {
       const a = e.alpha;
-      if (a != null && !Number.isNaN(a)) setHeading(a);
+      if (a == null || Number.isNaN(a)) return;
+      const raw = (a + 360) % 360;
+      const prev = smoothedHeading.current;
+      const next =
+        prev == null
+          ? raw
+          : (() => {
+              let diff = raw - prev;
+              if (diff > 180) diff -= 360;
+              if (diff < -180) diff += 360;
+              return (prev + diff * SMOOTH + 360) % 360;
+            })();
+      smoothedHeading.current = next;
+      if (rafId.current == null) {
+        rafId.current = requestAnimationFrame(() => {
+          rafId.current = null;
+          const current = smoothedHeading.current;
+          if (current == null) return;
+          const last = lastHeadingSet.current;
+          let delta = Math.abs(current - (last ?? current));
+          if (delta > 180) delta = 360 - delta;
+          if (last == null || delta >= MIN_DEG_CHANGE) {
+            lastHeadingSet.current = current;
+            setHeading(current);
+          }
+        });
+      }
     };
     window.addEventListener('deviceorientation', handler);
-    return () => window.removeEventListener('deviceorientation', handler);
+    return () => {
+      window.removeEventListener('deviceorientation', handler);
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
+    };
   }, [compassMode]);
 
   const [showInfo, setShowInfo] = useState(false);
@@ -123,12 +159,12 @@ export const HeightView: React.FC<HeightViewProps> = ({
           aria-hidden
         />
 
-        {/* Rotating dial: north arrow + N only (mrad in fixed centre) */}
+        {/* Rotating dial: single north arrow ^ */}
         <div
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
             transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
-            transition: compassMode ? 'transform 0.1s ease-out' : 'none',
+            transition: compassMode ? 'transform 0.2s ease-out' : 'none',
           }}
         >
           <span
@@ -136,13 +172,6 @@ export const HeightView: React.FC<HeightViewProps> = ({
             aria-hidden
           >
             ^
-          </span>
-          <span
-            className="absolute left-1/2 top-0 font-mono font-bold text-amber-400/95 text-base -translate-x-1/2 mt-3"
-            style={{ transform: 'translateX(-50%)' }}
-            aria-hidden
-          >
-            N
           </span>
         </div>
       </button>

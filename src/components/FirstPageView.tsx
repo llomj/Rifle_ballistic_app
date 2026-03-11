@@ -118,15 +118,18 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   }, [onOpenCalculate]);
 
   const smoothedHeading = useRef<number | null>(null);
+  const lastHeadingSet = useRef<number | null>(null);
   const rafId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!compassMode) {
       setHeading(null);
       smoothedHeading.current = null;
+      lastHeadingSet.current = null;
       return;
     }
-    const SMOOTH = 0.08; // Lower = smoother, higher = more responsive
+    const SMOOTH = 0.06; // Lower = smoother, less jitter
+    const MIN_DEG_CHANGE = 1.5; // Only update state when heading changes by at least this (reduces fidget)
     const handler = (e: DeviceOrientationEvent) => {
       const a = e.alpha;
       if (a == null || Number.isNaN(a)) return;
@@ -145,7 +148,15 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       if (rafId.current == null) {
         rafId.current = requestAnimationFrame(() => {
           rafId.current = null;
-          setHeading(smoothedHeading.current);
+          const current = smoothedHeading.current;
+          if (current == null) return;
+          const last = lastHeadingSet.current;
+          let delta = Math.abs(current - (last ?? current));
+          if (delta > 180) delta = 360 - delta;
+          if (last == null || delta >= MIN_DEG_CHANGE) {
+            lastHeadingSet.current = current;
+            setHeading(current);
+          }
         });
       }
     };
@@ -241,28 +252,19 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           aria-hidden
         />
 
-        {/* Rotating ring + north arrow (compass dial) — rotates so ^ points north */}
+        {/* Rotating ring: single north arrow ^ (no duplicate N) */}
         <div
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
             transform: compassMode && heading != null ? `rotate(${-heading}deg)` : undefined,
-            transition: compassMode ? 'transform 0.12s ease-out' : 'none',
+            transition: compassMode ? 'transform 0.2s ease-out' : 'none',
           }}
         >
-          {/* North arrow ^ */}
           <span
             className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
             aria-hidden
           >
             ^
-          </span>
-          {/* N only (top, bigger) */}
-          <span
-            className="absolute left-1/2 top-0 font-mono font-bold text-amber-400/95 text-base -translate-x-1/2 mt-3"
-            style={{ transform: 'translateX(-50%)' }}
-            aria-hidden
-          >
-            N
           </span>
         </div>
       </button>
