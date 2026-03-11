@@ -46,6 +46,12 @@ The app automatically chooses the correct formula from the scope unit selected i
 ### Future (architecture ready)
 Wind drift, angle compensation, GPS elevation, shot logging, camera mil measurement, reticle simulation, import/export profiles, range card generator.
 
+### **URGENT — Full offline requirement**
+- **The app must work fully offline.** With no internet, opening the app must load and run correctly (e.g. after the user has opened it at least once with network so the service worker can cache assets).
+- **No runtime dependency on CDNs or external URLs.** All scripts, styles, fonts, and icons must be bundled or served from the app origin (no `cdn.`, `esm.sh`, `googleapis`, etc. in production).
+- **Service worker:** Must cache the app shell and assets so offline visits are served from cache. See `public/sw.js` and `ps.md` for behaviour and troubleshooting.
+- If the app fails to open or breaks when offline, treat it as a critical bug and fix it; consult `ps.md` for solutions.
+
 ---
 
 ## 1. Genome Checkpoint (STRICT STATE)

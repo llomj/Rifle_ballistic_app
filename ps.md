@@ -14,6 +14,23 @@ When adding new content, add both languages in the same commit. Never ship Engli
 
 ---
 
+## Rifle Ballistic App — Full offline (no internet)
+
+**Requirement:** The app must open and work with no internet (e.g. in the field). See AGENTS.md § “URGENT — Full offline requirement”.
+
+**What was done to fix offline:**
+- Removed all CDN/external URLs from the built app: Tailwind and Font Awesome are bundled via npm; fonts use system stack; PWA icon is `public/icon-512.png`.
+- Removed the import map from `index.html` so the app does not load React or any runtime from `esm.sh`.
+- Service worker `public/sw.js` uses cache name `rifle-ballistic-offline-v1`, pre-caches `manifest.json`, `index.html`, and `icon-512.png`, and serves cache when offline (fetch and update cache when online).
+
+**If the app fails offline:**
+1. Ensure the user has opened the app at least once **with network** so the SW can cache assets.
+2. Do not re-add CDN scripts, styles, or fonts to `index.html`; keep everything bundled or local (Tailwind in `src/index.css`, Font Awesome imported in `main.tsx`, icon in `public/`).
+3. After changing `public/sw.js`, bump the version in `main.tsx` (e.g. `sw.js?v=2`) so clients get the new SW.
+4. Test: build (`npm run build`), serve `dist` (e.g. `npx serve dist`), open in browser, then go offline (DevTools → Network → Offline) and reload; the app should load from cache.
+
+---
+
 ## Flags Reference (syntax highlighting)
 
 **Requirement**: The Flags/Commands reference view must **not** be all green. It must use clear syntax highlighting (e.g. comments grey, flags/options blue, descriptions amber, base text slate/grey) so it is readable and matches AGENTS.md.
