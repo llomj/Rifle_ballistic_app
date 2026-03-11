@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
@@ -65,7 +65,16 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const [targetHeightsExpanded, setTargetHeightsExpanded] = useState(false);
   const [windExpanded, setWindExpanded] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [refMaxStr, setRefMaxStr] = useState('');
+  const [refIntervalStr, setRefIntervalStr] = useState('');
   const { measurement, scopeUnit, clicksConfig, setClicksConfig } = useBallisticSettings();
+
+  useEffect(() => {
+    if (showConfigModal) {
+      setRefMaxStr(String(clicksConfig.maxM));
+      setRefIntervalStr(String(clicksConfig.intervalM));
+    }
+  }, [showConfigModal, clicksConfig.maxM, clicksConfig.intervalM]);
   const { turretTable, compensationTable } = useTrajectoryTables();
 
   const mildotHeader = useMemo(
@@ -290,15 +299,19 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     {t('ballistic.maxMeters')}
                   </label>
                   <input
-                    type="number"
-                    inputMode="numeric"
-                    min={100}
-                    max={2000}
-                    step={1}
-                    value={clicksConfig.maxM}
-                    onChange={(e) => {
-                      const v = Math.round(parseFloat(e.target.value) || 800);
-                      setClicksConfig({ maxM: Math.max(100, Math.min(2000, v)) });
+                    type="text"
+                    inputMode="decimal"
+                    value={refMaxStr}
+                    onChange={(e) => setRefMaxStr(e.target.value)}
+                    onBlur={() => {
+                      const v = parseFloat(refMaxStr);
+                      if (Number.isFinite(v)) {
+                        const clamped = Math.max(100, Math.min(10000, v));
+                        setClicksConfig({ maxM: clamped });
+                        setRefMaxStr(String(clamped));
+                      } else {
+                        setRefMaxStr(String(clicksConfig.maxM));
+                      }
                     }}
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
                   />
@@ -308,15 +321,19 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                     {t('ballistic.incrementMeters')}
                   </label>
                   <input
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={2000}
-                    step={1}
-                    value={clicksConfig.intervalM}
-                    onChange={(e) => {
-                      const v = Math.round(parseFloat(e.target.value) || 50);
-                      setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
+                    type="text"
+                    inputMode="decimal"
+                    value={refIntervalStr}
+                    onChange={(e) => setRefIntervalStr(e.target.value)}
+                    onBlur={() => {
+                      const v = parseFloat(refIntervalStr);
+                      if (Number.isFinite(v) && v >= 1) {
+                        const clamped = Math.max(1, Math.min(2000, v));
+                        setClicksConfig({ intervalM: clamped });
+                        setRefIntervalStr(String(clamped));
+                      } else {
+                        setRefIntervalStr(String(clicksConfig.intervalM));
+                      }
                     }}
                     className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
                   />
