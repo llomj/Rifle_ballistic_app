@@ -6,6 +6,7 @@ import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
+import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -310,42 +311,36 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
                 <i className="fas fa-times text-sm" />
               </button>
             </div>
-            {/* Profile list: Default + saved (same as Settings > Users) */}
-            <div className="mb-4 space-y-1.5">
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('settings.users')}</p>
-              <button
-                type="button"
-                onClick={() => { playTapSound(); loadProfile('default'); }}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  currentProfile.id === 'default'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {t('ballistic.defaultUser')}
-              </button>
-              {savedProfiles.map((p) => (
+            {/* Profiles: Default + saved — same list as in BallisticHub */}
+            <div className="mb-4">
+              <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  key={p.id}
                   type="button"
-                  onClick={() => { playTapSound(); loadProfile(p.id); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    currentProfile.id === p.id
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  onClick={() => { playTapSound(); loadProfile('default'); }}
+                  className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    currentProfile.id === 'default'
+                      ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
                   }`}
                 >
-                  {p.userName}
+                  {DEFAULT_BALLISTIC_PROFILE.userName}
                 </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => { playTapSound(); loadProfile('default'); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400/90 border border-dashed border-amber-400/40 hover:bg-amber-500/10 transition-all"
-              >
-                <i className="fas fa-plus text-xs" />
-                {t('ballistic.addProfile')}
-              </button>
+                {savedProfiles.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { playTapSound(); loadProfile(p.id); }}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                      currentProfile.id === p.id
+                        ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                        : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                    }`}
+                  >
+                    {p.userName}
+                  </button>
+                ))}
+              </div>
             </div>
             <RifleScopeSection editable showSaveAs />
             </div>

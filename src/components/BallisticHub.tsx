@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
@@ -10,6 +10,7 @@ import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { getUniqueCalibers, getBulletById, searchCalibers } from '../data/catalogs';
 import type { CaliberOption } from '../data/catalogs';
+import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
 export type BallisticView = 'distance' | 'height';
 
@@ -37,17 +38,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [turretTableExpanded, setTurretTableExpanded] = useState(false);
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
-  const [turretMinStr, setTurretMinStr] = useState('');
-  const [turretMaxStr, setTurretMaxStr] = useState('');
-  const [turretIntervalStr, setTurretIntervalStr] = useState('');
-
-  useEffect(() => {
-    if (turretTableExpanded) {
-      setTurretMinStr(String(clicksConfig.minM));
-      setTurretMaxStr(String(clicksConfig.maxM));
-      setTurretIntervalStr(String(clicksConfig.intervalM));
-    }
-  }, [turretTableExpanded, clicksConfig.minM, clicksConfig.maxM, clicksConfig.intervalM]);
 
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
   const caliberOptions = useMemo(() => getUniqueCalibers(), []);
@@ -60,47 +50,39 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   return (
     <div className="max-w-lg mx-auto pb-48">
-      {/* Profiles: Default + saved (same as Settings > Users and Profile modal) */}
+      {/* Profiles: Default + saved — switch between them */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
-        <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('settings.users')}</label>
-        <div className="space-y-1.5">
+        <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => { playTapSound(); loadProfile('default'); }}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
               currentProfile.id === 'default'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
             }`}
           >
-            {t('ballistic.defaultUser')}
+            {DEFAULT_BALLISTIC_PROFILE.userName}
           </button>
           {savedProfiles.map((p) => (
             <button
               key={p.id}
               type="button"
               onClick={() => { playTapSound(); loadProfile(p.id); }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 currentProfile.id === p.id
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
               {p.userName}
             </button>
           ))}
-          <button
-            type="button"
-            onClick={() => { playTapSound(); loadProfile('default'); }}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400/90 border border-dashed border-amber-400/40 hover:bg-amber-500/10 hover:border-amber-400/60 transition-all"
-          >
-            <i className="fas fa-plus text-xs" />
-            {t('ballistic.addProfile')}
-          </button>
         </div>
       </section>
 
-      {/* User name (profile name; used when saving) */}
+      {/* User name */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input
@@ -216,18 +198,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               <div>
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.clicksMinM')}</label>
                 <input
-                  type="text"
+                  type="number"
                   inputMode="decimal"
-                  value={turretMinStr}
-                  onChange={(e) => setTurretMinStr(e.target.value)}
-                  onBlur={() => {
-                    const v = parseFloat(turretMinStr);
-                    if (Number.isFinite(v)) {
-                      setClicksConfig({ minM: Math.max(0, Math.min(10000, v)) });
-                      setTurretMinStr(String(Math.max(0, Math.min(10000, v))));
-                    } else {
-                      setTurretMinStr(String(clicksConfig.minM));
-                    }
+                  value={clicksConfig.minM}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (!Number.isFinite(v)) return;
+                    setClicksConfig({ minM: Math.max(0, Math.min(10000, v)) });
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
                 />
@@ -235,19 +212,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               <div>
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.maxMeters')}</label>
                 <input
-                  type="text"
+                  type="number"
                   inputMode="decimal"
-                  value={turretMaxStr}
-                  onChange={(e) => setTurretMaxStr(e.target.value)}
-                  onBlur={() => {
-                    const v = parseFloat(turretMaxStr);
-                    if (Number.isFinite(v)) {
-                      const clamped = Math.max(100, Math.min(10000, v));
-                      setClicksConfig({ maxM: clamped });
-                      setTurretMaxStr(String(clamped));
-                    } else {
-                      setTurretMaxStr(String(clicksConfig.maxM));
-                    }
+                  value={clicksConfig.maxM}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (!Number.isFinite(v)) return;
+                    setClicksConfig({ maxM: Math.max(100, Math.min(10000, v)) });
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
                 />
@@ -256,18 +227,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             <div>
               <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.incrementMeters')}</label>
               <input
-                type="text"
+                type="number"
                 inputMode="decimal"
-                value={turretIntervalStr}
-                onChange={(e) => setTurretIntervalStr(e.target.value)}
-                onBlur={() => {
-                  const v = parseFloat(turretIntervalStr);
-                  if (Number.isFinite(v) && v >= 1) {
-                    setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
-                    setTurretIntervalStr(String(Math.max(1, Math.min(2000, v))));
-                  } else {
-                    setTurretIntervalStr(String(clicksConfig.intervalM));
-                  }
+                value={clicksConfig.intervalM}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  if (!Number.isFinite(v)) return;
+                  setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
                 }}
                 className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
               />
