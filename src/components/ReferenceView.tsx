@@ -178,19 +178,19 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const opticsHeader = useMemo(
     () => [
       t('ballistic.opticsHeaderDistanceM'),
-      t('ballistic.opticsHeaderCm'),
+      t('ballistic.opticsHeaderReticleCm'),
       t('ballistic.opticsHeaderDistanceYd'),
-      t('ballistic.opticsHeaderIn'),
+      t('ballistic.opticsHeaderReticleIn'),
     ],
     [t]
   );
   const opticsRows = useMemo(() => {
-    // 10x optics rule of thumb: 100m = 10cm, 100y = 3.6"
+    // 1 reticle = 10 cm at 100 m; at distance d, 1 reticle = d/10 cm. yd: 3.6 in at 100 yd.
     return mildotDistances.map((d) => {
       const yd = Math.round(mToYd(d));
       const cm = Math.round((d / 10) * 10) / 10;
       const inch = Math.round(((yd * 3.6) / 100) * 10) / 10;
-      return [`${d} m`, `${cm} cm`, `${yd} y`, `${inch} in`];
+      return [`${d} m`, `${cm} cm`, `${yd} yd`, `${inch} in`];
     });
   }, [mildotDistances]);
 
@@ -271,24 +271,29 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         onToggle={() => { playTapSound(); setOpticsExpanded((e) => !e); }}
         onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
       >
-        {scope ? (
-          <>
-            <CliLine role="yellow">
-              {measureMag != null
-                ? formatTranslation(t('ballistic.opticsMeasureAtMag'), { mag: measureMag })
-                : t('ballistic.opticsMeasureAnyMag')}
-            </CliLine>
-            <CliLine role="cyan">{t('ballistic.opticsMeasureNote')}</CliLine>
-          </>
-        ) : null}
-        <CliLine role="yellow">{t('ballistic.optics10x')}</CliLine>
-        <CliTable
-          header={opticsHeader}
-          columnRoles={['amber', 'amber', 'amber', 'amber']}
-          headerRoles={['amber', 'amber', 'amber', 'amber']}
-          rows={opticsRows}
-          colWidths={['7rem', '7rem', '7rem', '7rem']}
-        />
+        <div className="pt-3 space-y-3">
+          {scope ? (
+            <div className="space-y-1">
+              <CliLine role="yellow">
+                {measureMag != null
+                  ? formatTranslation(t('ballistic.opticsMeasureAtMag'), { mag: measureMag })
+                  : t('ballistic.opticsMeasureAnyMag')}
+              </CliLine>
+              <CliLine role="cyan">{t('ballistic.opticsMeasureNote')}</CliLine>
+            </div>
+          ) : null}
+          <div className="space-y-1">
+            <CliLine role="yellow">{t('ballistic.opticsReticleRule')}</CliLine>
+            <CliLine role="white">{t('ballistic.optics10x')}</CliLine>
+          </div>
+          <CliTable
+            header={opticsHeader}
+            columnRoles={['sky', 'amber', 'sky', 'amber']}
+            headerRoles={['sky', 'amber', 'sky', 'amber']}
+            rows={opticsRows}
+            colWidths={['5rem', '8rem', '5rem', '8rem']}
+          />
+        </div>
       </CollapsiblePanel>
 
       <CollapsiblePanel

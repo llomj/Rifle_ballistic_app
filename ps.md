@@ -21,13 +21,14 @@ When adding new content, add both languages in the same commit. Never ship Engli
 **What was done to fix offline:**
 - Removed all CDN/external URLs from the built app: Tailwind and Font Awesome are bundled via npm; fonts use system stack; PWA icon is `public/icon-512.png`.
 - Removed the import map from `index.html` so the app does not load React or any runtime from `esm.sh`.
-- Service worker `public/sw.js` uses cache name `rifle-ballistic-offline-v1`, pre-caches `manifest.json`, `index.html`, and `icon-512.png`, and serves cache when offline (fetch and update cache when online).
+- **Service worker is generated at build time** by `scripts/generate-sw.cjs` (run after `vite build`). It precaches **every file in `dist/`** (index.html, manifest.json, icon, all hashed JS/CSS/fonts) so the app works offline as soon as the SW installs. There is no `public/sw.js`; the only SW is `dist/sw.js` produced by the build.
+- Fetch strategy: cache-first for all requests (serve from cache when available, else fetch and cache).
 
 **If the app fails offline:**
-1. Ensure the user has opened the app at least once **with network** so the SW can cache assets.
-2. Do not re-add CDN scripts, styles, or fonts to `index.html`; keep everything bundled or local (Tailwind in `src/index.css`, Font Awesome imported in `main.tsx`, icon in `public/`).
-3. After changing `public/sw.js`, bump the version in `main.tsx` (e.g. `sw.js?v=2`) so clients get the new SW.
-4. Test: build (`npm run build`), serve `dist` (e.g. `npx serve dist`), open in browser, then go offline (DevTools → Network → Offline) and reload; the app should load from cache.
+1. User must open the app at least once **with network** so the SW can install and run the install handler (which precaches all URLs).
+2. Do not re-add CDN scripts, styles, or fonts to `index.html`; keep everything bundled or local.
+3. After changing SW logic, edit `scripts/generate-sw.cjs` and bump `CACHE_NAME` version; rebuild and redeploy.
+4. Test: `npm run build`, serve `dist` with correct base (e.g. `npx serve dist` and open the path that matches your base, or deploy and open the app), go offline in DevTools, reload; the app should load from cache.
 
 ---
 

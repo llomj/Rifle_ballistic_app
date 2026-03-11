@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     if (import.meta.env.PROD) {
       const basePath = import.meta.env.BASE_URL || '/';
-      navigator.serviceWorker.register(`${basePath}sw.js?v=1`, { updateViaCache: 'none' })
+      navigator.serviceWorker.register(`${basePath}sw.js?v=2`, { updateViaCache: 'none' })
         .then(registration => {
           console.log('Rifle Ballistic SW registered (offline): ', registration);
         })

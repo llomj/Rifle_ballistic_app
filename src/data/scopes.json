@@ -1,5 +1,5 @@
 [
-  {"id":"hawke-sidewinder-30-4-16x50","name":"HAWKE SideWinder 30 4-16x50 10x 1/2 mil dot+","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-16x","brand":"Hawke","tubeDiameterMm":30,"reticleType":"Half Mil Dot"},
+  {"id":"hawke-sidewinder-30-4-16x50","name":"HAWKE SideWinder 30 4-16x50 10x 1/2 mil dot+","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-16x","magnificationCalibration":10,"brand":"Hawke","tubeDiameterMm":30,"reticleType":"Half Mil Dot"},
   {"id":"hawke-vantage-4-12x50","name":"Hawke Vantage 4-12x50 AO Mil Dot","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-12x"},
   {"id":"hawke-frontier-3-9x50","name":"Hawke Frontier 3-9x50 Mil Dot","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"3-9x"},
   {"id":"hawke-airmax-4-12x50","name":"Hawke Airmax 4-12x50 AMX IR","unit":"MIL","clickValue":0.1,"ffpOrSfp":"SFP","magnificationRange":"4-12x"},
