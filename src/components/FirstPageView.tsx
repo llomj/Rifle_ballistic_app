@@ -314,19 +314,23 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       )}
 
-      {/* Info modal — same design and transparency as profile modal */}
+      {/* Info modal — just under the circle, same design and transparency as profile */}
       {showInfo && (
         <div
           className="fixed inset-0 z-[100] overflow-y-auto"
           onClick={() => setShowInfo(false)}
         >
-          <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">
+          <div
+            className="flex flex-col items-center px-4 pb-8 min-h-full"
+            style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          >
             <div
               className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
               onClick={(e) => e.stopPropagation()}
             >
             <h3 className="text-amber-300 font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
-            <p className="text-slate-300 text-xs leading-relaxed mb-4">{t('firstPage.infoText')}</p>
+            <p className="text-slate-300 text-xs leading-relaxed mb-2">{t('firstPage.infoText')}</p>
+            <p className="text-slate-400 text-xs leading-relaxed mb-4">{t('firstPage.infoSwipe')}</p>
             <button
               type="button"
               onClick={() => { playTapSound(); setShowInfo(false); }}

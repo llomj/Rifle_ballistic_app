@@ -376,6 +376,7 @@ export const translations = {
       backToFirst: "Back to first page",
       infoTitle: "Main page — elevation clicks",
       infoText: "Enter distance (m or yd). The ^clicks value shows how many elevation turret clicks you need to dial to hit the target at that range. Uses your rifle profile (Profile → Targets zero distance) and ballistic data.",
+      infoSwipe: "Swipe the screen to access the second calculate page (Distance / Height).",
     },
     infoCalc: {
       distanceTitle: "Calculate distance",
@@ -873,6 +874,7 @@ export const translations = {
       backToFirst: "Retour à la première page",
       infoTitle: "Page principale — clics d'élévation",
       infoText: "Entrez la distance (m ou yd). Le ^clics indique combien de clics de tourelle d'élévation régler pour toucher la cible à cette portée. Utilise votre profil (Profil → Cibles, zéro) et les données balistiques.",
+      infoSwipe: "Glissez l'écran pour accéder à la deuxième page de calcul (Distance / Hauteur).",
     },
     infoCalc: {
       distanceTitle: "Calculer la distance",
