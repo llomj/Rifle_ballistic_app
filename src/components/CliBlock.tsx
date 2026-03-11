@@ -1,15 +1,15 @@
 import React from 'react';
 
-/** CLI-style color roles (syntax highlighting). */
+/** CLI-style color roles (syntax highlighting). Accent roles (yellow, amber, blue, sky) use theme. */
 const roleClass = {
-  yellow: 'text-amber-300',
+  yellow: 'text-theme-accent',
   cyan: 'text-cyan-400',
   white: 'text-slate-300',
   green: 'text-emerald-400',
   red: 'text-red-400',
-  blue: 'text-amber-300',
-  amber: 'text-amber-400/90',
-  sky: 'text-amber-300',
+  blue: 'text-theme-accent',
+  amber: 'text-theme-accent-90',
+  sky: 'text-theme-accent',
 } as const;
 
 type Role = keyof typeof roleClass;

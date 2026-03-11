@@ -51,7 +51,7 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }
           key={starNum}
           className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-500
             ${starNum <= earnedStars
-              ? 'bg-amber-400 text-amber-900 shadow-[0_0_12px_rgba(251,191,36,0.5)] scale-110'
+              ? 'bg-theme-accent text-theme-accent-contrast shadow-theme-accent-30 scale-110'
               : 'bg-slate-800 text-slate-600 border border-white/5'
             }`}
         >
@@ -173,7 +173,7 @@ export const EvolutionHub: React.FC<EvolutionHubProps> = ({ stats, onStartQuiz }
               </div>
               <div className="bg-slate-900/50 rounded-2xl p-4 border border-white/5">
                 <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">{t('hub.lastAccuracy')}</div>
-                <div className={`text-lg font-black ${lastAccuracy !== null ? 'text-amber-400' : 'text-slate-700'}`}>
+                <div className={`text-lg font-black ${lastAccuracy !== null ? 'text-theme-accent' : 'text-slate-700'}`}>
                   {lastAccuracy !== null ? `${lastAccuracy}%` : '---'}
                 </div>
               </div>

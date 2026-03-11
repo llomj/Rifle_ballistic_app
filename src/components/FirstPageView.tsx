@@ -190,13 +190,13 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       <button
         type="button"
         onClick={handleOpenHub}
-        className="relative rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        className="relative rounded-full border-2 border-theme-accent-50 bg-theme-accent-10 flex flex-col items-center justify-center shadow-lg shadow-theme-accent-10 gap-1.5 hover:bg-theme-accent-20 hover:border-theme-accent-70 active:scale-[0.98] transition-all touch-manipulation"
         style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('firstPage.openHub')}
       >
         {/* Fixed center: input+m at true center, clicks above, tap to open below */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-          <span className="font-mono font-bold text-amber-300 tabular-nums text-4xl leading-none -mb-1">
+          <span className="font-mono font-bold text-theme-accent tabular-nums text-4xl leading-none -mb-1">
             {clicksMeters.trim() !== ''
               ? (() => {
                   const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
@@ -223,7 +223,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
           </div>
           {compassMode && heading != null && (
-            <span className="text-sm text-amber-400/90 font-mono tabular-nums mt-2">
+            <span className="text-sm text-theme-accent-90 font-mono tabular-nums mt-2">
               {Math.round(heading)}° · {Math.round(heading * 60)} MOA
             </span>
           )}
@@ -240,7 +240,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
               className="absolute left-1/2 top-1/2 w-px origin-top z-[5]"
               style={{
                 height: isCardinal ? 8 : 4,
-                backgroundColor: 'rgba(251, 191, 36, 0.35)',
+                backgroundColor: 'var(--theme-accent-35)',
                 transform: `translate(-50%, -50%) rotate(${d}deg) translateY(-${radius}px)`,
               }}
             />
@@ -248,7 +248,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         })}
         <div
           className="absolute left-1/2 top-0 w-0.5 h-4 -translate-x-1/2 rounded-b z-[5]"
-          style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}
+          style={{ backgroundColor: 'var(--theme-accent-70)' }}
           aria-hidden
         />
 
@@ -261,7 +261,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           }}
         >
           <span
-            className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+            className="absolute left-1/2 top-2 font-mono font-bold text-theme-accent text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
             aria-hidden
           >
             ^
@@ -274,7 +274,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         <button
           type="button"
           onClick={() => { playTapSound(); setShowProfile(true); }}
-          className="p-2 rounded-full text-slate-500 hover:text-amber-400/80 hover:bg-white/5 transition-colors"
+          className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
           aria-label={t('ballistic.rifleProfile')}
         >
           <i className="fas fa-user text-lg" />
@@ -285,7 +285,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}
-          className="p-2 rounded-full text-slate-500 hover:text-amber-400/80 hover:bg-white/5 transition-colors"
+          className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
           aria-label={t('firstPage.infoTitle')}
         >
           <i className="fas fa-circle-info text-lg" />
@@ -299,15 +299,15 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         >
           <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">
             <div
-              className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
               onClick={(e) => e.stopPropagation()}
             >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-amber-300 font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
+              <h3 className="text-theme-accent font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
               <button
                 type="button"
                 onClick={() => { playTapSound(); setShowProfile(false); }}
-                className="p-1.5 rounded-full text-slate-500 hover:text-amber-400 hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-full text-slate-500 hover:text-theme-accent hover:bg-white/10 transition-colors"
                 aria-label={t('ballistic.configDone')}
               >
                 <i className="fas fa-times text-sm" />
@@ -322,7 +322,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
                   onClick={() => { playTapSound(); loadProfile('default'); }}
                   className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                     currentProfile.id === 'default'
-                      ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                       : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
                   }`}
                 >
@@ -335,7 +335,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
                     onClick={() => { playTapSound(); loadProfile(p.id); }}
                     className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                       currentProfile.id === p.id
-                        ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                        ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                         : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
                     }`}
                   >
@@ -361,16 +361,16 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
             style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
           >
             <div
-              className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
               onClick={(e) => e.stopPropagation()}
             >
-            <h3 className="text-amber-300 font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
+            <h3 className="text-theme-accent font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
             <p className="text-slate-300 text-xs leading-relaxed mb-2">{t('firstPage.infoText')}</p>
             <p className="text-slate-400 text-xs leading-relaxed mb-4">{t('firstPage.infoSwipe')}</p>
             <button
               type="button"
               onClick={() => { playTapSound(); setShowInfo(false); }}
-              className="w-full py-2 rounded-lg bg-amber-500/20 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-colors"
+              className="w-full py-2 rounded-lg bg-theme-accent-20 text-theme-accent text-sm font-medium hover:bg-theme-accent-30 transition-colors"
             >
               {t('ballistic.configDone')}
             </button>

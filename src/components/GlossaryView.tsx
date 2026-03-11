@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { GlossaryItem } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { formatTranslation } from '../translations';
 import { useTranslatedGlossary } from '../hooks/useTranslatedData';
+
+type ExplanationLevel = 'beginner' | 'intermediate' | 'expert';
 
 interface GlossaryViewProps {
   onBack: () => void;
@@ -12,9 +14,19 @@ interface GlossaryViewProps {
 export const GlossaryView: React.FC<GlossaryViewProps> = ({ onBack }) => {
   const { t } = useLanguage();
   const { playTapSound } = useSound();
-  const GLOSSARY = useTranslatedGlossary();
+  const rawGlossary = useTranslatedGlossary();
   const [search, setSearch] = useState('');
   const [selectedTerm, setSelectedTerm] = useState<GlossaryItem | null>(null);
+  const [explanationLevel, setExplanationLevel] = useState<ExplanationLevel>('intermediate');
+
+  const GLOSSARY = useMemo(() => {
+    return [...rawGlossary].sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: 'base' }));
+  }, [rawGlossary]);
+
+  // Reset explanation level when opening a new term
+  useEffect(() => {
+    if (selectedTerm) setExplanationLevel('intermediate');
+  }, [selectedTerm]);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -28,19 +40,28 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onBack }) => {
     };
   }, [selectedTerm]);
 
-  const filteredGlossary = GLOSSARY.filter(item => 
-    item.term.toLowerCase().includes(search.toLowerCase()) ||
-    item.definition.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredGlossary = useMemo(() => {
+    const q = search.toLowerCase();
+    return GLOSSARY.filter(item =>
+      item.term.toLowerCase().includes(q) ||
+      item.definition.toLowerCase().includes(q)
+    );
+  }, [GLOSSARY, search]);
 
-  const levels = Array.from({ length: 10 }, (_, index) => index + 1);
+  const getExplanationForLevel = (item: GlossaryItem, level: ExplanationLevel): string => {
+    switch (level) {
+      case 'beginner': return item.explanationBeginner;
+      case 'intermediate': return item.explanationIntermediate;
+      case 'expert': return item.explanationExpert;
+    }
+  };
 
-  const getLevelsFromRange = (range: string): number[] => {
-    const parts = range.split('-').map((part) => Number(part.trim()));
-    if (parts.length === 1 && !Number.isNaN(parts[0])) return [parts[0]];
-    if (parts.length !== 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) return [];
-    const [start, end] = parts[0] <= parts[1] ? parts : [parts[1], parts[0]];
-    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  const getExampleForLevel = (item: GlossaryItem, level: ExplanationLevel): string => {
+    switch (level) {
+      case 'beginner': return item.exampleBeginner;
+      case 'intermediate': return item.exampleIntermediate;
+      case 'expert': return item.exampleExpert;
+    }
   };
 
   return (
@@ -65,18 +86,29 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onBack }) => {
 
             <div className="space-y-6 sm:space-y-8">
               <div className="space-y-3 pt-2">
-                <span className="inline-block text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                  {formatTranslation(t('glossary.levelConcept'), { range: selectedTerm.levelRange })}
-                </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-white">{selectedTerm.term}</h3>
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <i className="fas fa-book-open text-emerald-400"></i> {t('glossary.inDepthDescription')}
-                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {(['beginner', 'intermediate', 'expert'] as const).map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => { playTapSound(); setExplanationLevel(level); }}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        explanationLevel === level
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-slate-800 text-slate-400 hover:text-white border border-white/10'
+                      }`}
+                    >
+                      {level === 'beginner' && t('glossary.explanationLevelBeginner')}
+                      {level === 'intermediate' && t('glossary.explanationLevelIntermediate')}
+                      {level === 'expert' && t('glossary.explanationLevelExpert')}
+                    </button>
+                  ))}
+                </div>
                 <div className="text-slate-300 leading-relaxed font-medium text-sm sm:text-base whitespace-pre-wrap">
-                  {selectedTerm.detailedDescription}
+                  {getExplanationForLevel(selectedTerm, explanationLevel)}
                 </div>
               </div>
 
@@ -85,8 +117,8 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onBack }) => {
                   <i className="fas fa-code text-emerald-400"></i> {t('glossary.implementationExample')}
                 </h4>
                 <div className="bg-slate-900 rounded-2xl p-4 sm:p-6 border border-white/5 shadow-inner overflow-hidden">
-                  <pre className="code-font text-xs sm:text-sm text-emerald-300 leading-relaxed overflow-x-auto p-1">
-                    <code>{selectedTerm.example}</code>
+                  <pre className="code-font text-xs sm:text-sm text-emerald-300 leading-relaxed overflow-x-auto p-1 whitespace-pre-wrap">
+                    <code>{getExampleForLevel(selectedTerm, explanationLevel)}</code>
                   </pre>
                 </div>
               </div>
@@ -130,63 +162,27 @@ export const GlossaryView: React.FC<GlossaryViewProps> = ({ onBack }) => {
         />
       </div>
 
-      {search === '' ? (
-        <div className="space-y-12">
-          {levels.map(level => {
-            const items = GLOSSARY.filter((item) => getLevelsFromRange(item.levelRange).includes(level));
-            if (items.length === 0) return null;
-            return (
-              <div key={level} className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-xs font-black text-emerald-400 uppercase tracking-[0.2em]">
-                    {formatTranslation(t('glossary.levelSection'), { level })}
-                  </h3>
-                  <div className="h-[1px] flex-1 bg-white/5"></div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map(item => (
-                    <div 
-                      key={item.term} 
-                      onClick={() => { playTapSound(); setSelectedTerm(item); }}
-                      className="glass p-5 rounded-2xl space-y-2 hover:border-emerald-500/40 hover:bg-slate-800/80 transition-all cursor-pointer group active:scale-[0.98]"
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-slate-100 group-hover:text-white transition-colors">{item.term}</h4>
-                        <i className="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all"></i>
-                      </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">{item.definition}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredGlossary.map(item => (
-            <div 
-              key={item.term} 
-              onClick={() => { playTapSound(); setSelectedTerm(item); }}
-              className="glass p-5 rounded-2xl space-y-2 animate-in fade-in duration-300 hover:border-emerald-500/40 cursor-pointer group active:scale-[0.98]"
-            >
-              <div className="flex justify-between items-start">
-                <h4 className="font-bold text-slate-100 group-hover:text-white">{item.term}</h4>
-                <span className="text-[8px] font-black text-slate-500 uppercase px-2 py-0.5 bg-white/5 rounded">
-                  {formatTranslation(t('glossary.levelBadge'), { range: item.levelRange })}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">{item.definition}</p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredGlossary.map(item => (
+          <div 
+            key={item.term} 
+            onClick={() => { playTapSound(); setSelectedTerm(item); }}
+            className="glass p-5 rounded-2xl space-y-2 hover:border-emerald-500/40 hover:bg-slate-800/80 transition-all cursor-pointer group active:scale-[0.98]"
+          >
+            <div className="flex justify-between items-start">
+              <h4 className="font-bold text-slate-100 group-hover:text-white transition-colors">{item.term}</h4>
+              <i className="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all"></i>
             </div>
-          ))}
-          {filteredGlossary.length === 0 && (
-            <div className="col-span-full py-12 text-center text-slate-500">
-              <i className="fas fa-search-minus text-4xl mb-4 block opacity-20"></i>
-              {formatTranslation(t('glossary.noResults'), { search })}
-            </div>
-          )}
-        </div>
-      )}
+            <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">{item.definition}</p>
+          </div>
+        ))}
+        {filteredGlossary.length === 0 && (
+          <div className="col-span-full py-12 text-center text-slate-500">
+            <i className="fas fa-search-minus text-4xl mb-4 block opacity-20"></i>
+            {formatTranslation(t('glossary.noResults'), { search })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

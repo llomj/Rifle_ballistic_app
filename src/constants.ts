@@ -173,13 +173,22 @@ export const LEVELS: LevelInfo[] = [
   }
 ];
 
-// Glossary item type for app use
+// Glossary item type for app use (alphabetical list; no levels)
 export interface GlossaryItem {
   term: string;
   definition: string;
-  levelRange: string;
-  detailedDescription: string;
-  example: string;
+  /** Example at beginner level: simple, few steps. */
+  exampleBeginner: string;
+  /** Example at intermediate level: clear step-by-step. */
+  exampleIntermediate: string;
+  /** Example at expert level: detailed step-by-step with numbers/formulas. */
+  exampleExpert: string;
+  /** Simple, accessible explanation. */
+  explanationBeginner: string;
+  /** More detailed, with terminology. */
+  explanationIntermediate: string;
+  /** In-depth, formulas, edge cases, expert detail. */
+  explanationExpert: string;
 }
 
 // Glossary data for the app (rifle / ballistic terms; master in glossary.md)

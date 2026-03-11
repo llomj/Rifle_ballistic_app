@@ -61,6 +61,9 @@ Wind drift, angle compensation, GPS elevation, shot logging, camera mil measurem
 - **Incremental Updates**: Keep updates as minimal as possible while satisfying requirements.
 - **Strict Scope Control**: When the user asks for a specific change, implement only that request. Do not add extra UI elements, display changes, or additional features unless explicitly requested.
 
+### Settings menu consistency
+- **The settings menu must always show the same options on every page.** Whether the user is on the hub, quiz, learning log, glossary, or any other view, opening the settings gear must display the same menu: Users (saved profiles), Customize (Profile, Ballistics, Environment), Rules (Glossary), Settings (theme, language, sound, haptic, compass, refresh), and Reset App if applicable. Do not hide or show sections based on the current view.
+
 ## 2. Glossary & Educational Integrity
 - **Glossary Source of Truth**: The `glossary.md` file is the master reference.
 - **Consistency Rule**: All definitions must be consistent with `glossary.md`.

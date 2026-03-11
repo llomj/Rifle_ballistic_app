@@ -289,7 +289,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="max-h-[70vh] overflow-y-auto overscroll-contain">
-              <h2 id="table-config-title" className="text-amber-400 font-medium mb-3">
+              <h2 id="table-config-title" className="text-theme-accent font-medium mb-3">
                 {t('ballistic.tableConfig')}
               </h2>
               <p className="text-xs text-slate-500 mb-4">{t('ballistic.configAffectsTurretMildotComp')}</p>
@@ -313,7 +313,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                         setRefMaxStr(String(clicksConfig.maxM));
                       }
                     }}
-                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
                   />
                 </div>
                 <div>
@@ -335,7 +335,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
                         setRefIntervalStr(String(clicksConfig.intervalM));
                       }
                     }}
-                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
+                    className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
                   />
                 </div>
               </div>

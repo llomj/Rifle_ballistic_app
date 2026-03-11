@@ -9,7 +9,12 @@ export const useTranslatedGlossary = (): GlossaryItem[] => {
     return RIFLE_GLOSSARY_FR.map((item) => ({
       ...item,
       definition: normalizeFrenchProse(item.definition),
-      detailedDescription: normalizeFrenchProse(item.detailedDescription),
+      exampleBeginner: normalizeFrenchProse(item.exampleBeginner),
+      exampleIntermediate: normalizeFrenchProse(item.exampleIntermediate),
+      exampleExpert: normalizeFrenchProse(item.exampleExpert),
+      explanationBeginner: normalizeFrenchProse(item.explanationBeginner),
+      explanationIntermediate: normalizeFrenchProse(item.explanationIntermediate),
+      explanationExpert: normalizeFrenchProse(item.explanationExpert),
     }));
   }
   return GLOSSARY;

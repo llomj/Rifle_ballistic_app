@@ -939,7 +939,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 {[1, 2, 3, 4, 5].map(starNum => (
                   <i
                     key={starNum}
-                    className={`fas fa-star text-[8px] ${starNum <= levelStars ? 'text-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.4)]' : 'text-slate-700'}`}
+                    className={`fas fa-star text-[8px] ${starNum <= levelStars ? 'text-theme-accent shadow-theme-accent-10' : 'text-slate-700'}`}
                   ></i>
                 ))}
               </div>
@@ -1195,13 +1195,13 @@ export const QuizView: React.FC<QuizViewProps> = ({
                       const bestPractices = (tRaw(`quiz.codeVersatility.${bestKey}`) as string[] | undefined) || [];
                       return (
                         <div className="space-y-4 pt-4 border-t border-emerald-500/20">
-                          <h5 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <h5 className="text-[10px] font-black text-theme-accent uppercase tracking-[0.2em] flex items-center gap-2">
                             <i className="fas fa-code-branch text-xs"></i>
                             {t('quiz.codeVersatility.title')}
                           </h5>
                           <div className="grid gap-4">
-                            <div className="bg-slate-900/50 rounded-xl p-4 border border-amber-500/20">
-                              <h6 className="text-[9px] font-bold text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <div className="bg-slate-900/50 rounded-xl p-4 border border-theme-accent-20">
+                              <h6 className="text-[9px] font-bold text-theme-accent uppercase tracking-wider mb-2 flex items-center gap-2">
                                 <i className="fas fa-project-diagram text-[10px]"></i>
                                 {t('quiz.codeVersatility.patternVersatility')}
                               </h6>

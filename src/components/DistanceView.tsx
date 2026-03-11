@@ -124,15 +124,15 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
         <button
         type="button"
         onClick={() => { playTapSound(); setInputsSectionExpanded((e) => !e); }}
-        className="relative rounded-full border-2 border-amber-400/50 bg-amber-500/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 gap-1.5 hover:bg-amber-500/20 hover:border-amber-400/70 active:scale-[0.98] transition-all touch-manipulation"
+        className="relative rounded-full border-2 border-theme-accent-50 bg-theme-accent-10 flex flex-col items-center justify-center shadow-lg shadow-theme-accent-10 gap-1.5 hover:bg-theme-accent-20 hover:border-theme-accent-70 active:scale-[0.98] transition-all touch-manipulation"
         style={{ width: CIRCLE_SIZE_PX, height: CIRCLE_SIZE_PX }}
         aria-label={t('ballistic.calculate')}
       >
         {/* Fixed center: calculator + Calculate + chevron */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-          <i className="fas fa-calculator text-amber-300 text-3xl" />
+          <i className="fas fa-calculator text-theme-accent text-3xl" />
           {compassMode && heading != null && (
-            <span className="text-sm text-amber-400/90 font-mono tabular-nums mt-2">
+            <span className="text-sm text-theme-accent-90 font-mono tabular-nums mt-2">
               {Math.round(heading * DEG_TO_MRAD)} mrad
             </span>
           )}
@@ -149,7 +149,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
               className="absolute left-1/2 top-1/2 w-px origin-top z-[5]"
               style={{
                 height: isCardinal ? 8 : 4,
-                backgroundColor: 'rgba(251, 191, 36, 0.35)',
+                backgroundColor: 'var(--theme-accent-35)',
                 transform: `translate(-50%, -50%) rotate(${d}deg) translateY(-${radius}px)`,
               }}
             />
@@ -157,7 +157,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
         })}
         <div
           className="absolute left-1/2 top-0 w-0.5 h-4 -translate-x-1/2 rounded-b z-[5]"
-          style={{ backgroundColor: 'rgba(251, 191, 36, 0.7)' }}
+          style={{ backgroundColor: 'var(--theme-accent-70)' }}
           aria-hidden
         />
 
@@ -170,7 +170,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
           }}
         >
           <span
-            className="absolute left-1/2 top-2 font-mono font-bold text-amber-400 text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+            className="absolute left-1/2 top-2 font-mono font-bold text-theme-accent text-xl -translate-x-1/2 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
             aria-hidden
           >
             ^
@@ -179,7 +179,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
       </button>
       </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md -mt-[8vh] rounded-xl border border-amber-400/30 bg-amber-500/5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+        <div className="w-full max-w-md -mt-[8vh] rounded-xl border border-theme-accent-30 bg-theme-accent-5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetHeightLabelFt') : t('ballistic.targetHeightLabel')}</CliLine>
@@ -190,7 +190,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
                 step={0.01}
                 value={heightStr}
                 onChange={(e) => setHeightStr(e.target.value)}
-                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
+                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-theme-accent font-mono text-base"
                 placeholder={measurement === 'imperial' ? 'e.g. 5.74' : 'e.g. 1.75'}
               />
             </label>
@@ -203,7 +203,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
                 step="0.1"
                 value={valueStr}
                 onChange={(e) => setValueStr(e.target.value)}
-                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-amber-300 font-mono text-base"
+                className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/20 px-4 py-3 text-theme-accent font-mono text-base"
                 placeholder={isMIL ? 'e.g. 4' : 'e.g. 2'}
               />
             </label>
@@ -211,7 +211,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
           <div className="flex gap-3">
             <button
               disabled
-              className="flex-1 py-3 rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-300 font-medium cursor-default text-sm"
+              className="flex-1 py-3 rounded-lg border border-theme-accent-30 bg-theme-accent-10 text-theme-accent font-medium cursor-default text-sm"
             >
               {t('ballistic.hubDistance')}
             </button>
@@ -250,7 +250,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}
-          className="p-2 rounded-full text-slate-500 hover:text-amber-400/80 hover:bg-white/5 transition-colors"
+          className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
           aria-label={t('infoCalc.distanceTitle')}
         >
           <i className="fas fa-circle-info text-lg" />
@@ -260,15 +260,15 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
       {showInfo && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center px-4 bg-black/60" style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }} onClick={() => setShowInfo(false)}>
           <div
-            className="glass rounded-xl p-5 max-w-sm w-full border border-amber-400/20 shadow-xl animate-in zoom-in duration-200"
+            className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-amber-300 font-semibold text-sm mb-2">{t('infoCalc.distanceTitle')}</h3>
+            <h3 className="text-theme-accent font-semibold text-sm mb-2">{t('infoCalc.distanceTitle')}</h3>
             <p className="text-slate-300 text-xs leading-relaxed mb-4">{t('infoCalc.distanceText')}</p>
             <button
               type="button"
               onClick={() => { playTapSound(); setShowInfo(false); }}
-              className="w-full py-2 rounded-lg bg-amber-500/20 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-colors"
+              className="w-full py-2 rounded-lg bg-theme-accent-20 text-theme-accent text-sm font-medium hover:bg-theme-accent-30 transition-colors"
             >
               {t('ballistic.configDone')}
             </button>

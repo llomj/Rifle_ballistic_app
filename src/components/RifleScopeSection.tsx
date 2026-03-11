@@ -110,19 +110,19 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
     : formatTranslation(t('ballistic.zeroAtZoom10x'), { distance: zeroDisplay });
   const measureLine3 = scope?.unit === 'MOA' ? t('ballistic.formulaHeightMoa') : t('ballistic.formulaHeightMils');
 
-  const inputCls = 'rounded bg-black/40 border border-white/20 px-2 py-1.5 text-amber-300 font-mono text-xs min-w-0';
+  const inputCls = 'rounded bg-black/40 border border-white/20 px-2 py-1.5 text-theme-accent font-mono text-xs min-w-0';
   const labelCls = 'text-slate-400 font-mono text-xs shrink-0';
   const numInputCls = 'w-20 min-w-[5rem]'; // same size as other small panels
 
   return (
     <div className="space-y-2">
       <section className="pb-1 border-b border-white/10">
-        <div className="rounded border border-amber-400/30 bg-amber-500/5 px-2 py-1.5 space-y-0.5">
+        <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 space-y-0.5">
           <CliLine role="yellow">{measureLine1}</CliLine>
           <CliLine role="yellow">{measureLine2}</CliLine>
           <CliLine role="yellow">{measureLine3}</CliLine>
         </div>
-        <div className="rounded border border-amber-400/30 bg-amber-500/5 px-2 py-1.5 mt-1">
+        <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 mt-1">
           <CliLine role="yellow">{goodForGameText}</CliLine>
         </div>
       </section>
@@ -328,7 +328,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <span className={`${labelCls} w-28`}>{t('ballistic.recoil')}</span>
-            <div className="rounded border border-amber-400/30 bg-amber-500/5 px-2 py-1.5 flex-1 min-w-0 text-slate-300 font-mono text-xs">
+            <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 flex-1 min-w-0 text-slate-300 font-mono text-xs">
               {recoilJ != null ? (
                 <>
                   {measurement === 'imperial'
@@ -356,7 +356,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               placeholder={bullet ? String(bullet.bcG1) : '—'}
               className={`${inputCls} ${numInputCls}`}
             />
-            {bcDisplay != null && <span className="text-amber-300/80">G1</span>}
+            {bcDisplay != null && <span className="text-theme-accent">G1</span>}
           </div>
           {showSaveAs && (
             <div className="pt-1 border-t border-white/10">
@@ -365,7 +365,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => { playTapSound(); setShowSavePrompt(true); }}
-                    className="py-1.5 px-2 rounded border border-amber-400/50 bg-amber-500/10 text-amber-300 text-xs font-medium"
+                    className="py-1.5 px-2 rounded border border-theme-accent-50 bg-theme-accent-10 text-theme-accent text-xs font-medium"
                   >
                     {t('ballistic.saveProfileAs')}
                   </button>
@@ -390,14 +390,14 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => { playTapSound(); setMeasurement('metric'); }}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${measurement === 'metric' ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${measurement === 'metric' ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30' : 'text-slate-400 hover:text-slate-200'}`}
                   >
                     {t('ballistic.measurementMetric')}
                   </button>
                   <button
                     type="button"
                     onClick={() => { playTapSound(); setMeasurement('imperial'); }}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${measurement === 'imperial' ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30' : 'text-slate-400 hover:text-slate-200'}`}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${measurement === 'imperial' ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30' : 'text-slate-400 hover:text-slate-200'}`}
                   >
                     {t('ballistic.measurementImperial')}
                   </button>

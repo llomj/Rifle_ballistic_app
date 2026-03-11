@@ -112,7 +112,7 @@ export function SearchCombobox<T>({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-xs placeholder-slate-500 ${inputClassName}`}
+        className={`w-full rounded bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-xs placeholder-slate-500 ${inputClassName}`}
       />
       {showList && (
         <ul
@@ -128,7 +128,7 @@ export function SearchCombobox<T>({
                 role="option"
                 aria-selected={i === focusedIndex}
                 className={`cursor-pointer px-3 py-2 text-xs ${
-                  i === focusedIndex ? 'bg-amber-500/20 text-amber-300' : 'text-slate-300 hover:bg-white/5'
+                  i === focusedIndex ? 'bg-theme-accent-20 text-theme-accent' : 'text-slate-300 hover:bg-white/5'
                 }`}
                 onMouseEnter={() => setFocusedIndex(i)}
                 onClick={() => {

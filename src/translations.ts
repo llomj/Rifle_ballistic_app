@@ -116,13 +116,13 @@ export const translations = {
     
     // Glossary View
     glossary: {
-      title: "CLI GLOSSARY",
+      title: "Glossary",
       searchPlaceholder: "Search glossary...",
-      levelConcept: "Level {range} Concept",
-      levelSection: "Level {level}",
-      levelBadge: "Lvl {range}",
-      inDepthDescription: "In-Depth Description",
-      implementationExample: "Implementation Example",
+      explanationLevelBeginner: "Beginner",
+      explanationLevelIntermediate: "Intermediate",
+      explanationLevelExpert: "Expert",
+      inDepthDescription: "Explanation",
+      implementationExample: "Example",
       noResults: "No terms found matching \"{search}\"",
     },
     
@@ -623,13 +623,13 @@ export const translations = {
     
     // Glossary View
     glossary: {
-      title: "GLOSSAIRE CLI",
+      title: "Glossaire",
       searchPlaceholder: "Rechercher dans le glossaire...",
-      levelConcept: "Concept Niveau {range}",
-      levelSection: "Niveau {level}",
-      levelBadge: "Niveau {range}",
-      inDepthDescription: "Description Approfondie",
-      implementationExample: "Exemple d'Implémentation",
+      explanationLevelBeginner: "Débutant",
+      explanationLevelIntermediate: "Intermédiaire",
+      explanationLevelExpert: "Expert",
+      inDepthDescription: "Explication",
+      implementationExample: "Exemple",
       noResults: "Aucun terme trouvé correspondant à \"{search}\"",
     },
     

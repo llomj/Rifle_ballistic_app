@@ -45,7 +45,7 @@ export const QuickRangeView: React.FC = () => {
             value={heightStr}
             onChange={(e) => setHeightStr(e.target.value)}
             placeholder={measurement === 'imperial' ? 'ft' : 'm'}
-            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2.5 text-amber-300 font-mono text-sm placeholder-slate-500 focus:border-amber-400/50 focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2.5 text-theme-accent font-mono text-sm placeholder-slate-500 focus:border-theme-accent-50 focus:outline-none"
           />
         </label>
         <label className="block">
@@ -60,7 +60,7 @@ export const QuickRangeView: React.FC = () => {
             value={valueStr}
             onChange={(e) => setValueStr(e.target.value)}
             placeholder={isMIL ? 'mils' : 'MOA'}
-            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2.5 text-amber-300 font-mono text-sm placeholder-slate-500 focus:border-amber-400/50 focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2.5 text-theme-accent font-mono text-sm placeholder-slate-500 focus:border-theme-accent-50 focus:outline-none"
           />
         </label>
       </div>
@@ -77,7 +77,7 @@ export const QuickRangeView: React.FC = () => {
             <>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.resultHoldover')}</span>
-                <span className="font-mono text-sm text-amber-300">{turret.line.replace(/^Turret:\s*/, '').split(/\s+/)[1] ?? '—'} mrad</span>
+                <span className="font-mono text-sm text-theme-accent">{turret.line.replace(/^Turret:\s*/, '').split(/\s+/)[1] ?? '—'} mrad</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.resultClicks')}</span>

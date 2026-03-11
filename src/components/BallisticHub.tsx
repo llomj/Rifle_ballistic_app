@@ -59,7 +59,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             onClick={() => { playTapSound(); loadProfile('default'); }}
             className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
               currentProfile.id === 'default'
-                ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                 : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
             }`}
           >
@@ -72,7 +72,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               onClick={() => { playTapSound(); loadProfile(p.id); }}
               className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 currentProfile.id === p.id
-                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
@@ -82,7 +82,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           <button
             type="button"
             onClick={() => { playTapSound(); addNewProfile(); }}
-            className="px-3 py-2 rounded-lg border border-dashed border-amber-400/40 text-amber-400/90 text-sm font-medium hover:bg-amber-500/10 hover:border-amber-400/60 transition-colors"
+            className="px-3 py-2 rounded-lg border border-dashed border-theme-accent-50 text-theme-accent-90 text-sm font-medium hover:bg-theme-accent-10 hover:border-theme-accent-70 transition-colors"
           >
             <i className="fas fa-plus mr-1.5" />
             {t('ballistic.addProfile')}
@@ -110,7 +110,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               onClick={() => { playTapSound(); setScopeUnit('MIL'); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 scopeUnit === 'MIL'
-                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
@@ -121,7 +121,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               onClick={() => { playTapSound(); setScopeUnit('MOA'); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 scopeUnit === 'MOA'
-                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
@@ -134,7 +134,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               onClick={() => { playTapSound(); setMeasurement('metric'); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 measurement === 'metric'
-                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
@@ -145,7 +145,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               onClick={() => { playTapSound(); setMeasurement('imperial'); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 measurement === 'imperial'
-                  ? 'border-amber-400/50 bg-amber-500/10 text-amber-300'
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
                   : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
               }`}
             >
@@ -181,7 +181,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   const m = measurement === 'imperial' ? ydToM(raw) : raw;
                   updateCurrentProfile({ zeroDistanceM: Math.max(1, Math.min(2000, m)) });
                 }}
-                className="w-24 rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm"
+                className="w-24 rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm"
               />
               <span className="text-slate-500 text-sm">{measurement === 'imperial' ? 'yd' : 'm'}</span>
             </div>
@@ -214,7 +214,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     if (!Number.isFinite(v)) return;
                     setClicksConfig({ minM: Math.max(0, Math.min(10000, v)) });
                   }}
-                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
                 />
               </div>
               <div>
@@ -228,7 +228,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     if (!Number.isFinite(v)) return;
                     setClicksConfig({ maxM: Math.max(100, Math.min(10000, v)) });
                   }}
-                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
                 />
               </div>
             </div>
@@ -243,7 +243,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   if (!Number.isFinite(v)) return;
                   setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
                 }}
-                className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
+                className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-theme-accent font-mono text-sm"
               />
             </div>
             <CliSep />
@@ -298,7 +298,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 placeholder={t('ballistic.bulletType')}
                 getLabelForId={(id) => caliberOptions.find((c) => c.caliberKey === id)?.caliber ?? id}
                 className="w-full"
-                inputClassName="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm min-w-0"
+                inputClassName="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -316,7 +316,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     })
                   }
                   placeholder="e.g. 180"
-                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-amber-300 font-mono text-sm min-w-0"
+                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0"
                 />
                 <span className="text-slate-500 shrink-0">g</span>
               </div>
@@ -377,7 +377,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="flex items-center gap-2 font-medium">
-            <i className="fas fa-save text-amber-400/80" />
+            <i className="fas fa-save text-theme-accent" />
             {t('ballistic.save')}
           </span>
           <i className="fas fa-chevron-right text-slate-500 text-xs" />

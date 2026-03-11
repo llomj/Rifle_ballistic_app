@@ -2,28 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme accent colors — default yellow; set via data-theme on root */
+/* Theme accent colors — default yellow; set via data-theme on root. Circles/UI use these. */
 [data-theme="yellow"],
 :root {
   --theme-accent: #fbbf24;
+  --theme-accent-dark: #f59e0b;
+  --theme-accent-contrast: #1c1917;
   --theme-accent-muted: rgba(251, 191, 36, 0.2);
+  --theme-accent-5: rgba(251, 191, 36, 0.05);
+  --theme-accent-10: rgba(251, 191, 36, 0.1);
+  --theme-accent-20: rgba(251, 191, 36, 0.2);
+  --theme-accent-30: rgba(251, 191, 36, 0.3);
+  --theme-accent-35: rgba(251, 191, 36, 0.35);
+  --theme-accent-50: rgba(251, 191, 36, 0.5);
+  --theme-accent-70: rgba(251, 191, 36, 0.7);
+  --theme-accent-90: rgba(251, 191, 36, 0.9);
 }
 [data-theme="green"] {
   --theme-accent: #34d399;
+  --theme-accent-dark: #10b981;
+  --theme-accent-contrast: #fff;
   --theme-accent-muted: rgba(52, 211, 153, 0.2);
+  --theme-accent-5: rgba(52, 211, 153, 0.05);
+  --theme-accent-10: rgba(52, 211, 153, 0.1);
+  --theme-accent-20: rgba(52, 211, 153, 0.2);
+  --theme-accent-30: rgba(52, 211, 153, 0.3);
+  --theme-accent-35: rgba(52, 211, 153, 0.35);
+  --theme-accent-50: rgba(52, 211, 153, 0.5);
+  --theme-accent-70: rgba(52, 211, 153, 0.7);
+  --theme-accent-90: rgba(52, 211, 153, 0.9);
 }
 [data-theme="blue"] {
   --theme-accent: #38bdf8;
+  --theme-accent-dark: #0ea5e9;
+  --theme-accent-contrast: #fff;
   --theme-accent-muted: rgba(56, 189, 248, 0.2);
+  --theme-accent-5: rgba(56, 189, 248, 0.05);
+  --theme-accent-10: rgba(56, 189, 248, 0.1);
+  --theme-accent-20: rgba(56, 189, 248, 0.2);
+  --theme-accent-30: rgba(56, 189, 248, 0.3);
+  --theme-accent-35: rgba(56, 189, 248, 0.35);
+  --theme-accent-50: rgba(56, 189, 248, 0.5);
+  --theme-accent-70: rgba(56, 189, 248, 0.7);
+  --theme-accent-90: rgba(56, 189, 248, 0.9);
 }
 [data-theme="magenta"] {
-  --theme-accent: #ff00ff;
+  --theme-accent: #f0f;
+  --theme-accent-dark: #d946ef;
+  --theme-accent-contrast: #fff;
   --theme-accent-muted: rgba(255, 0, 255, 0.2);
+  --theme-accent-5: rgba(255, 0, 255, 0.05);
+  --theme-accent-10: rgba(255, 0, 255, 0.1);
+  --theme-accent-20: rgba(255, 0, 255, 0.2);
+  --theme-accent-30: rgba(255, 0, 255, 0.3);
+  --theme-accent-35: rgba(255, 0, 255, 0.35);
+  --theme-accent-50: rgba(255, 0, 255, 0.5);
+  --theme-accent-70: rgba(255, 0, 255, 0.7);
+  --theme-accent-90: rgba(255, 0, 255, 0.9);
 }
 
 .text-theme-accent { color: var(--theme-accent); }
+.text-theme-accent-90 { color: var(--theme-accent-90); }
 .bg-theme-accent-muted { background-color: var(--theme-accent-muted); }
+.bg-theme-accent-5 { background-color: var(--theme-accent-5); }
+.bg-theme-accent-10 { background-color: var(--theme-accent-10); }
+.bg-theme-accent-20 { background-color: var(--theme-accent-20); }
 .border-theme-accent { border-color: var(--theme-accent); }
+.border-theme-accent-20 { border-color: var(--theme-accent-20); }
+.border-theme-accent-30 { border-color: var(--theme-accent-30); }
+.border-theme-accent-50 { border-color: var(--theme-accent-50); }
+.border-theme-accent-70 { border-color: var(--theme-accent-70); }
+.hover\:bg-theme-accent-20:hover { background-color: var(--theme-accent-20); }
+.hover\:border-theme-accent-70:hover { border-color: var(--theme-accent-70); }
+.shadow-theme-accent-10 { box-shadow: 0 10px 15px -3px var(--theme-accent-20), 0 4px 6px -4px var(--theme-accent-20); }
+.hover\:bg-theme-accent-10:hover { background-color: var(--theme-accent-10); }
+.hover\:bg-theme-accent-20:hover { background-color: var(--theme-accent-20); }
+.hover\:bg-theme-accent-30:hover { background-color: var(--theme-accent-30); }
+.hover\:text-theme-accent:hover { color: var(--theme-accent); }
+.hover\:text-theme-accent-80:hover { color: var(--theme-accent-90); }
+.bg-theme-accent { background-color: var(--theme-accent); color: var(--theme-accent-contrast); }
+.hover\:bg-theme-accent-dark:hover { background-color: var(--theme-accent-dark); }
+.text-theme-accent-contrast { color: var(--theme-accent-contrast); }
+.shadow-theme-accent-30 { box-shadow: 0 25px 50px -12px var(--theme-accent-30); }
+.focus\:border-theme-accent-50:focus { outline: none; border-color: var(--theme-accent-50); }
 
 /* Local fonts: system stack for full offline; optional webfonts via fontsource if added */
 body {

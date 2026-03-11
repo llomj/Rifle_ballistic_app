@@ -32,7 +32,7 @@ const FallingStars: React.FC = () => {
       {stars.map((s) => (
         <div
           key={s.id}
-          className="absolute text-amber-400 animate-fall opacity-80"
+          className="absolute text-theme-accent animate-fall opacity-80"
           style={{
             left: s.left,
             animationDelay: s.delay,
@@ -522,14 +522,14 @@ const App: React.FC = () => {
             )}
             {showResult.starEarned && showResult.starEarned < 5 && (
               <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-amber-500/10 animate-pulse"></div>
+                <div className="absolute inset-0 bg-theme-accent-10 animate-pulse"></div>
               </div>
             )}
 
             {showResult.starEarned ? (
-              <div className="w-28 h-28 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center text-6xl mx-auto shadow-[0_0_40px_rgba(251,191,36,0.3)] border border-amber-400/50 relative">
+              <div className="w-28 h-28 rounded-full bg-theme-accent-20 text-theme-accent flex items-center justify-center text-6xl mx-auto shadow-theme-accent-10 border border-theme-accent-50 relative">
                 <i className="fas fa-star animate-[spin_4s_linear_infinite]"></i>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center border-2 border-amber-400 text-lg font-black text-amber-400 z-10">
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center border-2 border-theme-accent text-lg font-black text-theme-accent z-10">
                   {showResult.starEarned}
                 </div>
               </div>
@@ -542,7 +542,7 @@ const App: React.FC = () => {
             <div className="relative z-10">
               {showResult.starEarned ? (
                 <>
-                  <h2 className="text-3xl font-black mb-2 text-amber-400 bg-clip-text">{t('stars.starEarned')}</h2>
+                  <h2 className="text-3xl font-black mb-2 text-theme-accent bg-clip-text">{t('stars.starEarned')}</h2>
                   <p className="text-slate-300">
                     {formatTranslation(t('stars.youEarnedStars'), { count: showResult.starEarned })}
                   </p>
@@ -558,7 +558,7 @@ const App: React.FC = () => {
             <div className="py-4 px-6 bg-white/5 rounded-2xl flex flex-wrap justify-around gap-4 border border-white/5 relative z-10">
               <div>
                 <div className="text-xs text-slate-500 uppercase font-bold mb-1 tracking-wider">{t('result.evolutionGain')}</div>
-                <div className="text-2xl font-black text-amber-400">+{showResult.score * XP_PER_QUESTION} XP</div>
+                <div className="text-2xl font-black text-theme-accent">+{showResult.score * XP_PER_QUESTION} XP</div>
               </div>
               <div>
                 <div className="text-xs text-slate-500 uppercase font-bold mb-1 tracking-wider">{t('result.successRate')}</div>
@@ -577,7 +577,7 @@ const App: React.FC = () => {
             <button
               onClick={() => { if (soundEnabled) void playUITapSound(); setShowResult(null); }}
               className={`w-full py-4 rounded-2xl font-bold text-white transition-all transform active:scale-95 shadow-xl relative z-10 ${showResult.starEarned
-                  ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 text-amber-950 text-lg'
+                  ? 'bg-theme-accent hover:bg-theme-accent-dark shadow-theme-accent-30 text-theme-accent-contrast text-lg'
                   : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30'
                 }`}
             >
@@ -629,9 +629,9 @@ const App: React.FC = () => {
       {/* Reset App Confirmation Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-8 max-w-md w-full space-y-6 animate-in zoom-in duration-300 shadow-2xl border border-amber-500/20">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl bg-amber-500/20 text-amber-400">
+<div className="glass rounded-3xl p-8 max-w-md w-full space-y-6 animate-in zoom-in duration-300 shadow-2xl border border-theme-accent-20">
+          <div className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl bg-theme-accent-20 text-theme-accent">
                 <i className="fas fa-triangle-exclamation"></i>
               </div>
               <h2 className="text-2xl font-black text-white">
@@ -650,7 +650,7 @@ const App: React.FC = () => {
               </button>
               <button
                 onClick={() => { if (soundEnabled) void playUITapSound(); confirmResetApp(); }}
-                className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 rounded-xl font-bold text-white transition-all shadow-xl shadow-amber-500/30"
+                className="flex-1 py-3 bg-theme-accent hover:bg-theme-accent-dark rounded-xl font-bold text-theme-accent-contrast transition-all shadow-xl shadow-theme-accent-30"
               >
                 {t('resetModal.confirm')}
               </button>

@@ -81,13 +81,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
   const menuItems: MenuItem[] = [];
 
-  // 0. Users — saved profiles (from main page Save), above User
-  if (view === 'hub') {
-    menuItems.push({ type: 'users' } as MenuItem);
-  }
+  // 0. Users — saved profiles (from main page Save). Shown on every view so menu is consistent.
+  menuItems.push({ type: 'users' } as MenuItem);
 
-  // 1. Customize — Profile, calculator, clicks, mildot, Ballistics, Environment (hub only)
-  if ((onNavigateToProfile || onNavigateToBallistic) && view === 'hub') {
+  // 1. Customize — Profile, Ballistics, Environment. Shown on every view so menu is consistent.
+  if (onNavigateToProfile || onNavigateToBallistic) {
     const customizeSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onNavigateToProfile) {
       customizeSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
@@ -155,7 +153,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   onClick={() => { playTapSound(); loadProfile('default'); onClose(); }}
                   className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     currentProfile.id === 'default'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                      ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -169,7 +167,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                       onClick={() => { playTapSound(); loadProfile(p.id); onClose(); }}
                       className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                         currentProfile.id === p.id
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                          ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
@@ -188,7 +186,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
               )}
               <button
                 onClick={() => { playTapSound(); loadProfile('default'); onClose(); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-400/90 border border-dashed border-amber-400/40 hover:bg-amber-500/10 mt-1"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-theme-accent-90 border border-dashed border-theme-accent-50 hover:bg-theme-accent-10 mt-1"
               >
                 <i className="fas fa-plus text-xs" />
                 {t('ballistic.addProfile')}
@@ -418,7 +416,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   onResetApp?.();
                   onClose();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left text-theme-accent hover:bg-theme-accent-10 hover:text-theme-accent"
               >
                 <i className="fas fa-rotate-left text-sm w-5 flex-shrink-0"></i>
                 <span className="text-sm font-medium">{t('settings.resetApp')}</span>
