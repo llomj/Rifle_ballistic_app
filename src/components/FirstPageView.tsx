@@ -264,8 +264,8 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
-      {/* Profile and Info icons — bottom centre, profile above info */}
-      <div className="mt-auto pt-4 pb-2 flex flex-col items-center gap-0.5 w-full">
+      {/* Profile icon — between circle and info icon */}
+      <div className="flex justify-center w-full py-2">
         <button
           type="button"
           onClick={() => { playTapSound(); setShowProfile(true); }}
@@ -274,6 +274,9 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         >
           <i className="fas fa-user text-lg" />
         </button>
+      </div>
+      {/* Info icon — bottom centre */}
+      <div className="mt-auto pt-4 pb-2 flex justify-center w-full">
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}
@@ -287,7 +290,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       {showProfile && (
         <div
           className="fixed inset-0 z-[100] flex flex-col items-center px-4 overflow-y-auto"
-          style={{ backgroundColor: 'rgba(0,0,0,0.009)', paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          style={{ backgroundColor: 'rgba(0,0,0,0.0045)', paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
           onClick={() => setShowProfile(false)}
         >
           <div
