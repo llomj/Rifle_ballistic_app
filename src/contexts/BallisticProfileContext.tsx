@@ -29,7 +29,7 @@ function loadSavedFromStorage(): BallisticProfile[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
+    const valid = parsed.filter(
       (p: unknown): p is BallisticProfile =>
         p != null &&
         typeof p === 'object' &&
@@ -41,6 +41,10 @@ function loadSavedFromStorage(): BallisticProfile[] {
         typeof (p as BallisticProfile).scopeHeightCm === 'number' &&
         typeof (p as BallisticProfile).bulletId === 'string' &&
         typeof (p as BallisticProfile).muzzleVelocityMps === 'number'
+    );
+    // Only show user-added profiles: remove any "test" entries (legacy/demo)
+    return valid.filter(
+      (p) => (p.userName || '').trim().toLowerCase() !== 'test'
     );
   } catch {
     return [];
