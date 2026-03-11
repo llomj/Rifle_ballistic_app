@@ -4,7 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { mToYd, cmToIn } from '../utils/ballisticUnits';
-import { CliSep, CliLine, CliPre, CliTable } from './CliBlock';
+import { CliSep, CliLine, CliTable } from './CliBlock';
 import { generateDistancesFromInterval, MILDOT_ANIMALS, MILDOT_STEEL_PLATES } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
@@ -130,23 +130,6 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
     return `-${value.toFixed(2)}`;
   };
 
-  const compensationLines = useMemo(
-    () =>
-      compensationTable.map((row) => {
-        const distStr =
-          measurement === 'imperial'
-            ? `${Math.round(mToYd(row.distance))} yd`
-            : `${row.distance} m`;
-        const dropStr =
-          measurement === 'imperial'
-            ? `${cmToIn(row.cm).toFixed(1)} in`
-            : `${row.cm} cm`;
-        const holdover = getHoldoverStr(row.cm, row.distance);
-        return `${distStr.padEnd(8)}  ${dropStr.padEnd(10)}  ${holdover} ${scopeUnit === 'MOA' ? 'MOA' : 'mrad'}`;
-      }),
-    [compensationTable, measurement, scopeUnit]
-  );
-
   const clicksHeader = useMemo(
     () => [
       t('ballistic.clicksHeaderDistance'),
@@ -271,8 +254,6 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
           rows={compensationRows}
           colWidths={['7rem', '7rem', '7rem']}
         />
-        <CliSep />
-        <CliPre lines={compensationLines} />
       </CollapsiblePanel>
 
       <CollapsiblePanel
