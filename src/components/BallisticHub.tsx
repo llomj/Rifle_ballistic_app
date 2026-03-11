@@ -29,7 +29,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { currentProfile, updateCurrentProfile, saveCurrentAs } = useBallisticProfile();
+  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrentAs, loadProfile } = useBallisticProfile();
   const { scopeUnit, setScopeUnit, measurement, setMeasurement, clicksConfig, setClicksConfig } = useBallisticSettings();
   const { turretTable } = useTrajectoryTables();
   const [setupExpanded, setSetupExpanded] = useState(false);
@@ -49,7 +49,39 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   return (
     <div className="max-w-lg mx-auto pb-48">
-      {/* User name */}
+      {/* Profiles: Default + saved (same as Settings > Users and Profile modal) */}
+      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
+        <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('settings.users')}</label>
+        <div className="space-y-1.5">
+          <button
+            type="button"
+            onClick={() => { playTapSound(); loadProfile('default'); }}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              currentProfile.id === 'default'
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {t('ballistic.defaultUser')}
+          </button>
+          {savedProfiles.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => { playTapSound(); loadProfile(p.id); }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                currentProfile.id === p.id
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {p.userName}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* User name (profile name; used when saving) */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input

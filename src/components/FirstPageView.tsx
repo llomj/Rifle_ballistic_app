@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
@@ -22,6 +23,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   const { playTapSound } = useSound();
   const { t } = useLanguage();
   const { measurement, compassMode } = useBallisticSettings();
+  const { currentProfile, savedProfiles, loadProfile } = useBallisticProfile();
   const [heading, setHeading] = useState<number | null>(null);
   const { getTurretForExactDistance } = useTrajectoryTables();
   const [clicksMeters, setClicksMeters] = useState('');
@@ -307,6 +309,35 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
               >
                 <i className="fas fa-times text-sm" />
               </button>
+            </div>
+            {/* Profile list: Default + saved (same as Settings > Users) */}
+            <div className="mb-4 space-y-1.5">
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('settings.users')}</p>
+              <button
+                type="button"
+                onClick={() => { playTapSound(); loadProfile('default'); }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentProfile.id === 'default'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {t('ballistic.defaultUser')}
+              </button>
+              {savedProfiles.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => { playTapSound(); loadProfile(p.id); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    currentProfile.id === p.id
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {p.userName}
+                </button>
+              ))}
             </div>
             <RifleScopeSection editable showSaveAs />
             </div>
