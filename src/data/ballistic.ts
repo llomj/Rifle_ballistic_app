@@ -34,6 +34,35 @@ export interface ScopeCatalogItem {
   reticleType?: string;
   /** Optional: zero stop. */
   zeroStop?: boolean;
+  /** Optional: for SFP, magnification at which reticle subtensions are correct (e.g. 10 for 3–9×). */
+  magnificationCalibration?: number;
+}
+
+/**
+ * Parse magnification range string (e.g. "4-16x", "3-9x") and return the maximum magnification.
+ * Used for SFP scopes: measure distance/height at this magnification for correct mil/MOA reading.
+ */
+export function parseMaxMagnificationFromRange(range?: string): number | null {
+  if (!range || typeof range !== 'string') return null;
+  const match = range.match(/(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const a = parseFloat(match[1]);
+  const b = parseFloat(match[2]);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return Math.max(a, b);
+}
+
+/**
+ * Magnification at which to measure distance and height with the scope.
+ * FFP: any magnification (returns null). SFP: calibration mag or max of range (returns number).
+ */
+export function getScopeMagnificationForMeasure(scope: ScopeCatalogItem | undefined): number | null {
+  if (!scope) return null;
+  if (scope.ffpOrSfp === 'FFP') return null;
+  if (scope.magnificationCalibration != null && Number.isFinite(scope.magnificationCalibration)) {
+    return scope.magnificationCalibration;
+  }
+  return parseMaxMagnificationFromRange(scope.magnificationRange);
 }
 
 /** Catalog item: bullet from bullets.json */

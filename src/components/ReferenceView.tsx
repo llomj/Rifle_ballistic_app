@@ -3,9 +3,11 @@ import { formatTranslation } from '../translations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { mToYd, cmToIn } from '../utils/ballisticUnits';
+import { getScopeById } from '../data/catalogs';
+import { getScopeMagnificationForMeasure, generateDistancesFromInterval, MILDOT_ANIMALS, MILDOT_STEEL_PLATES } from '../data/ballistic';
 import { CliSep, CliLine, CliTable } from './CliBlock';
-import { generateDistancesFromInterval, MILDOT_ANIMALS, MILDOT_STEEL_PLATES } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 
@@ -71,6 +73,9 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
   const [refIntervalStr, setRefIntervalStr] = useState('');
   const [mildotHumanHeightStr, setMildotHumanHeightStr] = useState('');
   const { measurement, scopeUnit, clicksConfig, setClicksConfig, mildotConfig, setMildotConfig } = useBallisticSettings();
+  const { currentProfile } = useBallisticProfile();
+  const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
+  const measureMag = useMemo(() => getScopeMagnificationForMeasure(scope), [scope]);
 
   useEffect(() => {
     if (showConfigModal) {
@@ -228,8 +233,11 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         onToggle={() => { playTapSound(); setMildotExpanded((e) => !e); }}
         onTitleClick={() => { playTapSound(); setShowMildotConfigModal(true); }}
       >
-        <CliLine role="yellow">{formatTranslation(t('ballistic.mildotShoulderNote'), { animal: t(mildotAnimal.nameKey), animalM: mildotAnimal.heightM, humanM: mildotConfig.humanHeightM.toFixed(2) })}</CliLine>
-        <CliLine role="yellow">{t('ballistic.mildot10xNote')}</CliLine>
+        <CliSep />
+        <CliLine role="yellow" wrap>
+          {formatTranslation(t('ballistic.mildotShoulderNote'), { animal: t(mildotAnimal.nameKey), animalM: mildotAnimal.heightM, humanM: mildotConfig.humanHeightM.toFixed(2) })}
+        </CliLine>
+        <CliLine role="yellow" wrap>{t('ballistic.mildot10xNote')}</CliLine>
         <CliTable
           columnRoles={['sky', 'white', 'white', 'white']}
           rows={mildotRows}
@@ -244,6 +252,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         onToggle={() => { playTapSound(); setCompensationExpanded((e) => !e); }}
         onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
       >
+        <CliSep />
         <CliLine role="yellow">{t('ballistic.tenPer1000Comp')}</CliLine>
         <CliLine role="white" wrap>{t('ballistic.compProfileNote')}</CliLine>
         <CliSep />
@@ -262,6 +271,16 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         onToggle={() => { playTapSound(); setOpticsExpanded((e) => !e); }}
         onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
       >
+        {scope ? (
+          <>
+            <CliLine role="yellow">
+              {measureMag != null
+                ? formatTranslation(t('ballistic.opticsMeasureAtMag'), { mag: measureMag })
+                : t('ballistic.opticsMeasureAnyMag')}
+            </CliLine>
+            <CliLine role="cyan">{t('ballistic.opticsMeasureNote')}</CliLine>
+          </>
+        ) : null}
         <CliLine role="yellow">{t('ballistic.optics10x')}</CliLine>
         <CliTable
           header={opticsHeader}
