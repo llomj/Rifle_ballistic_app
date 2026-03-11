@@ -182,7 +182,7 @@ export interface GlossaryItem {
   example: string;
 }
 
-// Glossary data for the app (CLI/terminal terms)
-import { CLI_GLOSSARY } from './data/cliGlossary';
-export const GLOSSARY: GlossaryItem[] = CLI_GLOSSARY;
+// Glossary data for the app (rifle / ballistic terms; master in glossary.md)
+import { RIFLE_GLOSSARY } from './data/rifleGlossary';
+export const GLOSSARY: GlossaryItem[] = RIFLE_GLOSSARY;
 

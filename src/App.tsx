@@ -67,15 +67,6 @@ const INITIAL_STATS: UserStats = {
 const QuizView = lazy(() => import('./components/QuizView').then((module) => ({ default: module.QuizView })));
 const HistoryLog = lazy(() => import('./components/HistoryLog').then((module) => ({ default: module.HistoryLog })));
 const GlossaryView = lazy(() => import('./components/GlossaryView').then((module) => ({ default: module.GlossaryView })));
-const OperationsView = lazy(() => import('./components/OperationsView').then((module) => ({ default: module.OperationsView })));
-const MethodsView = lazy(() => import('./components/MethodsView').then((module) => ({ default: module.MethodsView })));
-const FlagsView = lazy(() => import('./components/FlagsView').then((module) => ({ default: module.FlagsView })));
-const FlowView = lazy(() => import('./components/FlowView').then((module) => ({ default: module.FlowView })));
-const WeakSpotDrillsView = lazy(() => import('./components/WeakSpotDrillsView').then((module) => ({ default: module.WeakSpotDrillsView })));
-const PlatformView = lazy(() => import('./components/PlatformView').then((module) => ({ default: module.PlatformView })));
-const IdSearchModal = lazy(() => import('./components/IdSearchModal').then((module) => ({ default: module.IdSearchModal })));
-const IdLogView = lazy(() => import('./components/IdLogView').then((module) => ({ default: module.IdLogView })));
-const LevelSelectorModal = lazy(() => import('./components/LevelSelectorModal').then((module) => ({ default: module.LevelSelectorModal })));
 const BallisticHub = lazy(() => import('./components/BallisticHub').then((m) => ({ default: m.BallisticHub })));
 const FirstPageView = lazy(() => import('./components/FirstPageView').then((m) => ({ default: m.FirstPageView })));
 const DistanceView = lazy(() => import('./components/DistanceView').then((m) => ({ default: m.DistanceView })));
@@ -105,16 +96,7 @@ const App: React.FC = () => {
   const [randomizeTrigger, setRandomizeTrigger] = useState(0);
   const [showRandomModeModal, setShowRandomModeModal] = useState(false);
   const randomMode = stats.randomMode ?? false;
-  const [showOperations, setShowOperations] = useState(false);
-  const [showMethods, setShowMethods] = useState(false);
-  const [showFlags, setShowFlags] = useState(false);
-  const [showFlow, setShowFlow] = useState(false);
-  const [showIdSearch, setShowIdSearch] = useState(false);
-  const [showIdLog, setShowIdLog] = useState(false);
-  const [showLevelSelector, setShowLevelSelector] = useState(false);
-  const [showWeakSpotDrills, setShowWeakSpotDrills] = useState(false);
-  const [showPlatform, setShowPlatform] = useState(false);
-  const [drillLevels, setDrillLevels] = useState<number[] | null>(null);
+  const [drillLevels] = useState<number[] | null>(null);
   const [ballisticView, setBallisticView] = useState<'first' | 'hub' | 'ballistics' | 'distance' | 'height'>('first');
   const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets' | 'environment'>('ballistics');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -166,13 +148,6 @@ const App: React.FC = () => {
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en');
-  };
-
-  const handleLevelChange = (level: number) => {
-    setStats(prev => ({
-      ...prev,
-      currentLevel: level
-    }));
   };
 
   useEffect(() => {
@@ -258,13 +233,6 @@ const App: React.FC = () => {
     setView('quiz');
     setShowResult(null);
     setDrillLevels(null);
-  };
-
-  const handleStartDrill = (levels: number[]) => {
-    setDrillLevels(levels);
-    setShowWeakSpotDrills(false);
-    setView('quiz');
-    setShowResult(null);
   };
 
   const handleRandomModeToggle = () => {
@@ -504,16 +472,7 @@ const App: React.FC = () => {
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}
           onShowGlossary={() => setView('glossary')}
-          onShowMethods={() => setShowMethods(true)}
-          onShowFlags={() => setShowFlags(true)}
-          onShowFlow={() => setShowFlow(true)}
-          onShowIdSearch={() => setShowIdSearch(true)}
-          onShowIdLog={() => setShowIdLog(true)}
           onShowLearningLog={() => setView('log')}
-          onShowOperations={() => setShowOperations(true)}
-          onShowLevelSelector={() => setShowLevelSelector(true)}
-          onShowWeakSpotDrills={() => setShowWeakSpotDrills(true)}
-          onShowPlatform={() => setShowPlatform(true)}
           onToggleLanguage={toggleLanguage}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
@@ -667,76 +626,6 @@ const App: React.FC = () => {
         <p className="mt-1 text-[10px] text-slate-700">SW v15</p>
       </footer>
 
-      {/* Operations View Modal */}
-      {showOperations && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <OperationsView onBack={() => setShowOperations(false)} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Methods View Modal */}
-      {showMethods && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <MethodsView onBack={() => setShowMethods(false)} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Flags View Modal */}
-      {showFlags && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <FlagsView onBack={() => setShowFlags(false)} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Flow View Modal */}
-      {showFlow && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <FlowView onBack={() => setShowFlow(false)} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Weak Spot Drills Modal */}
-      {showWeakSpotDrills && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <WeakSpotDrillsView
-                history={stats.history}
-                onBack={() => setShowWeakSpotDrills(false)}
-                onStartDrill={handleStartDrill}
-              />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Platform (Linux vs macOS) Modal */}
-      {showPlatform && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Suspense fallback={<ViewLoading />}>
-              <PlatformView onBack={() => setShowPlatform(false)} />
-            </Suspense>
-          </div>
-        </div>
-      )}
-
       {/* Reset App Confirmation Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
@@ -807,48 +696,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* ID Search Modal */}
-      {showIdSearch && (
-        <Suspense fallback={<ViewLoading />}>
-          <IdSearchModal
-            onClose={() => setShowIdSearch(false)}
-            onSaveToLog={saveToIdLog}
-          />
-        </Suspense>
-      )}
-
-      {/* ID Log View */}
-      {showIdLog && (
-        <Suspense fallback={<ViewLoading />}>
-          <IdLogView
-            entries={stats.idLog}
-            rifles={stats.idLogRifles ?? []}
-            onClose={() => setShowIdLog(false)}
-            onAddRifle={addIdLogRifle}
-            onRemoveRifle={removeIdLogRifle}
-            onRenameRifle={renameIdLogRifle}
-            onSetRifleUserName={setRifleUserName}
-            onSetEntryRifle={setEntryRifle}
-          />
-        </Suspense>
-      )}
-
-      {/* Level Selector Modal */}
-      {showLevelSelector && (
-        <Suspense fallback={<ViewLoading />}>
-          <LevelSelectorModal
-            currentLevel={stats.currentLevel}
-            highestUnlockedLevel={stats.highestUnlockedLevel}
-            onSelectLevel={handleLevelChange}
-            onClose={() => setShowLevelSelector(false)}
-            acquiredStars={stats.acquiredStars}
-            levelProgress={stats.levelProgress}
-            correctPerLevel={stats.correctPerLevel}
-            randomMode={randomMode}
-            randomModeStats={stats.randomModeStats}
-          />
-        </Suspense>
-      )}
     </div>
     </SoundProvider>
   );

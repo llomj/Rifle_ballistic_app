@@ -17,16 +17,7 @@ interface SettingsMenuProps {
   anchorBottom?: boolean; // When true, menu opens near top-right (mobile-friendly placement)
   onToggleRandomMode?: () => void;
   onShowGlossary?: () => void;
-  onShowMethods?: () => void;
-  onShowFlags?: () => void;
-  onShowFlow?: () => void;
-  onShowIdSearch?: () => void;
-  onShowIdLog?: () => void;
   onShowLearningLog?: () => void;
-  onShowOperations?: () => void;
-  onShowLevelSelector?: () => void;
-  onShowWeakSpotDrills?: () => void;
-  onShowPlatform?: () => void;
   onToggleLanguage?: () => void;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
@@ -58,16 +49,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   anchorBottom = false,
   onToggleRandomMode,
   onShowGlossary,
-  onShowMethods,
-  onShowFlags,
-  onShowFlow,
-  onShowIdSearch,
-  onShowIdLog,
   onShowLearningLog,
-  onShowOperations,
-  onShowLevelSelector,
-  onShowWeakSpotDrills,
-  onShowPlatform,
   onToggleLanguage,
   soundEnabled = true,
   onToggleSound,
@@ -124,81 +106,18 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     });
   }
 
-  // 1. Rules (expandable: Commands, Flags, Flow, Glossary, Operations & Math)
-  if (onShowMethods || onShowFlags || onShowFlow || onShowGlossary || onShowOperations) {
-    const rulesSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
-    if (onShowMethods) {
-      rulesSubItems.push({
-        icon: 'fa-code',
-        label: t('app.methods'),
-        onClick: () => { onShowMethods!(); onClose(); }
-      });
-    }
-    if (onShowFlags) {
-      rulesSubItems.push({
-        icon: 'fa-flag',
-        label: t('app.flags'),
-        onClick: () => { onShowFlags!(); onClose(); }
-      });
-    }
-    if (onShowFlow) {
-      rulesSubItems.push({
-        icon: 'fa-diagram-project',
-        label: t('app.flow'),
-        onClick: () => { onShowFlow(); onClose(); }
-      });
-    }
-    if (onShowGlossary) {
-      rulesSubItems.push({
+  // Rules: Glossary only (rifle/ballistic terms)
+  if (onShowGlossary) {
+    menuItems.push({
+      type: 'rules',
+      icon: 'fa-book',
+      label: t('settings.rules'),
+      subItems: [{
         icon: 'fa-circle-info',
         label: t('app.glossary'),
         onClick: () => { onShowGlossary(); onClose(); }
-      });
-    }
-    if (onShowOperations) {
-      rulesSubItems.push({
-        icon: 'fa-calculator',
-        label: t('app.operations'),
-        onClick: () => { onShowOperations(); onClose(); }
-      });
-    }
-    if (onShowIdSearch) {
-      rulesSubItems.push({
-        icon: 'fa-id-badge',
-        label: t('settings.searchById'),
-        onClick: () => { onShowIdSearch(); onClose(); }
-      });
-    }
-    if (onShowIdLog) {
-      rulesSubItems.push({
-        icon: 'fa-id-badge',
-        label: t('settings.idLog'),
-        onClick: () => { onShowIdLog(); onClose(); }
-      });
-    }
-    if (onShowPlatform) {
-      rulesSubItems.push({
-        icon: 'fa-laptop',
-        label: t('rules.platform'),
-        onClick: () => { onShowPlatform(); onClose(); }
-      });
-    }
-    if (onShowWeakSpotDrills) {
-      rulesSubItems.push({
-        icon: 'fa-bullseye',
-        label: t('rules.weakSpotDrills'),
-        onClick: () => { onShowWeakSpotDrills(); onClose(); }
-      });
-    }
-    rulesSubItems.sort((a, b) => a.label.localeCompare(b.label, language));
-    if (rulesSubItems.length > 0) {
-      menuItems.push({
-        type: 'rules',
-        icon: 'fa-book',
-        label: t('settings.rules'),
-        subItems: rulesSubItems
-      });
-    }
+      }]
+    });
   }
 
   // Settings — Language, Sound, Haptic, Compass, Refresh (general app preferences)
