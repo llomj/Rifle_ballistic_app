@@ -634,7 +634,7 @@ const App: React.FC = () => {
           </Suspense>
         ) : ballisticView === 'ballistics' ? (
           <Suspense fallback={<ViewLoading />}>
-            <ReferenceView onBack={() => setBallisticView('hub')} />
+            <ReferenceView onBack={() => setBallisticView('first')} />
           </Suspense>
         ) : ballisticView === 'distance' ? (
           <Suspense fallback={<ViewLoading />}>

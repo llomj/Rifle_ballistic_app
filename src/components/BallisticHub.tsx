@@ -47,16 +47,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   return (
     <div className="max-w-lg mx-auto pb-48">
-      {/* Back to First Page */}
-      <button
-        type="button"
-        onClick={() => { playTapSound(); onBackToFirstPage(); }}
-        className="mb-4 flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors"
-      >
-        <i className="fas fa-arrow-left text-xs" />
-        {t('firstPage.backToFirst')}
-      </button>
-
       {/* User name */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
@@ -359,6 +349,15 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           <i className="fas fa-chevron-right text-slate-500 text-xs" />
         </button>
       </section>
+
+      {/* Back to Main — large bottom button */}
+      <button
+        type="button"
+        onClick={() => { playTapSound(); onBackToFirstPage(); }}
+        className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
+      >
+        {t('ballistic.backToMain')}
+      </button>
     </div>
   );
 };

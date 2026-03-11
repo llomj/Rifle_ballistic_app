@@ -157,19 +157,6 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
 
   return (
     <div className="space-y-3 animate-in fade-in duration-300 pb-8">
-      <div className="flex items-center justify-between border-b border-white/5 pb-3">
-        <button
-          onClick={() => {
-            playTapSound();
-            onBack();
-          }}
-          className="flex items-center gap-2 text-slate-400 hover:text-white"
-        >
-          <i className="fas fa-arrow-left text-lg" />
-          <span className="text-base font-medium">{t('ballistic.backToHub')}</span>
-        </button>
-      </div>
-
       <CliLine role="yellow">{t('ballistic.referenceTitle')}</CliLine>
       <CliLine role="yellow">{t('ballistic.goodFor')}</CliLine>
       <CliSep />
@@ -275,9 +262,9 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
           playTapSound();
           onBack();
         }}
-        className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-sm"
+        className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
       >
-        {t('ballistic.backToHub')}
+        {t('ballistic.backToMain')}
       </button>
 
       {showConfigModal && (
