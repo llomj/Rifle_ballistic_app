@@ -166,14 +166,12 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.clicksMinM')}</label>
                 <input
                   type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={1000}
-                  step={25}
+                  inputMode="decimal"
                   value={clicksConfig.minM}
                   onChange={(e) => {
-                    const v = Math.round(parseFloat(e.target.value) || 0);
-                    setClicksConfig({ minM: Math.max(0, Math.min(1000, v)) });
+                    const v = parseFloat(e.target.value);
+                    if (!Number.isFinite(v)) return;
+                    setClicksConfig({ minM: Math.max(0, Math.min(10000, v)) });
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
                 />
@@ -182,14 +180,12 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 <label className="text-xs text-slate-400 uppercase tracking-wider block mb-1">{t('ballistic.maxMeters')}</label>
                 <input
                   type="number"
-                  inputMode="numeric"
-                  min={100}
-                  max={3000}
-                  step={50}
+                  inputMode="decimal"
                   value={clicksConfig.maxM}
                   onChange={(e) => {
-                    const v = Math.round(parseFloat(e.target.value) || 800);
-                    setClicksConfig({ maxM: Math.max(100, Math.min(3000, v)) });
+                    const v = parseFloat(e.target.value);
+                    if (!Number.isFinite(v)) return;
+                    setClicksConfig({ maxM: Math.max(100, Math.min(10000, v)) });
                   }}
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
                 />
@@ -199,13 +195,11 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.incrementMeters')}</label>
               <input
                 type="number"
-                inputMode="numeric"
-                min={1}
-                max={2000}
-                step={1}
+                inputMode="decimal"
                 value={clicksConfig.intervalM}
                 onChange={(e) => {
-                  const v = Math.round(parseFloat(e.target.value) || 50);
+                  const v = parseFloat(e.target.value);
+                  if (!Number.isFinite(v)) return;
                   setClicksConfig({ intervalM: Math.max(1, Math.min(2000, v)) });
                 }}
                 className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2 text-amber-300 font-mono text-sm"
