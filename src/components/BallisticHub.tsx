@@ -7,7 +7,7 @@ import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { getUniqueCalibers, getBulletById, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
+import { getUniqueCalibers, getBulletById, getScopeById, getRifleById, getBulletsForCaliberKey, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
 import type { CaliberOption } from '../data/catalogs';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
@@ -70,6 +70,8 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   }, [turretTableExpanded, clicksConfig.minM, clicksConfig.maxM, clicksConfig.intervalM]);
 
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
+  const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
+  const rifle = useMemo(() => getRifleById(currentProfile.rifleId), [currentProfile.rifleId]);
   const caliberOptions = useMemo(() => getUniqueCalibers(), []);
   const selectedCaliberKey = filterCaliberKey ?? bullet?.caliberKey ?? (caliberOptions[0]?.caliberKey ?? '');
 
@@ -364,7 +366,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="text-sm font-medium text-white">{t('ballistic.ammunition')}</span>
-          <i className={`fas fa-chevron-down text-xs transition-transform ${ammunitionExpanded ? 'rotate-180' : ''}`} />
+          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={bullet?.name ?? currentProfile.bulletId}>
+            {(bullet?.name ?? currentProfile.bulletId) || '—'}
+          </span>
+          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${ammunitionExpanded ? 'rotate-180' : ''}`} />
         </button>
         {ammunitionExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
@@ -392,6 +397,26 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   }`}
                 >
                   {c.caliber}
+                </button>
+              ))}
+            </div>
+            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bullet')}</label>
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1">
+              {getBulletsForCaliberKey(selectedCaliberKey).map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => {
+                    updateCurrentProfile({ bulletId: b.id });
+                    playTapSound();
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    currentProfile.bulletId === b.id
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  {b.name}
                 </button>
               ))}
             </div>
@@ -427,7 +452,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="text-sm font-medium text-white">{t('ballistic.scope')}</span>
-          <i className={`fas fa-chevron-down text-xs transition-transform ${scopeExpanded ? 'rotate-180' : ''}`} />
+          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={scope?.name ?? currentProfile.scopeId}>
+            {(scope?.name ?? currentProfile.scopeId) || '—'}
+          </span>
+          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${scopeExpanded ? 'rotate-180' : ''}`} />
         </button>
         {scopeExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
@@ -470,7 +498,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="text-sm font-medium text-white">{t('ballistic.rifle')}</span>
-          <i className={`fas fa-chevron-down text-xs transition-transform ${rifleExpanded ? 'rotate-180' : ''}`} />
+          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={rifle?.name ?? currentProfile.rifleId}>
+            {(rifle?.name ?? currentProfile.rifleId) || '—'}
+          </span>
+          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
         </button>
         {rifleExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
