@@ -8,9 +8,10 @@ import { RifleScopeSection } from './RifleScopeSection';
 import { SearchCombobox } from './SearchCombobox';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { getUniqueCalibers, getBulletById, searchCalibers } from '../data/catalogs';
+import { getUniqueCalibers, getBulletById, searchCalibers, SCOPES, getScopeById, searchScopes } from '../data/catalogs';
 import type { CaliberOption } from '../data/catalogs';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+import type { ScopeCatalogItem } from '../data/ballistic';
 
 export type BallisticView = 'distance' | 'height';
 
@@ -45,6 +46,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [targetsExpanded, setTargetsExpanded] = useState(false);
   const [turretTableExpanded, setTurretTableExpanded] = useState(false);
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
+  const [scopeExpanded, setScopeExpanded] = useState(false);
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
   const [turretMinStr, setTurretMinStr] = useState('');
   const [turretMaxStr, setTurretMaxStr] = useState('');
@@ -404,6 +406,40 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                 <span className="text-slate-500 shrink-0">g</span>
               </div>
             </div>
+          </div>
+        )}
+      </section>
+
+      {/* Scope — list of scopes; selection fills rifle profile scope section */}
+      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setScopeExpanded((e) => !e); }}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+        >
+          <span className="text-sm font-medium text-white">{t('ballistic.scope')}</span>
+          <i className={`fas fa-chevron-down text-xs transition-transform ${scopeExpanded ? 'rotate-180' : ''}`} />
+        </button>
+        {scopeExpanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.scope')}</label>
+            <SearchCombobox<ScopeCatalogItem>
+              items={SCOPES}
+              getItemId={(s) => s.id}
+              getItemLabel={(s) => s.name}
+              value={currentProfile.scopeId}
+              onSelect={(s) => {
+                if (s) {
+                  updateCurrentProfile({ scopeId: s.id });
+                  playTapSound();
+                }
+              }}
+              search={searchScopes}
+              placeholder={t('ballistic.scope')}
+              getLabelForId={(id) => getScopeById(id)?.name ?? id}
+              className="w-full"
+              inputClassName="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0"
+            />
           </div>
         )}
       </section>
