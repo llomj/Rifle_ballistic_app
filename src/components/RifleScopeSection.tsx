@@ -151,7 +151,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemId={(s) => s.id}
               getItemLabel={(s) => s.name}
               value={currentProfile.scopeId}
-              onSelect={(s) => s && updateCurrentProfile({ scopeId: s.id })}
+              onSelect={(s) => s && updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit })}
               search={searchScopes}
               placeholder={t('ballistic.scope')}
               getLabelForId={(id) => getScopeById(id)?.name ?? id}

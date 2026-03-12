@@ -445,7 +445,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   key={s.id}
                   type="button"
                   onClick={() => {
-                    updateCurrentProfile({ scopeId: s.id });
+                    updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -488,7 +488,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   key={r.id}
                   type="button"
                   onClick={() => {
-                    updateCurrentProfile({ rifleId: r.id });
+                    updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${

@@ -76,6 +76,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
   const updateCurrentProfile = useCallback((updates: Partial<BallisticProfile>) => {
     setCurrentProfileState((prev) => {
       const next = { ...prev, ...updates };
+      // When user selects rifle, scope, or ammunition, lock into current profile; persist if saved.
       if (prev.id !== 'default') {
         setSavedProfiles((list) =>
           list.map((p) =>
