@@ -216,7 +216,9 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               min="0"
               step={measurement === 'imperial' ? 0.01 : 0.1}
               value={currentProfile.rimDiametersMm != null
-                ? (measurement === 'imperial' ? mmToIn(currentProfile.rimDiametersMm) : currentProfile.rimDiametersMm)
+                ? (measurement === 'imperial'
+                  ? Math.round(mmToIn(currentProfile.rimDiametersMm) * 100) / 100
+                  : currentProfile.rimDiametersMm)
                 : ''}
               onChange={(e) => {
                 if (e.target.value === '') {
@@ -238,7 +240,9 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               min="0"
               step={measurement === 'imperial' ? 0.01 : 0.1}
               value={currentProfile.caseLengthMm != null
-                ? (measurement === 'imperial' ? mmToIn(currentProfile.caseLengthMm) : currentProfile.caseLengthMm)
+                ? (measurement === 'imperial'
+                  ? Math.round(mmToIn(currentProfile.caseLengthMm) * 100) / 100
+                  : currentProfile.caseLengthMm)
                 : ''}
               onChange={(e) => {
                 if (e.target.value === '') {
@@ -260,7 +264,9 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               min="0"
               step={measurement === 'imperial' ? 0.01 : 0.1}
               value={currentProfile.overallLengthMm != null
-                ? (measurement === 'imperial' ? mmToIn(currentProfile.overallLengthMm) : currentProfile.overallLengthMm)
+                ? (measurement === 'imperial'
+                  ? Math.round(mmToIn(currentProfile.overallLengthMm) * 100) / 100
+                  : currentProfile.overallLengthMm)
                 : ''}
               onChange={(e) => {
                 if (e.target.value === '') {

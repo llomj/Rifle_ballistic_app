@@ -64,7 +64,7 @@ export function formatScopeHeight(cm: number, measurement: MeasurementSystem): s
 export function formatBarrelLength(cm: number, measurement: MeasurementSystem): string {
   if (measurement === 'imperial') {
     const inVal = cmToIn(cm);
-    return `${inVal.toFixed(1)} in`;
+    return `${inVal.toFixed(2)} in`;
   }
   return `${cm.toFixed(1)} cm`;
 }
