@@ -421,6 +421,7 @@ export const translations = {
     firstPage: {
       openHub: "Open profile",
       tapToOpen: "Tap to open",
+      typeDistanceHere: "Type distance",
       backToFirst: "Back to first page",
       elevationToggle: "Toggle elevation (GPS altitude)",
       infoTitle: "Main page — elevation clicks",
@@ -432,6 +433,7 @@ export const translations = {
       distanceText: "Enter target height and mils (or MOA) from your reticle. The app calculates the distance to the target and the elevation clicks needed.",
       heightTitle: "Calculate height",
       heightText: "Enter distance and mils (or MOA) from your reticle. The app calculates the target height subtended in your scope.",
+      pressHere: "Press here",
     },
     targets: {
       human: "Human",
@@ -975,6 +977,7 @@ export const translations = {
     firstPage: {
       openHub: "Ouvrir le profil",
       tapToOpen: "Appuyer pour ouvrir",
+      typeDistanceHere: "Saisir la distance",
       elevationToggle: "Activer/désactiver l'altitude (GPS)",
       backToFirst: "Retour à la première page",
       infoTitle: "Page principale — clics d'élévation",
@@ -986,6 +989,7 @@ export const translations = {
       distanceText: "Entrez la hauteur de la cible et les mils (ou MOA) de votre réticule. L'app calcule la distance à la cible et les clics d'élévation nécessaires.",
       heightTitle: "Calculer la hauteur",
       heightText: "Entrez la distance et les mils (ou MOA) de votre réticule. L'app calcule la hauteur de la cible dans votre lunette.",
+      pressHere: "Appuyer ici",
     },
     targets: {
       human: "Homme",

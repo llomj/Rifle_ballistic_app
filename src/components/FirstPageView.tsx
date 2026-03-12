@@ -218,10 +218,10 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
               inputMode="decimal"
               value={clicksMeters}
               onChange={(e) => setClicksMeters(e.target.value)}
-              placeholder={measurement === 'imperial' ? 'yd' : 'm'}
+              placeholder={t('firstPage.typeDistanceHere')}
               className="w-28 bg-transparent border-none text-center font-mono text-4xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0"
             />
-            <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? 'y' : 'm'}</span>
+            <span className="font-mono text-3xl text-slate-400">{measurement === 'imperial' ? ' yd' : ' m'}</span>
           </div>
           {compassMode && heading != null && (
             <span className="text-sm text-theme-accent-90 font-mono tabular-nums mt-2">
