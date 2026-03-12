@@ -396,7 +396,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     e.stopPropagation();
                     e.preventDefault();
                     updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
-                    setRifleFilterQuery(r.name);
+                    setRifleFilterQuery('');
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -543,7 +543,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     e.stopPropagation();
                     e.preventDefault();
                     updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
-                    setScopeFilterQuery(s.name);
+                    setScopeFilterQuery('');
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${

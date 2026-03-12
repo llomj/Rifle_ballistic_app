@@ -203,7 +203,7 @@ This pulls the panel UP by 20% of the viewport height, positioning it right at t
 
 **Problem:** In BallisticHub, when opening the list via the chevron (v) for Ammunition, Scope, or Rifle, selecting an option could leave the UI "stuck" and the list would disappear, preventing re-selection.
 
-**Solution (updated):** (1) Call `e.stopPropagation()` and `e.preventDefault()` on list item button clicks so no parent swallows the click. (2) Add `onClick={(e) => e.stopPropagation()}` on the scrollable list container. (3) **Do NOT close the panel after selection** — do not call `setScopeExpanded(false)`, `setRifleExpanded(false)`, or `setAmmunitionExpanded(false)`. The rifle and scope lists must **always persist** when the section is expanded so the user can re-select another rifle or scope at any time.
+**Solution (updated):** (1) Call `e.stopPropagation()` and `e.preventDefault()` on list item button clicks so no parent swallows the click. (2) Add `onClick={(e) => e.stopPropagation()}` on the scrollable list container. (3) **Do NOT close the panel after selection** — do not call `setScopeExpanded(false)`, `setRifleExpanded(false)`, or `setAmmunitionExpanded(false)`. (4) **Clear the filter on select** — when user selects a rifle or scope, call `setRifleFilterQuery('')` and `setScopeFilterQuery('')` (not the item name). The list then shows all rifles/scopes again so the user can re-select without clearing the search bar manually.
 
 **Panel order:** Turret table → Rifle → Ammunition → Scope (rifle first so ammunition can filter by rifle caliber).
 
