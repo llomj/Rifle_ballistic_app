@@ -26,7 +26,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { scopeUnit, measurement, compassMode } = useBallisticSettings();
+  const { scopeUnit, measurement, compassMode, elevationEnabled, elevationData } = useBallisticSettings();
   const [heading, setHeading] = useState<number | null>(null);
   const [distanceStr, setDistanceStr] = useState('');
   const [valueStr, setValueStr] = useState('');
@@ -132,6 +132,17 @@ export const HeightView: React.FC<HeightViewProps> = ({
           {compassMode && heading != null && (
             <span className="text-sm text-theme-accent-90 font-mono tabular-nums mt-2">
               {Math.round(heading * DEG_TO_MRAD)} mrad
+            </span>
+          )}
+          {elevationEnabled && (
+            <span className="text-xs text-theme-accent-80 font-mono tabular-nums mt-1">
+              {elevationData.altitudeM != null
+                ? measurement === 'imperial'
+                  ? `${Math.round(mToFt(elevationData.altitudeM))} ft`
+                  : `${Math.round(elevationData.altitudeM)} m`
+                : elevationData.error
+                  ? '—'
+                  : '…'}
             </span>
           )}
           <i className={`fas fa-chevron-${inputsSectionExpanded ? 'up' : 'down'} text-slate-500 text-[10px] mt-0.5`} />

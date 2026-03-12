@@ -422,6 +422,7 @@ export const translations = {
       openHub: "Open profile",
       tapToOpen: "Tap to open",
       backToFirst: "Back to first page",
+      elevationToggle: "Toggle elevation (GPS altitude)",
       infoTitle: "Main page — elevation clicks",
       infoText: "Enter distance (m or yd). The ^clicks value shows how many elevation turret clicks you need to dial to hit the target at that range. Uses your user profile (Profile → Targets zero distance) and ballistic data.",
       infoSwipe: "Swipe the screen to access the second calculate page (Distance / Height).",
@@ -974,6 +975,7 @@ export const translations = {
     firstPage: {
       openHub: "Ouvrir le profil",
       tapToOpen: "Appuyer pour ouvrir",
+      elevationToggle: "Activer/désactiver l'altitude (GPS)",
       backToFirst: "Retour à la première page",
       infoTitle: "Page principale — clics d'élévation",
       infoText: "Entrez la distance (m ou yd). Le ^clics indique combien de clics de tourelle d'élévation régler pour toucher la cible à cette portée. Utilise votre profil utilisateur (Profil → Cibles, zéro) et les données balistiques.",

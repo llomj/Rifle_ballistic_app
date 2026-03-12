@@ -25,6 +25,8 @@ interface SettingsMenuProps {
   onToggleHaptic?: () => void;
   compassEnabled?: boolean;
   onToggleCompass?: () => void;
+  elevationEnabled?: boolean;
+  onToggleElevation?: () => void;
   onResetApp?: () => void;
 }
 
@@ -57,6 +59,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onToggleHaptic,
   compassEnabled = false,
   onToggleCompass,
+  elevationEnabled = false,
+  onToggleElevation,
   onResetApp
 }) => {
   const { t, language } = useLanguage();
@@ -342,6 +346,20 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   </div>
                   <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${compassEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
                     <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${compassEnabled ? 'left-5' : 'left-0.5'}`} />
+                  </div>
+                </button>
+              )}
+              {onToggleElevation && (
+                <button
+                  onClick={() => { playTapSound(); onToggleElevation(); }}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex items-center gap-3">
+                    <i className="fas fa-mountain-sun text-sm w-5 flex-shrink-0" />
+                    <span className="text-sm font-medium">{t('ballistic.altitude')}</span>
+                  </div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${elevationEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${elevationEnabled ? 'left-5' : 'left-0.5'}`} />
                   </div>
                 </button>
               )}

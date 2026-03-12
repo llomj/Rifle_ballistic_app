@@ -7,6 +7,7 @@ import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+import { mToFt } from '../utils/ballisticUnits';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -23,7 +24,7 @@ const WHEEL_SWIPE_THRESHOLD = 50; // Accumulated |deltaX| for trackpad two-finge
 export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenCalculate }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { measurement, compassMode } = useBallisticSettings();
+  const { measurement, compassMode, elevationEnabled, setElevationEnabled, elevationData } = useBallisticSettings();
   const { currentProfile, savedProfiles, loadProfile } = useBallisticProfile();
   const [heading, setHeading] = useState<number | null>(null);
   const { getTurretForExactDistance } = useTrajectoryTables();
@@ -227,6 +228,17 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
               {Math.round(heading)}° · {Math.round(heading * 60)} MOA
             </span>
           )}
+          {elevationEnabled && (
+            <span className="text-xs text-theme-accent-80 font-mono tabular-nums mt-1">
+              {elevationData.altitudeM != null
+                ? measurement === 'imperial'
+                  ? `${Math.round(mToFt(elevationData.altitudeM))} ft`
+                  : `${Math.round(elevationData.altitudeM)} m`
+                : elevationData.error
+                  ? '—'
+                  : '…'}
+            </span>
+          )}
           <span className="absolute left-1/2 -translate-x-1/2 text-[10px] text-slate-500 uppercase tracking-wider" style={{ bottom: 44 }}>{t('firstPage.tapToOpen')}</span>
         </div>
 
@@ -269,7 +281,18 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
-      {/* Profile (far left) and Info (far right) icons — same line */}
+      {/* Elevation toggle (under compass), Profile and Info icons */}
+      <div className="mt-2 flex items-center justify-center gap-1">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setElevationEnabled(!elevationEnabled); }}
+          className={`p-2 rounded-full transition-colors ${elevationEnabled ? 'text-theme-accent bg-theme-accent-20' : 'text-slate-500 hover:text-theme-accent-80 hover:bg-white/5'}`}
+          aria-label={t('firstPage.elevationToggle')}
+          aria-pressed={elevationEnabled}
+        >
+          <i className="fas fa-mountain-sun text-lg" />
+        </button>
+      </div>
       <div className="mt-auto pt-4 pb-2 flex justify-between items-center w-full px-2">
         <button
           type="button"

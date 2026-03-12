@@ -47,7 +47,13 @@ interface BallisticSettingsState {
   clicksConfig: ClicksConfig;
   mildotConfig: MildotConfig;
   compassMode: boolean;
+  elevationEnabled: boolean;
   theme: ThemeId;
+}
+
+export interface ElevationData {
+  altitudeM: number | null;
+  error: string | null;
 }
 
 interface BallisticSettingsContextType {
@@ -56,12 +62,16 @@ interface BallisticSettingsContextType {
   clicksConfig: ClicksConfig;
   mildotConfig: MildotConfig;
   compassMode: boolean;
+  elevationEnabled: boolean;
+  elevationData: ElevationData;
   theme: ThemeId;
   setMeasurement: (m: MeasurementSystem) => void;
   setScopeUnit: (u: ScopeUnit) => void;
   setClicksConfig: (c: Partial<ClicksConfig>) => void;
   setMildotConfig: (c: Partial<MildotConfig>) => void;
   setCompassMode: (on: boolean) => void;
+  setElevationEnabled: (on: boolean) => void;
+  setElevationData: (data: ElevationData) => void;
   setTheme: (t: ThemeId) => void;
 }
 
@@ -71,12 +81,14 @@ const defaultState: BallisticSettingsState = {
   clicksConfig: DEFAULT_CLICKS_CONFIG,
   mildotConfig: DEFAULT_MILDOT_CONFIG,
   compassMode: true,
+  elevationEnabled: false,
   theme: 'yellow',
 };
 
 const BallisticSettingsContext = createContext<BallisticSettingsContextType | undefined>(undefined);
 
 export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [elevationData, setElevationData] = useState<ElevationData>({ altitudeM: null, error: null });
   const [state, setState] = useState<BallisticSettingsState>(() => {
     try {
       const raw = localStorage.getItem(BALLISTIC_SETTINGS_STORAGE_KEY);
@@ -92,6 +104,7 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
             }
           : defaultState.clicksConfig;
         const compassMode = parsed.compassMode === true || parsed.compassMode === false ? parsed.compassMode : defaultState.compassMode;
+        const elevationEnabled = parsed.elevationEnabled === true || parsed.elevationEnabled === false ? parsed.elevationEnabled : defaultState.elevationEnabled;
         const theme = ['yellow', 'green', 'blue', 'magenta'].includes(parsed.theme) ? parsed.theme : defaultState.theme;
         const mildotConfig: MildotConfig = parsed.mildotConfig && typeof parsed.mildotConfig.animalId === 'string' && typeof parsed.mildotConfig.humanHeightM === 'number'
           ? {
@@ -111,7 +124,7 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
                   : defaultState.mildotConfig.plateHeightM,
             }
           : defaultState.mildotConfig;
-        return { measurement, scopeUnit, clicksConfig, mildotConfig, compassMode, theme };
+        return { measurement, scopeUnit, clicksConfig, mildotConfig, compassMode, elevationEnabled, theme };
       }
     } catch (_) {}
     return defaultState;
@@ -153,9 +166,44 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
   const setCompassMode = (compassMode: boolean) => {
     setState((prev) => ({ ...prev, compassMode }));
   };
+  const setElevationEnabled = (elevationEnabled: boolean) => {
+    setState((prev) => ({ ...prev, elevationEnabled }));
+  };
   const setTheme = (theme: ThemeId) => {
     setState((prev) => ({ ...prev, theme }));
   };
+
+  // When elevation is enabled, get altitude from device GPS (works offline).
+  useEffect(() => {
+    if (!state.elevationEnabled) {
+      setElevationData({ altitudeM: null, error: null });
+      return;
+    }
+    if (!navigator.geolocation) {
+      setElevationData({ altitudeM: null, error: 'Unavailable' });
+      return;
+    }
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const alt = pos.coords.altitude;
+        setElevationData({
+          altitudeM: typeof alt === 'number' && !Number.isNaN(alt) ? alt : null,
+          error: null,
+        });
+      },
+      (err) => {
+        const msg =
+          err.code === 1 ? 'Permission denied' :
+          err.code === 2 ? 'Position unavailable' :
+          err.code === 3 ? 'Timeout' : 'Error';
+        setElevationData({ altitudeM: null, error: msg });
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 }
+    );
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [state.elevationEnabled]);
 
   return (
     <BallisticSettingsContext.Provider
@@ -165,12 +213,16 @@ export const BallisticSettingsProvider: React.FC<{ children: ReactNode }> = ({ c
         clicksConfig: state.clicksConfig,
         mildotConfig: state.mildotConfig,
         compassMode: state.compassMode,
+        elevationEnabled: state.elevationEnabled,
+        elevationData,
         theme: state.theme,
         setMeasurement,
         setScopeUnit,
         setClicksConfig,
         setMildotConfig,
         setCompassMode,
+        setElevationEnabled,
+        setElevationData,
         setTheme,
       }}
     >

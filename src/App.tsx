@@ -81,7 +81,7 @@ const ViewLoading: React.FC = () => (
 
 const App: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { compassMode, setCompassMode, theme } = useBallisticSettings();
+  const { compassMode, setCompassMode, elevationEnabled, setElevationEnabled, theme } = useBallisticSettings();
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [view, setView] = useState<'hub' | 'quiz' | 'log' | 'glossary'>('hub');
   const [showResult, setShowResult] = useState<{
@@ -480,6 +480,8 @@ const App: React.FC = () => {
           onToggleHaptic={toggleHaptic}
           compassEnabled={compassMode}
           onToggleCompass={handleToggleCompass}
+          elevationEnabled={elevationEnabled}
+          onToggleElevation={() => setElevationEnabled(!elevationEnabled)}
           onResetApp={() => setShowResetModal(true)}
       />
 
