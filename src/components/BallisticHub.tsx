@@ -7,7 +7,7 @@ import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { getUniqueCalibers, getBulletById, searchCalibers, searchScopes } from '../data/catalogs';
+import { getUniqueCalibers, getBulletById, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
 import type { CaliberOption } from '../data/catalogs';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
@@ -45,7 +45,9 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [turretTableExpanded, setTurretTableExpanded] = useState(false);
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [scopeExpanded, setScopeExpanded] = useState(false);
+  const [rifleExpanded, setRifleExpanded] = useState(false);
   const [scopeFilterQuery, setScopeFilterQuery] = useState('');
+  const [rifleFilterQuery, setRifleFilterQuery] = useState('');
   const [caliberFilterQuery, setCaliberFilterQuery] = useState('');
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
   const [turretMinStr, setTurretMinStr] = useState('');
@@ -453,6 +455,49 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   }`}
                 >
                   {s.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Rifle — list of rifles; selection fills rifle profile */}
+      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+        >
+          <span className="text-sm font-medium text-white">{t('ballistic.rifle')}</span>
+          <i className={`fas fa-chevron-down text-xs transition-transform ${rifleExpanded ? 'rotate-180' : ''}`} />
+        </button>
+        {rifleExpanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.rifle')}</label>
+            <input
+              type="text"
+              value={rifleFilterQuery}
+              onChange={(e) => setRifleFilterQuery(e.target.value)}
+              placeholder={t('ballistic.rifle')}
+              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+            />
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1">
+              {searchRifles(rifleFilterQuery, 200).map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => {
+                    updateCurrentProfile({ rifleId: r.id });
+                    playTapSound();
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    currentProfile.rifleId === r.id
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  {r.name}
                 </button>
               ))}
             </div>
