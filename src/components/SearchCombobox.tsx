@@ -119,6 +119,8 @@ export function SearchCombobox<T>({
           ref={listRef}
           className="absolute z-50 mt-1 max-h-[50vh] min-h-[8rem] w-full overflow-y-auto overscroll-contain rounded border border-white/20 bg-slate-900 py-1 shadow-lg touch-pan-y"
           style={{ WebkitOverflowScrolling: 'touch' }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           {filtered.length === 0 ? (
             <li className="px-3 py-2 text-slate-500 text-xs">No results</li>
