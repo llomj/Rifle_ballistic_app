@@ -382,12 +382,14 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               placeholder={t('ballistic.bulletType')}
               className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24">
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
               {searchCalibers(caliberFilterQuery, 200).map((c) => (
                 <button
                   key={c.caliberKey}
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     setFilterCaliberKey(c.caliberKey);
                     playTapSound();
                   }}
@@ -409,14 +411,17 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               placeholder={t('ballistic.bullet')}
               className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24">
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
               {searchBullets(bulletFilterQuery, selectedCaliberKey, 200).map((b) => (
                 <button
                   key={b.id}
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     updateCurrentProfile({ bulletId: b.id });
                     setBulletFilterQuery(b.name);
+                    setAmmunitionExpanded(false);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -476,14 +481,17 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               placeholder={t('ballistic.scope')}
               className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24">
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
               {searchScopes(scopeFilterQuery, 200).map((s) => (
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
                     setScopeFilterQuery(s.name);
+                    setScopeExpanded(false);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -523,14 +531,17 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               placeholder={t('ballistic.rifle')}
               className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24">
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
               {searchRifles(rifleFilterQuery, 200).map((r) => (
                 <button
                   key={r.id}
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
                     setRifleFilterQuery(r.name);
+                    setRifleExpanded(false);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${

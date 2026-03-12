@@ -197,3 +197,11 @@ The workflow (`.github/workflows/deploy.yml`) must match the **last successful r
 
 This pulls the panel UP by 20% of the viewport height, positioning it right at the bottom edge of the circle. Adjust the percentage as needed for the desired visual overlap.
 
+---
+
+## March 2026 — Ammunition / Scope / Rifle list selection (BallisticHub)
+
+**Problem:** In BallisticHub, when opening the list via the chevron (v) for Ammunition, Scope, or Rifle, selecting an option could leave the UI "stuck" and the list would disappear without the selection applying (especially Scope and Rifle).
+
+**Solution:** (1) Call `e.stopPropagation()` and `e.preventDefault()` on list item button clicks so no parent or document handler can swallow or interfere with the click. (2) Add `onClick={(e) => e.stopPropagation()}` on the scrollable list container div so any tap inside the dropdown is contained. (3) After applying the selection, explicitly close the panel: `setScopeExpanded(false)`, `setRifleExpanded(false)`, `setAmmunitionExpanded(false)` (for bullet selection). The list then closes in a controlled way after the profile update has been applied.
+
