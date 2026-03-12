@@ -3,6 +3,8 @@ import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
+import { getScopeById } from '../data/catalogs';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
@@ -26,6 +28,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
+  const { currentProfile } = useBallisticProfile();
   const { scopeUnit, measurement, compassMode, elevationEnabled, elevationData } = useBallisticSettings();
   const [heading, setHeading] = useState<number | null>(null);
   const [heightStr, setHeightStr] = useState('');
@@ -33,20 +36,22 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   const [inputsSectionExpanded, setInputsSectionExpanded] = useState(false);
 
   const { getTurretRowForDistance } = useTrajectoryTables();
+  const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
+  const scopeUnitForFormula = scope?.unit === 'MIL' || scope?.unit === 'MOA' ? scope.unit : scopeUnit;
   const parseNum = (s: string) => parseFloat(String(s).replace(',', '.')) || 0;
   const heightRaw = useMemo(() => parseNum(heightStr), [heightStr]);
   const height = useMemo(() => (measurement === 'imperial' ? ftToM(heightRaw) : heightRaw), [heightRaw, measurement]);
   const value = useMemo(() => parseNum(valueStr), [valueStr]);
   const distance = useMemo(() => {
     if (height <= 0 || value <= 0) return null;
-    return distanceFromHeight(height, value, scopeUnit);
-  }, [height, value, scopeUnit]);
+    return distanceFromHeight(height, value, scopeUnitForFormula);
+  }, [height, value, scopeUnitForFormula]);
   const turret = useMemo(
     () => (distance != null ? getTurretRowForDistance(distance) : null),
     [distance, getTurretRowForDistance]
   );
   const result = distance != null ? Math.round(distance * 1000) / 1000 : null;
-  const isMIL = scopeUnit === 'MIL';
+  const isMIL = scopeUnitForFormula === 'MIL';
   const reticleCm = result != null && value > 0
     ? isMIL ? Math.round((result / 10) * 100) / 100 : Math.round((2.91 * result / 100) * 100) / 100
     : null;

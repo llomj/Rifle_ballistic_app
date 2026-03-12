@@ -3,6 +3,8 @@ import { useSwipeLeft } from '../hooks/useSwipeLeft';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
+import { getScopeById } from '../data/catalogs';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
@@ -26,6 +28,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
+  const { currentProfile } = useBallisticProfile();
   const { scopeUnit, measurement, compassMode, elevationEnabled, elevationData } = useBallisticSettings();
   const [heading, setHeading] = useState<number | null>(null);
   const [distanceStr, setDistanceStr] = useState('');
@@ -33,11 +36,13 @@ export const HeightView: React.FC<HeightViewProps> = ({
   const [inputsSectionExpanded, setInputsSectionExpanded] = useState(false);
 
   const { getTurretRowForDistance } = useTrajectoryTables();
+  const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
+  const scopeUnitForFormula = scope?.unit === 'MIL' || scope?.unit === 'MOA' ? scope.unit : scopeUnit;
   const parseNum = (s: string) => parseFloat(String(s).replace(',', '.')) || 0;
   const distanceRaw = useMemo(() => parseNum(distanceStr), [distanceStr]);
   const distance = useMemo(() => (measurement === 'imperial' ? ydToM(distanceRaw) : distanceRaw), [distanceRaw, measurement]);
   const value = useMemo(() => parseNum(valueStr), [valueStr]);
-  const isMIL = scopeUnit === 'MIL';
+  const isMIL = scopeUnitForFormula === 'MIL';
   const height = useMemo(() => {
     if (distance <= 0 || value <= 0) return null;
     return isMIL ? heightFromDistanceMils(distance, value) : heightFromDistanceMOA(distance, value);
