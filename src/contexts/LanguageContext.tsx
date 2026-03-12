@@ -11,7 +11,8 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const LANGUAGE_STORAGE_KEY = 'cli_exercises_learn_language_v1';
+const LANGUAGE_STORAGE_KEY = 'cli_exercises_learn_language_v2';
+const PREV_LANGUAGE_STORAGE_KEY = 'cli_exercises_learn_language_v1';
 const LEGACY_LANGUAGE_KEY = 'python_exercises_learn_language';
 
 // Translation data
@@ -26,6 +27,18 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
         try { localStorage.removeItem(LEGACY_LANGUAGE_KEY); } catch (_) {}
         saved = legacy;
+      }
+    }
+    if (!saved) {
+      const prev = localStorage.getItem(PREV_LANGUAGE_STORAGE_KEY);
+      if (prev === 'fr') {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
+        try { localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY); } catch (_) {}
+        saved = 'fr';
+      } else {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
+        try { localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY); } catch (_) {}
+        saved = 'fr';
       }
     }
     return (saved === 'en' ? 'en' : 'fr') as Language;
