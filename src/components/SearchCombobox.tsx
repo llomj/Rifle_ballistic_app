@@ -117,7 +117,7 @@ export function SearchCombobox<T>({
       {showList && (
         <ul
           ref={listRef}
-          className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded border border-white/20 bg-slate-900 py-1 shadow-lg"
+          className="absolute z-50 mt-1 max-h-[50vh] min-h-[8rem] w-full overflow-y-auto overscroll-contain rounded border border-white/20 bg-slate-900 py-1 shadow-lg"
         >
           {filtered.length === 0 ? (
             <li className="px-3 py-2 text-slate-500 text-xs">No results</li>
