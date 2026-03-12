@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
@@ -29,7 +29,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrent, addNewProfile, loadProfile, deleteSavedProfile } = useBallisticProfile();
+  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrent, loadProfile, deleteSavedProfile } = useBallisticProfile();
   const { scopeUnit, setScopeUnit, measurement, setMeasurement, clicksConfig, setClicksConfig } = useBallisticSettings();
 
   // When profile changes (Default or saved), show its scope unit and measurement (MIL, metric, target, etc.)
@@ -57,23 +57,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [profileNameInput, setProfileNameInput] = useState(currentProfile.userName);
   const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
   const [savePanelExpanded, setSavePanelExpanded] = useState(false);
-  const [highlightNameInput, setHighlightNameInput] = useState(false);
-  const userNameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setProfileNameInput(currentProfile.userName);
   }, [currentProfile.id]);
-
-  const handleAddProfile = () => {
-    playTapSound();
-    addNewProfile();
-    setHighlightNameInput(true);
-    setTimeout(() => {
-      userNameInputRef.current?.focus();
-      userNameInputRef.current?.select();
-    }, 50);
-    setTimeout(() => setHighlightNameInput(false), 2500);
-  };
 
   useEffect(() => {
     if (turretTableExpanded) {
@@ -165,14 +152,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               {p.userName}
             </button>
           ))}
-          <button
-            type="button"
-            onClick={handleAddProfile}
-            className="px-3 py-2 rounded-lg border border-dashed border-theme-accent-50 text-theme-accent-90 text-sm font-medium hover:bg-theme-accent-10 hover:border-theme-accent-70 transition-colors"
-          >
-            <i className="fas fa-plus mr-1.5" />
-            {t('ballistic.addProfile')}
-          </button>
         </div>
       </section>
 
@@ -180,7 +159,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input
-          ref={userNameInputRef}
           type="text"
           value={profileNameInput}
           onChange={(e) => setProfileNameInput(e.target.value)}
@@ -189,11 +167,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           }}
           placeholder={t('ballistic.userNamePlaceholder')}
           autoComplete="off"
-          className={`w-full rounded-lg bg-black/40 px-3 py-2.5 text-slate-200 placeholder-slate-500 text-sm transition-all ${
-            highlightNameInput
-              ? 'border-2 border-theme-accent shadow-theme-accent-30'
-              : 'border border-white/20'
-          }`}
+          className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-slate-200 placeholder-slate-500 text-sm"
         />
       </section>
 
