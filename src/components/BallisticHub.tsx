@@ -51,6 +51,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [turretIntervalStr, setTurretIntervalStr] = useState('');
   const [profileNameInput, setProfileNameInput] = useState(currentProfile.userName);
   const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
+  const [savePanelExpanded, setSavePanelExpanded] = useState(false);
 
   useEffect(() => {
     setProfileNameInput(currentProfile.userName);
@@ -126,28 +127,18 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             {DEFAULT_BALLISTIC_PROFILE.userName}
           </button>
           {savedProfiles.map((p) => (
-            <div key={p.id} className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => { playTapSound(); loadProfile(p.id); }}
-                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  currentProfile.id === p.id
-                    ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                    : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                }`}
-              >
-                {p.userName}
-              </button>
-              <button
-                type="button"
-                onClick={() => { playTapSound(); setProfileToDelete(p.id); }}
-                className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors"
-                title={t('ballistic.delete')}
-                aria-label={t('ballistic.delete')}
-              >
-                <i className="fas fa-trash-alt text-xs" />
-              </button>
-            </div>
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => { playTapSound(); loadProfile(p.id); }}
+              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                currentProfile.id === p.id
+                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+              }`}
+            >
+              {p.userName}
+            </button>
           ))}
           <button
             type="button"
@@ -461,19 +452,62 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         </button>
       </section>
 
-      {/* Save — lower on screen */}
+      {/* Save — expandable: save current + list of saved profiles with delete */}
       <section className="mt-12 mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
         <button
           type="button"
-          onClick={handleSave}
+          onClick={() => { playTapSound(); setSavePanelExpanded((e) => !e); }}
           className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="flex items-center gap-2 font-medium">
             <i className="fas fa-save text-theme-accent" />
             {t('ballistic.save')}
           </span>
-          <i className="fas fa-chevron-right text-slate-500 text-xs" />
+          <i className={`fas fa-chevron-down text-xs transition-transform ${savePanelExpanded ? 'rotate-180' : ''}`} />
         </button>
+        {savePanelExpanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-theme-accent-50 bg-theme-accent-10 text-theme-accent text-sm font-medium hover:bg-theme-accent-20 transition-colors"
+            >
+              <span>{t('ballistic.save')}</span>
+              <i className="fas fa-save text-xs" />
+            </button>
+            <label className="text-xs text-slate-400 uppercase tracking-wider block pt-1">{t('ballistic.savedProfiles')}</label>
+            <div className="space-y-1.5">
+              {savedProfiles.length === 0 ? (
+                <p className="text-slate-500 text-sm py-1">{t('ballistic.noSavedProfiles')}</p>
+              ) : (
+                savedProfiles.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { playTapSound(); loadProfile(p.id); setSavePanelExpanded(false); }}
+                      className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentProfile.id === p.id
+                          ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5 border border-white/10'
+                      }`}
+                    >
+                      {p.userName}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { playTapSound(); setProfileToDelete(p.id); }}
+                      className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors"
+                      title={t('ballistic.delete')}
+                      aria-label={t('ballistic.delete')}
+                    >
+                      <i className="fas fa-trash-alt text-xs" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Back to Main — large bottom button */}
