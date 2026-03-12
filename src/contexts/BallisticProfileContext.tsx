@@ -14,8 +14,8 @@ interface BallisticProfileContextType {
   updateCurrentProfile: (updates: Partial<BallisticProfile>) => void;
   /** Save current setup as a new named profile. */
   saveCurrentAs: (userName: string) => void;
-  /** Save current state: if default → create new profile; if saved → update in place. */
-  saveCurrent: () => void;
+  /** Save current state: if default → create new profile; if saved → update in place. Optional overrides (e.g. userName from input) applied at save time. */
+  saveCurrent: (overrides?: Partial<BallisticProfile>) => void;
   /** Create a new profile (from default setup), add to saved list, and switch to it. */
   addNewProfile: () => void;
   /** Load a profile by id ('default' or a saved id). */
@@ -101,17 +101,20 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
     setCurrentProfileState(newProfile);
   }, [currentProfile]);
 
-  const saveCurrent = useCallback(() => {
-    if (currentProfile.id === 'default') {
-      saveCurrentAs(currentProfile.userName.trim() || 'My setup');
+  const saveCurrent = useCallback((overrides?: Partial<BallisticProfile>) => {
+    const profile = { ...currentProfile, ...overrides };
+    const name = (profile.userName || '').trim() || 'My setup';
+    if (profile.id === 'default') {
+      saveCurrentAs(name);
     } else {
       setSavedProfiles((prev) =>
         prev.map((p) =>
-          p.id === currentProfile.id
-            ? { ...currentProfile, userName: currentProfile.userName.trim() || p.userName, createdAt: p.createdAt }
+          p.id === profile.id
+            ? { ...profile, userName: name, createdAt: p.createdAt }
             : p
         )
       );
+      setCurrentProfileState((prev) => (prev.id === profile.id ? { ...profile, userName: name } : prev));
     }
   }, [currentProfile, saveCurrentAs]);
 

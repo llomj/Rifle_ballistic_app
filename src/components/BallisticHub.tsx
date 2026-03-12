@@ -70,7 +70,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   const handleSave = () => {
     playTapSound();
-    saveCurrent();
+    saveCurrent({ userName: profileNameInput });
   };
 
   return (
@@ -160,18 +160,16 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         </div>
       </section>
 
-      {/* User name — local state so typing is not lost when profile/settings sync */}
+      {/* User name — local state only while typing; push to profile on blur/save so panel stays in sync and no dropped letters */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input
           type="text"
           value={profileNameInput}
-          onChange={(e) => {
-            const v = e.target.value;
-            setProfileNameInput(v);
-            updateCurrentProfile({ userName: v });
+          onChange={(e) => setProfileNameInput(e.target.value)}
+          onBlur={() => {
+            updateCurrentProfile({ userName: profileNameInput });
           }}
-          onBlur={() => setProfileNameInput(currentProfile.userName)}
           placeholder={t('ballistic.userNamePlaceholder')}
           autoComplete="off"
           className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-slate-200 placeholder-slate-500 text-sm"
