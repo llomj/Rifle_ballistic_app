@@ -5,7 +5,6 @@ import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
-import { SearchCombobox } from './SearchCombobox';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 import { getUniqueCalibers, getBulletById, searchCalibers, searchScopes } from '../data/catalogs';
@@ -47,6 +46,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [scopeExpanded, setScopeExpanded] = useState(false);
   const [scopeFilterQuery, setScopeFilterQuery] = useState('');
+  const [caliberFilterQuery, setCaliberFilterQuery] = useState('');
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
   const [turretMinStr, setTurretMinStr] = useState('');
   const [turretMaxStr, setTurretMaxStr] = useState('');
@@ -366,25 +366,32 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         </button>
         {ammunitionExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bulletType')}</label>
-              <SearchCombobox<CaliberOption>
-                items={caliberOptions}
-                getItemId={(c) => c.caliberKey}
-                getItemLabel={(c) => c.caliber}
-                value={selectedCaliberKey || null}
-                onSelect={(c) => {
-                  if (c) {
+            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bulletType')}</label>
+            <input
+              type="text"
+              value={caliberFilterQuery}
+              onChange={(e) => setCaliberFilterQuery(e.target.value)}
+              placeholder={t('ballistic.bulletType')}
+              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+            />
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1">
+              {searchCalibers(caliberFilterQuery, 200).map((c) => (
+                <button
+                  key={c.caliberKey}
+                  type="button"
+                  onClick={() => {
                     setFilterCaliberKey(c.caliberKey);
                     playTapSound();
-                  }
-                }}
-                search={searchCalibers}
-                placeholder={t('ballistic.bulletType')}
-                getLabelForId={(id) => caliberOptions.find((c) => c.caliberKey === id)?.caliber ?? id}
-                className="w-full"
-                inputClassName="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0"
-              />
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    selectedCaliberKey === c.caliberKey
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  {c.caliber}
+                </button>
+              ))}
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bulletGram')}</label>
