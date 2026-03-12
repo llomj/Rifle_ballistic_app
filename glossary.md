@@ -143,7 +143,7 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 
 ## App-Specific Terms
 
-- **Rifle profile**: Saved set of rifle data (caliber, barrel length, twist, scope height, zero distance, etc.) in the app.
+- **User profile**: Saved set of rifle data (caliber, barrel length, twist, scope height, zero distance, etc.) in the app.
 - **Scope settings**: Stored scope parameters: FFP/SFP, unit (MIL/MOA), click value, clicks per revolution, magnification (for SFP).
 - **Quick Range mode**: Flow where user enters target height and mils (or MOA) to get distance, then holdover and/or clicks.
 - **Ballistic table**: Table of distance vs. drop, holdover (MIL/MOA), and turret clicks for the current rifle/load.

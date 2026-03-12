@@ -291,7 +291,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           <i className="fas fa-circle-info text-lg" />
         </button>
       </div>
-      {/* Profile modal — rifle profile section, transparent like settings menu, scrolls to top */}
+      {/* Profile modal — user profile section, transparent like settings menu, scrolls to top */}
       {showProfile && (
         <div
           className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
