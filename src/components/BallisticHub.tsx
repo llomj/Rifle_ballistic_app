@@ -167,7 +167,9 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           >
             {DEFAULT_BALLISTIC_PROFILE.userName}
           </button>
-          {savedProfiles.map((p) => (
+          {savedProfiles
+            .filter((p) => (p.userName || '').trim() !== 'New profile')
+            .map((p) => (
             <button
               key={p.id}
               type="button"
