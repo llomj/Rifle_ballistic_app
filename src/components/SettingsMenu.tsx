@@ -194,13 +194,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                   </div>
                 ))
               )}
-              <button
-                onClick={() => { playTapSound(); loadProfile('default'); onClose(); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-theme-accent-90 border border-dashed border-theme-accent-50 hover:bg-theme-accent-10 mt-1"
-              >
-                <i className="fas fa-plus text-xs" />
-                {t('ballistic.addProfile')}
-              </button>
             </div>
           )}
         </div>
