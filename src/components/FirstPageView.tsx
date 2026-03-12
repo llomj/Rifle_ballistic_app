@@ -269,8 +269,8 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
-      {/* Profile icon — between circle and info icon */}
-      <div className="flex justify-center w-full py-2">
+      {/* Profile (far left) and Info (far right) icons — same line */}
+      <div className="mt-auto pt-4 pb-2 flex justify-between items-center w-full px-2">
         <button
           type="button"
           onClick={() => { playTapSound(); setShowProfile(true); }}
@@ -279,9 +279,6 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         >
           <i className="fas fa-user text-lg" />
         </button>
-      </div>
-      {/* Info icon — bottom centre */}
-      <div className="mt-auto pt-4 pb-2 flex justify-center w-full">
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}
