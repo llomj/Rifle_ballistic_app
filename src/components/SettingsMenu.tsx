@@ -4,7 +4,7 @@ import { useSound } from '../contexts/SoundContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings, type ThemeId } from '../contexts/BallisticSettingsContext';
 
-export type BallisticTab = 'rifles' | 'ballistics' | 'targets' | 'environment';
+export type BallisticTab = 'rifles' | 'ballistics' | 'targets';
 
 interface SettingsMenuProps {
   isOpen: boolean;
@@ -90,16 +90,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   // 0. Users — saved profiles (from main page Save). Shown on every view so menu is consistent.
   menuItems.push({ type: 'users' } as MenuItem);
 
-  // 1. Customize — Profile, Environment (Ballistics is a separate row below). Shown on every view so menu is consistent.
+  // 1. Customize — Profile (Ballistics is a separate row below). Shown on every view so menu is consistent.
   if (onNavigateToProfile || onNavigateToBallistic) {
     const customizeSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onNavigateToProfile) {
       customizeSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
-    }
-    if (onNavigateToBallistic) {
-      customizeSubItems.push(
-        { icon: 'fa-wind', label: t('ballistic.tabEnvironment'), onClick: () => { onNavigateToBallistic('environment'); onClose(); } },
-      );
     }
     menuItems.push({
       type: 'customize',

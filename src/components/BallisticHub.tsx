@@ -13,7 +13,7 @@ import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
 export type BallisticView = 'distance' | 'height';
 
-export type BallisticTab = 'rifles' | 'ballistics' | 'targets' | 'environment';
+export type BallisticTab = 'rifles' | 'ballistics' | 'targets';
 
 interface BallisticHubProps {
   /** Open the ballistic selection (trajectory table, etc.). */

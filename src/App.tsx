@@ -98,7 +98,7 @@ const App: React.FC = () => {
   const randomMode = stats.randomMode ?? false;
   const [drillLevels] = useState<number[] | null>(null);
   const [ballisticView, setBallisticView] = useState<'first' | 'hub' | 'ballistics' | 'distance' | 'height'>('first');
-  const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets' | 'environment'>('ballistics');
+  const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets'>('ballistics');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
