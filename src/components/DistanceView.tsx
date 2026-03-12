@@ -136,7 +136,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
         {/* Fixed center: calculator + Press here + chevron */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
           <i className="fas fa-calculator text-theme-accent text-3xl" />
-          <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1.5">{t('infoCalc.pressHere')}</span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider mt-1.5">{t('infoCalc.pressHere')}</span>
           {compassMode && heading != null && (
             <span className="text-sm text-theme-accent-90 font-mono tabular-nums mt-2">
               {Math.round(heading * DEG_TO_MRAD)} mrad
