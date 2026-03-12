@@ -439,8 +439,8 @@ const App: React.FC = () => {
   return (
     <SoundProvider soundEnabled={soundEnabled} onPlay={() => void playUITapSound()}>
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]" data-theme={theme}>
-      {/* Settings at bottom centre */}
-      <div className="fixed bottom-0 left-0 right-0 z-[110] flex justify-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
+      {/* Settings at bottom centre — aligned with profile/info icon row */}
+      <div className="fixed bottom-0 left-0 right-0 z-[110] min-h-[10rem] pb-[env(safe-area-inset-bottom)] flex items-center justify-center bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
         <button
           onClick={() => {
             if (soundEnabled) void playUITapSound();
