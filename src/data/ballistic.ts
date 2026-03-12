@@ -105,6 +105,10 @@ export interface BallisticProfile {
   muzzleVelocityMps: number;
   bcOverride?: number;
   createdAt?: number;
+  /** Scope unit (MIL/MOA). Stored per profile so Default and saved profiles show correctly. */
+  scopeUnit?: ScopeUnit;
+  /** Measurement system. Stored per profile. */
+  measurement?: 'metric' | 'imperial';
 }
 
 /** Whether a bullet's caliberKey matches a rifle's (for filtering). */
@@ -138,7 +142,7 @@ export function recoilCategory(recoilJ: number): 'low' | 'medium' | 'high' | 've
 
 export const BALLISTIC_PROFILES_STORAGE_KEY = 'rifle_ballistic_setups_v2';
 
-/** Default profile: Tikka .300 Win Mag + Hawke SideWinder + 180 gr, 922 m/s. */
+/** Default profile: Tikka .300 Win Mag + Hawke SideWinder + 180 gr, 922 m/s. MIL, metric. */
 export const DEFAULT_BALLISTIC_PROFILE: BallisticProfile = {
   id: 'default',
   userName: 'Default (Tikka .300)',
@@ -153,6 +157,8 @@ export const DEFAULT_BALLISTIC_PROFILE: BallisticProfile = {
   overallLengthMm: 85,
   bulletId: '300winmag-180gr-g1',
   muzzleVelocityMps: 922,
+  scopeUnit: 'MIL',
+  measurement: 'metric',
 };
 
 /** Rifle profile — stored locally, user can switch quickly. */

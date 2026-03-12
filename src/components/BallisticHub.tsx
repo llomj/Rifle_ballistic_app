@@ -30,8 +30,16 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
-  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrent, addNewProfile, loadProfile } = useBallisticProfile();
+  const { currentProfile, savedProfiles, updateCurrentProfile, saveCurrent, addNewProfile, loadProfile, deleteSavedProfile } = useBallisticProfile();
   const { scopeUnit, setScopeUnit, measurement, setMeasurement, clicksConfig, setClicksConfig } = useBallisticSettings();
+
+  // When profile changes (Default or saved), show its scope unit and measurement (MIL, metric, target, etc.)
+  useEffect(() => {
+    const u = currentProfile.scopeUnit === 'MIL' || currentProfile.scopeUnit === 'MOA' ? currentProfile.scopeUnit : 'MIL';
+    const m = currentProfile.measurement === 'metric' || currentProfile.measurement === 'imperial' ? currentProfile.measurement : 'metric';
+    setScopeUnit(u);
+    setMeasurement(m);
+  }, [currentProfile.id, currentProfile.scopeUnit, currentProfile.measurement, setScopeUnit, setMeasurement]);
   const { turretTable } = useTrajectoryTables();
   const [setupExpanded, setSetupExpanded] = useState(false);
   const [targetsExpanded, setTargetsExpanded] = useState(false);
@@ -77,18 +85,28 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             {DEFAULT_BALLISTIC_PROFILE.userName}
           </button>
           {savedProfiles.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => { playTapSound(); loadProfile(p.id); }}
-              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                currentProfile.id === p.id
-                  ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-              }`}
-            >
-              {p.userName}
-            </button>
+            <div key={p.id} className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => { playTapSound(); loadProfile(p.id); }}
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  currentProfile.id === p.id
+                    ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                    : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                }`}
+              >
+                {p.userName}
+              </button>
+              <button
+                type="button"
+                onClick={() => { playTapSound(); deleteSavedProfile(p.id); }}
+                className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors"
+                title={t('ballistic.delete')}
+                aria-label={t('ballistic.delete')}
+              >
+                <i className="fas fa-trash-alt text-xs" />
+              </button>
+            </div>
           ))}
           <button
             type="button"
@@ -118,7 +136,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => { playTapSound(); setScopeUnit('MIL'); }}
+              onClick={() => { playTapSound(); setScopeUnit('MIL'); updateCurrentProfile({ scopeUnit: 'MIL' }); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 scopeUnit === 'MIL'
                   ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
@@ -129,7 +147,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => { playTapSound(); setScopeUnit('MOA'); }}
+              onClick={() => { playTapSound(); setScopeUnit('MOA'); updateCurrentProfile({ scopeUnit: 'MOA' }); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 scopeUnit === 'MOA'
                   ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
@@ -142,7 +160,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => { playTapSound(); setMeasurement('metric'); }}
+              onClick={() => { playTapSound(); setMeasurement('metric'); updateCurrentProfile({ measurement: 'metric' }); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 measurement === 'metric'
                   ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
@@ -153,7 +171,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => { playTapSound(); setMeasurement('imperial'); }}
+              onClick={() => { playTapSound(); setMeasurement('imperial'); updateCurrentProfile({ measurement: 'imperial' }); }}
               className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition-colors ${
                 measurement === 'imperial'
                   ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
