@@ -166,7 +166,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               min="0"
               step={measurement === 'imperial' ? 0.01 : 0.1}
               value={currentProfile.scopeHeightCm != null
-                ? (measurement === 'imperial' ? cmToIn(currentProfile.scopeHeightCm) : currentProfile.scopeHeightCm)
+                ? (measurement === 'imperial' ? Math.round(cmToIn(currentProfile.scopeHeightCm) * 100) / 100 : currentProfile.scopeHeightCm)
                 : ''}
               onChange={(e) => {
                 const raw = parseFloat(e.target.value) || 0;
@@ -184,7 +184,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               min="0"
               step={measurement === 'imperial' ? 0.1 : 0.1}
               value={currentProfile.barrelLengthCm != null
-                ? (measurement === 'imperial' ? cmToIn(currentProfile.barrelLengthCm) : currentProfile.barrelLengthCm)
+                ? (measurement === 'imperial' ? Math.round(cmToIn(currentProfile.barrelLengthCm) * 100) / 100 : currentProfile.barrelLengthCm)
                 : ''}
               onChange={(e) => {
                 if (e.target.value === '') {
