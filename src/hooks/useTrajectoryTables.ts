@@ -29,7 +29,10 @@ export function useTrajectoryTables(): {
   return useMemo(() => {
     const scope = getScopeById(currentProfile.scopeId);
     const bullet = getBulletById(currentProfile.bulletId);
-    const bc = currentProfile.bcOverride ?? bullet?.bcG1;
+    // Use G7 BC when bullet has dragModel G7 (more accurate for long-range); otherwise G1
+    const bc = currentProfile.bcOverride ?? (
+      bullet?.dragModel?.toUpperCase() === 'G7' && bullet?.bcG7 != null ? bullet.bcG7 : bullet?.bcG1
+    );
     const mv = currentProfile.muzzleVelocityMps;
     const scopeH = currentProfile.scopeHeightCm;
 

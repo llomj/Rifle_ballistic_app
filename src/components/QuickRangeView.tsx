@@ -73,11 +73,13 @@ export const QuickRangeView: React.FC = () => {
               {measurement === 'imperial' ? `${(distanceM != null ? mToYd(distanceM) : 0).toFixed(1)} yd` : `${distanceM?.toFixed(1)} m`}
             </span>
           </div>
-          {isMIL && turret && !turret.outOfRange && (
+          {turret && !turret.outOfRange && (
             <>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.resultHoldover')}</span>
-                <span className="font-mono text-sm text-theme-accent">{turret.line.replace(/^Turret:\s*/, '').split(/\s+/)[1] ?? '—'} mrad</span>
+                <span className="font-mono text-sm text-theme-accent">
+                  {turret.line.replace(/^Turret:\s*/, '').split(/\s+/)[1] ?? '—'} {isMIL ? 'mrad' : 'MOA'}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.resultClicks')}</span>
@@ -85,14 +87,9 @@ export const QuickRangeView: React.FC = () => {
               </div>
             </>
           )}
-          {isMIL && (!turret || turret.outOfRange) && (
+          {(!turret || turret.outOfRange) && (
             <p className="text-xs text-slate-500">
               {turret?.outOfRange ? t('ballistic.targetTooFar') : `${t('ballistic.table150to800')}; ${t('ballistic.resultHoldover')} / ${t('ballistic.resultClicks')} ${t('ballistic.for150mPlus')}`}
-            </p>
-          )}
-          {!isMIL && (
-            <p className="text-xs text-slate-500">
-              {t('ballistic.resultHoldover')} / {t('ballistic.resultClicks')} — {t('ballistic.useBallisticsTableForMoa')}
             </p>
           )}
         </div>
