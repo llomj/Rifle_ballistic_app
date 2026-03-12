@@ -83,8 +83,11 @@ export interface CaliberOption {
   caliber: string;
 }
 
+let uniqueCalibersCache: CaliberOption[] | null = null;
+
 /** Comprehensive caliber list (from calibers.json). Merged with bullets catalog so any caliber in BULLETS not yet in the list is included. */
 export function getUniqueCalibers(): CaliberOption[] {
+  if (uniqueCalibersCache) return uniqueCalibersCache;
   const byKey = new Map<string, CaliberOption>();
   for (const c of calibersJson as CaliberOption[]) {
     byKey.set(c.caliberKey, c);
@@ -94,7 +97,8 @@ export function getUniqueCalibers(): CaliberOption[] {
       byKey.set(b.caliberKey, { caliberKey: b.caliberKey, caliber: b.caliber });
     }
   }
-  return Array.from(byKey.values()).sort((a, b) => a.caliber.localeCompare(b.caliber));
+  uniqueCalibersCache = Array.from(byKey.values()).sort((a, b) => a.caliber.localeCompare(b.caliber));
+  return uniqueCalibersCache;
 }
 
 export function searchCalibers(query: string, limit = 20): CaliberOption[] {
