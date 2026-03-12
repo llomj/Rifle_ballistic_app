@@ -49,6 +49,12 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [turretMinStr, setTurretMinStr] = useState('');
   const [turretMaxStr, setTurretMaxStr] = useState('');
   const [turretIntervalStr, setTurretIntervalStr] = useState('');
+  const [profileNameInput, setProfileNameInput] = useState(currentProfile.userName);
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProfileNameInput(currentProfile.userName);
+  }, [currentProfile.id]);
 
   useEffect(() => {
     if (turretTableExpanded) {
@@ -69,6 +75,41 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
 
   return (
     <div className="max-w-lg mx-auto pb-48">
+      {/* Delete profile confirmation */}
+      {profileToDelete != null && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setProfileToDelete(null)}
+        >
+          <div
+            className="rounded-xl border border-white/20 bg-slate-900 p-5 max-w-sm w-full shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-slate-200 text-sm mb-4">{t('ballistic.deleteProfileWarning')}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { playTapSound(); setProfileToDelete(null); }}
+                className="px-4 py-2 rounded-lg border border-white/20 text-slate-300 hover:bg-white/10 text-sm font-medium"
+              >
+                {t('ballistic.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playTapSound();
+                  if (profileToDelete) deleteSavedProfile(profileToDelete);
+                  setProfileToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-red-500/20 text-red-400 border border-red-400/40 hover:bg-red-500/30 text-sm font-medium"
+              >
+                {t('ballistic.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Profiles: Default + saved — switch between them */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
@@ -99,7 +140,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => { playTapSound(); deleteSavedProfile(p.id); }}
+                onClick={() => { playTapSound(); setProfileToDelete(p.id); }}
                 className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors"
                 title={t('ballistic.delete')}
                 aria-label={t('ballistic.delete')}
@@ -119,14 +160,20 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         </div>
       </section>
 
-      {/* User name */}
+      {/* User name — local state so typing is not lost when profile/settings sync */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input
           type="text"
-          value={currentProfile.userName}
-          onChange={(e) => updateCurrentProfile({ userName: e.target.value })}
+          value={profileNameInput}
+          onChange={(e) => {
+            const v = e.target.value;
+            setProfileNameInput(v);
+            updateCurrentProfile({ userName: v });
+          }}
+          onBlur={() => setProfileNameInput(currentProfile.userName)}
           placeholder={t('ballistic.userNamePlaceholder')}
+          autoComplete="off"
           className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-slate-200 placeholder-slate-500 text-sm"
         />
       </section>

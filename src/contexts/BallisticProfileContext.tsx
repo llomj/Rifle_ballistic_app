@@ -80,7 +80,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
         setSavedProfiles((list) =>
           list.map((p) =>
             p.id === prev.id
-              ? { ...next, id: prev.id, userName: prev.userName, createdAt: p.createdAt }
+              ? { ...next, id: prev.id, userName: next.userName, createdAt: p.createdAt }
               : p
           )
         );

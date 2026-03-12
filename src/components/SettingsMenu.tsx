@@ -67,6 +67,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   const [usersExpanded, setUsersExpanded] = useState(false);
   const [customizeExpanded, setCustomizeExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -74,6 +75,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       setUsersExpanded(false);
       setCustomizeExpanded(false);
       setSettingsExpanded(false);
+      setProfileToDelete(null);
     }
   }, [isOpen]);
 
@@ -183,7 +185,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                       {p.userName}
                     </button>
                     <button
-                      onClick={() => { playTapSound(); deleteSavedProfile(p.id); }}
+                      onClick={() => { playTapSound(); setProfileToDelete(p.id); }}
                       className="p-2 text-slate-500 hover:text-red-400"
                       title={t('ballistic.delete')}
                       aria-label={t('ballistic.delete')}
@@ -434,6 +436,41 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
           )}
         </div>
       </div>
+
+      {/* Delete profile confirmation */}
+      {profileToDelete != null && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setProfileToDelete(null)}
+        >
+          <div
+            className="rounded-xl border border-white/20 bg-slate-900 p-5 max-w-sm w-full shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-slate-200 text-sm mb-4">{t('ballistic.deleteProfileWarning')}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { playTapSound(); setProfileToDelete(null); }}
+                className="px-4 py-2 rounded-lg border border-white/20 text-slate-300 hover:bg-white/10 text-sm font-medium"
+              >
+                {t('ballistic.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playTapSound();
+                  if (profileToDelete) deleteSavedProfile(profileToDelete);
+                  setProfileToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-red-500/20 text-red-400 border border-red-400/40 hover:bg-red-500/30 text-sm font-medium"
+              >
+                {t('ballistic.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
