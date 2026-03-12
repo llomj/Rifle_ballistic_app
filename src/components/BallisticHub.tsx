@@ -387,13 +387,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         <button
           type="button"
           onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
-          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
-          <span className="text-sm font-medium text-white">{t('ballistic.rifle')}</span>
-          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={rifle?.name ?? currentProfile.rifleId}>
+          <span className="text-sm font-medium text-white shrink-0 min-w-[5.5rem]">{t('ballistic.rifle')}</span>
+          <span className="text-sm text-theme-accent min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded" title={rifle?.name ?? currentProfile.rifleId}>
             {(rifle?.name ?? currentProfile.rifleId) || '—'}
           </span>
-          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
+          <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
         </button>
         {rifleExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
@@ -436,13 +436,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         <button
           type="button"
           onClick={() => { playTapSound(); setAmmunitionExpanded((e) => !e); }}
-          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
-          <span className="text-sm font-medium text-white">{t('ballistic.ammunition')}</span>
-          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={bullet?.name ?? currentProfile.bulletId}>
+          <span className="text-sm font-medium text-white shrink-0 min-w-[5.5rem]">{t('ballistic.ammunition')}</span>
+          <span className="text-sm text-theme-accent min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded" title={bullet?.name ?? currentProfile.bulletId}>
             {(bullet?.name ?? currentProfile.bulletId) || '—'}
           </span>
-          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${ammunitionExpanded ? 'rotate-180' : ''}`} />
+          <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${ammunitionExpanded ? 'rotate-180' : ''}`} />
         </button>
         {ammunitionExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
@@ -534,13 +534,13 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         <button
           type="button"
           onClick={() => { playTapSound(); setScopeExpanded((e) => !e); }}
-          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
-          <span className="text-sm font-medium text-white">{t('ballistic.scope')}</span>
-          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={scope?.name ?? currentProfile.scopeId}>
+          <span className="text-sm font-medium text-white shrink-0 min-w-[5.5rem]">{t('ballistic.scope')}</span>
+          <span className="text-sm text-theme-accent min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded" title={scope?.name ?? currentProfile.scopeId}>
             {(scope?.name ?? currentProfile.scopeId) || '—'}
           </span>
-          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${scopeExpanded ? 'rotate-180' : ''}`} />
+          <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${scopeExpanded ? 'rotate-180' : ''}`} />
         </button>
         {scopeExpanded && (
           <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
