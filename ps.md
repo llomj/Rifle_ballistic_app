@@ -201,7 +201,11 @@ This pulls the panel UP by 20% of the viewport height, positioning it right at t
 
 ## March 2026 — Ammunition / Scope / Rifle list selection (BallisticHub)
 
-**Problem:** In BallisticHub, when opening the list via the chevron (v) for Ammunition, Scope, or Rifle, selecting an option could leave the UI "stuck" and the list would disappear without the selection applying (especially Scope and Rifle).
+**Problem:** In BallisticHub, when opening the list via the chevron (v) for Ammunition, Scope, or Rifle, selecting an option could leave the UI "stuck" and the list would disappear, preventing re-selection.
 
-**Solution:** (1) Call `e.stopPropagation()` and `e.preventDefault()` on list item button clicks so no parent or document handler can swallow or interfere with the click. (2) Add `onClick={(e) => e.stopPropagation()}` on the scrollable list container div so any tap inside the dropdown is contained. (3) After applying the selection, explicitly close the panel: `setScopeExpanded(false)`, `setRifleExpanded(false)`, `setAmmunitionExpanded(false)` (for bullet selection). The list then closes in a controlled way after the profile update has been applied.
+**Solution (updated):** (1) Call `e.stopPropagation()` and `e.preventDefault()` on list item button clicks so no parent swallows the click. (2) Add `onClick={(e) => e.stopPropagation()}` on the scrollable list container. (3) **Do NOT close the panel after selection** — do not call `setScopeExpanded(false)`, `setRifleExpanded(false)`, or `setAmmunitionExpanded(false)`. The rifle and scope lists must **always persist** when the section is expanded so the user can re-select another rifle or scope at any time.
+
+**Panel order:** Turret table → Rifle → Ammunition → Scope (rifle first so ammunition can filter by rifle caliber).
+
+**Ammunition filtered by rifle:** When a rifle is selected, the ammunition list shows only bullets for that rifle's caliber. Use `selectedCaliberKey = rifle?.caliberKey ?? filterCaliberKey ?? bullet?.caliberKey ?? ...` so rifle caliber takes precedence. Sync `filterCaliberKey` when rifle changes: `useEffect(() => { if (rifle?.caliberKey) setFilterCaliberKey(rifle.caliberKey); }, [rifle?.caliberKey])`.
 

@@ -74,7 +74,12 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const rifle = useMemo(() => getRifleById(currentProfile.rifleId), [currentProfile.rifleId]);
   const caliberOptions = useMemo(() => getUniqueCalibers(), []);
-  const selectedCaliberKey = filterCaliberKey ?? bullet?.caliberKey ?? (caliberOptions[0]?.caliberKey ?? '');
+  // When rifle is selected, ammunition list filters by rifle caliber; else fall back to manual caliber filter or bullet's caliber.
+  const selectedCaliberKey = rifle?.caliberKey ?? filterCaliberKey ?? bullet?.caliberKey ?? (caliberOptions[0]?.caliberKey ?? '');
+
+  useEffect(() => {
+    if (rifle?.caliberKey) setFilterCaliberKey(rifle.caliberKey);
+  }, [rifle?.caliberKey]);
 
   const handleSave = () => {
     playTapSound();
@@ -359,7 +364,56 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         )}
       </section>
 
-      {/* Ammunition — bullet type & bullet gram, auto-populates Rifle Profile */}
+      {/* Rifle — list of rifles; selection fills rifle profile. List persists so user can re-select. */}
+      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+        >
+          <span className="text-sm font-medium text-white">{t('ballistic.rifle')}</span>
+          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={rifle?.name ?? currentProfile.rifleId}>
+            {(rifle?.name ?? currentProfile.rifleId) || '—'}
+          </span>
+          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
+        </button>
+        {rifleExpanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.rifle')}</label>
+            <input
+              type="text"
+              value={rifleFilterQuery}
+              onChange={(e) => setRifleFilterQuery(e.target.value)}
+              placeholder={t('ballistic.rifle')}
+              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+            />
+            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
+              {searchRifles(rifleFilterQuery, 200).map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
+                    setRifleFilterQuery(r.name);
+                    playTapSound();
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    currentProfile.rifleId === r.id
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  {r.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Ammunition — filtered by rifle caliber; list persists so user can re-select. */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
         <button
           type="button"
@@ -421,7 +475,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     e.preventDefault();
                     updateCurrentProfile({ bulletId: b.id });
                     setBulletFilterQuery(b.name);
-                    setAmmunitionExpanded(false);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -458,7 +511,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         )}
       </section>
 
-      {/* Scope — list of scopes; selection fills rifle profile scope section */}
+      {/* Scope — list of scopes; selection fills rifle profile. List persists so user can re-select. */}
       <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
         <button
           type="button"
@@ -491,7 +544,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                     e.preventDefault();
                     updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
                     setScopeFilterQuery(s.name);
-                    setScopeExpanded(false);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -501,56 +553,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   }`}
                 >
                   {s.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* Rifle — list of rifles; selection fills rifle profile */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
-          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
-        >
-          <span className="text-sm font-medium text-white">{t('ballistic.rifle')}</span>
-          <span className="text-sm text-theme-accent truncate min-w-0 max-w-[60%]" title={rifle?.name ?? currentProfile.rifleId}>
-            {(rifle?.name ?? currentProfile.rifleId) || '—'}
-          </span>
-          <i className={`fas fa-chevron-down text-xs transition-transform flex-shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
-        </button>
-        {rifleExpanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
-            <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.rifle')}</label>
-            <input
-              type="text"
-              value={rifleFilterQuery}
-              onChange={(e) => setRifleFilterQuery(e.target.value)}
-              placeholder={t('ballistic.rifle')}
-              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
-            />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
-              {searchRifles(rifleFilterQuery, 200).map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
-                    setRifleFilterQuery(r.name);
-                    setRifleExpanded(false);
-                    playTapSound();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    currentProfile.rifleId === r.id
-                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                  }`}
-                >
-                  {r.name}
                 </button>
               ))}
             </div>
