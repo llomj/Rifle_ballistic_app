@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 
 export interface SearchComboboxProps<T> {
   items: T[];
@@ -36,7 +36,11 @@ export function SearchCombobox<T>({
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const filteredRaw = search(query, limit);
+  // Some catalogs are large; avoid running full search/filter work when the dropdown is closed.
+  const filteredRaw = useMemo(() => {
+    if (!open && query.length === 0) return [];
+    return search(query, limit);
+  }, [open, query, limit, search]);
   // Ensure current value appears in list (e.g. default rifle) even if not in search results
   const currentItem = value ? items.find((i) => getItemId(i) === value) : null;
   const filtered =

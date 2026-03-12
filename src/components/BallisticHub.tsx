@@ -7,7 +7,7 @@ import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { getUniqueCalibers, getBulletById, getScopeById, getRifleById, getBulletsForCaliberKey, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
+import { getUniqueCalibers, getBulletById, getScopeById, getRifleById, getBulletsForCaliberKey, searchBullets, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
 import type { CaliberOption } from '../data/catalogs';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
@@ -49,6 +49,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [scopeFilterQuery, setScopeFilterQuery] = useState('');
   const [rifleFilterQuery, setRifleFilterQuery] = useState('');
   const [caliberFilterQuery, setCaliberFilterQuery] = useState('');
+  const [bulletFilterQuery, setBulletFilterQuery] = useState('');
   const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
   const [turretMinStr, setTurretMinStr] = useState('');
   const [turretMaxStr, setTurretMaxStr] = useState('');
