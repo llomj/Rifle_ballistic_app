@@ -28,7 +28,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         saved = legacy;
       }
     }
-    return (saved === 'fr' ? 'fr' : 'en') as Language;
+    return (saved === 'en' ? 'en' : 'fr') as Language;
   });
 
   const setLanguage = (lang: Language) => {
