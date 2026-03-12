@@ -401,13 +401,21 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
               ))}
             </div>
             <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bullet')}</label>
+            <input
+              type="text"
+              value={bulletFilterQuery}
+              onChange={(e) => setBulletFilterQuery(e.target.value)}
+              placeholder={t('ballistic.bullet')}
+              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+            />
             <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1">
-              {getBulletsForCaliberKey(selectedCaliberKey).map((b) => (
+              {searchBullets(bulletFilterQuery, selectedCaliberKey, 200).map((b) => (
                 <button
                   key={b.id}
                   type="button"
                   onClick={() => {
                     updateCurrentProfile({ bulletId: b.id });
+                    setBulletFilterQuery(b.name);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -474,6 +482,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   type="button"
                   onClick={() => {
                     updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
+                    setScopeFilterQuery(s.name);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
@@ -520,6 +529,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   type="button"
                   onClick={() => {
                     updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
+                    setRifleFilterQuery(r.name);
                     playTapSound();
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
