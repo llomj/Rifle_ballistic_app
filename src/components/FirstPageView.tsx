@@ -311,15 +311,18 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           <i className="fas fa-circle-info text-lg" />
         </button>
       </div>
-      {/* Profile modal — user profile section, transparent like settings menu, scrolls to top */}
+      {/* Profile modal — user profile section, transparent like settings menu; inner scroll for bullet/form section */}
       {showProfile && (
         <div
-          className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
+          className="fixed inset-0 z-[100] flex flex-col items-center"
           onClick={() => setShowProfile(false)}
         >
-          <div className="flex flex-col items-center px-4 pt-4 pb-8 min-h-full">
+          <div
+            className="w-full flex-1 min-h-0 px-4 pt-4 pb-8 overflow-y-auto overflow-x-hidden overscroll-contain"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             <div
-              className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              className="glass rounded-xl p-5 max-w-sm w-full mx-auto border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
               onClick={(e) => e.stopPropagation()}
             >
             <div className="flex items-center justify-between mb-4">
