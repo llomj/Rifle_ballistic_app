@@ -207,5 +207,5 @@ This pulls the panel UP by 20% of the viewport height, positioning it right at t
 
 **Panel order:** Turret table → Rifle → Ammunition → Scope (rifle first so ammunition can filter by rifle caliber).
 
-**Ammunition filtered by rifle:** When a rifle is selected, the ammunition list shows only bullets for that rifle's caliber. Use `selectedCaliberKey = rifle?.caliberKey ?? filterCaliberKey ?? bullet?.caliberKey ?? ...` so rifle caliber takes precedence. Sync `filterCaliberKey` when rifle changes: `useEffect(() => { if (rifle?.caliberKey) setFilterCaliberKey(rifle.caliberKey); }, [rifle?.caliberKey])`.
+**Ammunition filtered by rifle:** When user selects a rifle, the ammunition list must show only ammunition conforming to that rifle (same `caliberKey`). Fix: (1) Derive the list from the selected rifle: `getBulletsForCaliberKey(rifle.caliberKey)` when rifle is selected; when no rifle, show empty state with message "Select a rifle above to see compatible ammunition". (2) When rifle is selected, do not show the full caliber picker (all calibers); show a single line "Ammunition for [rifle.caliber]" and the bullet list for that caliber only. (3) Filter the bullet list by `bulletFilterQuery` (search) within that caliber. This way the ammunition panel always reflects the selected rifle and the list appears as soon as a rifle is chosen.
 
