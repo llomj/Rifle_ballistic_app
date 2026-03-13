@@ -20,7 +20,7 @@ import {
   searchBullets,
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
-import { computeRecoilEnergyJ, recoilCategory } from '../data/ballistic';
+import { computeRecoilEnergyJ, recoilCategory, getScopeMagnificationForMeasure } from '../data/ballistic';
 
 interface RifleScopeSectionProps {
   /** When true, show editable form (comboboxes + inputs). When false, show read-only summary. */
@@ -105,9 +105,14 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
   const measureLine1 = scope?.ffpOrSfp === 'FFP' ? t('ballistic.measureDistanceFfp') : t('ballistic.measureDistanceSfp');
   const zeroM = currentProfile.zeroDistanceM ?? 100;
   const zeroDisplay = measurement === 'imperial' ? Math.round(mToYd(zeroM)) : zeroM;
-  const measureLine2 = measurement === 'imperial'
-    ? formatTranslation(t('ballistic.zeroAtYdZoom10x'), { distance: zeroDisplay })
-    : formatTranslation(t('ballistic.zeroAtZoom10x'), { distance: zeroDisplay });
+  const measureMag = getScopeMagnificationForMeasure(scope);
+  const measureLine2 = measureMag != null
+    ? (measurement === 'imperial'
+        ? formatTranslation(t('ballistic.zeroAtYdZoomMag'), { distance: zeroDisplay, mag: measureMag })
+        : formatTranslation(t('ballistic.zeroAtZoomMag'), { distance: zeroDisplay, mag: measureMag }))
+    : (measurement === 'imperial'
+        ? formatTranslation(t('ballistic.zeroAtYdZoomAnyMag'), { distance: zeroDisplay })
+        : formatTranslation(t('ballistic.zeroAtZoomAnyMag'), { distance: zeroDisplay }));
   const measureLine3 = scope?.unit === 'MOA' ? t('ballistic.formulaHeightMoa') : t('ballistic.formulaHeightMils');
 
   const inputCls = 'rounded bg-black/40 border border-white/20 px-2 py-1.5 text-theme-accent font-mono text-xs min-w-0';

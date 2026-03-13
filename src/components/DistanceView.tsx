@@ -11,7 +11,7 @@ const DEG_TO_MRAD = (1000 * Math.PI) / 180;
 import { mToYd, cmToIn, ftToM, mToFt, formatTurretLine } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
-import { distanceFromHeight } from '../data/ballistic';
+import { distanceFromHeight, getScopeMagnificationForMeasure } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 
 interface DistanceViewProps {
@@ -38,6 +38,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   const { getTurretRowForDistance } = useTrajectoryTables();
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const scopeUnitForFormula = scope?.unit === 'MIL' || scope?.unit === 'MOA' ? scope.unit : scopeUnit;
+  const measureMag = useMemo(() => getScopeMagnificationForMeasure(scope), [scope]);
   const parseNum = (s: string) => parseFloat(String(s).replace(',', '.')) || 0;
   const heightRaw = useMemo(() => parseNum(heightStr), [heightStr]);
   const height = useMemo(() => (measurement === 'imperial' ? ftToM(heightRaw) : heightRaw), [heightRaw, measurement]);
@@ -197,6 +198,13 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
       </div>
       {inputsSectionExpanded && (
         <div className="w-full max-w-md -mt-[8vh] rounded-xl border border-theme-accent-30 bg-theme-accent-5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+          {scope && (
+            <CliLine role="cyan">
+              {measureMag != null
+                ? formatTranslation(t('ballistic.opticsMeasureAtMag'), { mag: measureMag })
+                : t('ballistic.opticsMeasureAnyMag')}
+            </CliLine>
+          )}
           <section className="space-y-2">
             <label className="block">
               <CliLine role="yellow">{measurement === 'imperial' ? t('ballistic.targetHeightLabelFt') : t('ballistic.targetHeightLabel')}</CliLine>
