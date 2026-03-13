@@ -30,6 +30,11 @@ When adding new content, add both languages in the same commit. Never ship Engli
 3. After changing SW logic, edit `scripts/generate-sw.cjs` and bump `CACHE_NAME` version; rebuild and redeploy.
 4. Test: `npm run build`, serve `dist` with correct base (e.g. `npx serve dist` and open the path that matches your base, or deploy and open the app), go offline in DevTools, reload; the app should load from cache.
 
+**If the app does not open on phone (blank / redirect / PWA fails):**
+1. **404 redirect:** `public/404.html` must use the correct app fallback (e.g. `rifle_ballistic_app`), not another project name. When the user hits the site root or a wrong path, they are redirected to the app base; wrong fallback sends them to a 404.
+2. **PWA start_url:** The manifest is generated at build time in `scripts/generate-sw.cjs` with `start_url` and icon `src` set to the deploy base path (from `VITE_BASE_REPO`). This ensures "Add to Home Screen" opens the app at the correct URL (e.g. `https://user.github.io/rifle_ballistic_app/`).
+3. After deploy, on phone: clear site data or open the clear-sw URL for the app, then reopen from the home screen so the new SW and manifest are used.
+
 ---
 
 ## Flags Reference (syntax highlighting)

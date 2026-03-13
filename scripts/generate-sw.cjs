@@ -29,7 +29,7 @@ const precacheUrls = files.map((f) => {
   return JSON.stringify(url);
 });
 
-const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v2';
+const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v3';
 const PRECACHE_URLS = [${precacheUrls.join(',\n  ')}];
 
 self.addEventListener('install', (e) => {
@@ -62,3 +62,11 @@ self.addEventListener('fetch', (e) => {
 
 fs.writeFileSync(path.join(distDir, 'sw.js'), swContent, 'utf8');
 console.log('Generated sw.js with', precacheUrls.length, 'precache URLs');
+
+// Write manifest.json with correct base path so PWA start_url and icon work on deploy
+const manifestPath = path.join(__dirname, '..', 'public', 'manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+manifest.start_url = basePath;
+if (manifest.icons && manifest.icons[0]) manifest.icons[0].src = basePath + 'icon-512.png';
+fs.writeFileSync(path.join(distDir, 'manifest.json'), JSON.stringify(manifest, null, 0), 'utf8');
+console.log('Generated manifest.json with start_url', manifest.start_url);
