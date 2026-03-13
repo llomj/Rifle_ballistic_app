@@ -175,6 +175,13 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
     [compensationTable, measurement, scopeUnit]
   );
 
+  const opticsPanelTitle = useMemo(() => {
+    if (!scope) return t('ballistic.panelOptics');
+    return measureMag != null
+      ? formatTranslation(t('ballistic.opticsPanelTitleMag'), { mag: measureMag })
+      : t('ballistic.opticsPanelTitleFfp');
+  }, [scope, measureMag, t]);
+
   const opticsHeader = useMemo(
     () => [
       t('ballistic.opticsHeaderMeter'),
@@ -271,7 +278,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       </CollapsiblePanel>
 
       <CollapsiblePanel
-        title={t('ballistic.panelOptics')}
+        title={opticsPanelTitle}
         expanded={opticsExpanded}
         onToggle={() => { playTapSound(); setOpticsExpanded((e) => !e); }}
         onTitleClick={() => { playTapSound(); setShowConfigModal(true); }}
@@ -286,10 +293,18 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
               </CliLine>
               <CliLine role="cyan">{t('ballistic.opticsMeasureNote')}</CliLine>
             </div>
-          ) : null}
+          ) : (
+            <CliLine role="cyan">{t('ballistic.opticsSelectScopeNote')}</CliLine>
+          )}
           <div className="space-y-1">
             <CliLine role="yellow">{t('ballistic.opticsReticleRule')}</CliLine>
-            <CliLine role="white">{t('ballistic.optics10x')}</CliLine>
+            <CliLine role="white">
+              {scope && measureMag != null
+                ? formatTranslation(t('ballistic.opticsReferenceAtMag'), { mag: measureMag })
+                : scope && measureMag == null
+                  ? t('ballistic.opticsReferenceFfp')
+                  : t('ballistic.optics10x')}
+            </CliLine>
           </div>
           <CliTable
             header={opticsHeader}

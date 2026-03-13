@@ -216,3 +216,13 @@ This pulls the panel UP by 20% of the viewport height, positioning it right at t
 
 **Default profile ammunition:** When user presses the Default profile button, the correct ammunition must appear as **.300 Win Mag 180 gr** (not "7.62mm"). (1) `DEFAULT_BALLISTIC_PROFILE` has `bulletId: '300winmag-180gr-g1'`; `bullets.json` entry has `name: ".300 Win Mag 180 gr SP G1"`. (2) In code, when `currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId`, display the label from a constant `DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr'` in BallisticHub and RifleScopeSection so the default is correct even if the app serves a cached bundle. (3) Bump service worker `CACHE_NAME` (e.g. to v4) in `scripts/generate-sw.cjs` when changing default data so phones get the new assets on next load.
 
+---
+
+## Ballistics — Optics panel (scope magnification)
+
+**Requirement:** When the user opens the Optics panel in Ballistics (Reference), the correct magnification for the **selected profile scope** must appear: (1) in the **panel title** (e.g. "Optics (10×)" for default Hawke, "Optics (12×)" for 4–12× SFP, "Optics (FFP)" for FFP), (2) in the **expanded description** ("Set scope to X× to measure…" or "Use any magnification (FFP)"), and (3) in the **reference line** under the table ("10× reference" or "{mag}× reference" / "Any magnification (FFP)"). The same scope/magnification must apply on the **Distance** and **Height** calculate pages (hint at top of expanded panel).
+
+**Source of truth:** `getScopeMagnificationForMeasure(scope)` in `src/data/ballistic.ts`: FFP → `null` (any mag); SFP → `scope.magnificationCalibration` if set (e.g. 10 for Hawke SideWinder), else max of `scope.magnificationRange` (e.g. 12 for "4-12x"). Scope comes from `currentProfile.scopeId` via `getScopeById()` in `src/data/catalogs.ts`.
+
+**If Optics doesn’t show the right magnification:** (1) Confirm the profile has a valid `scopeId` (e.g. `hawke-sidewinder-30-4-16x50`) and that `scopes.json` contains that id with `magnificationCalibration` or `magnificationRange`. (2) ReferenceView, DistanceView, HeightView and RifleScopeSection all use `useBallisticProfile().currentProfile` and `getScopeById(currentProfile.scopeId)` — ensure they’re rendered inside `BallisticProfileProvider`. (3) After deploy, clear PWA cache (see "Desktop browser shows changes, phone app does not") so the app loads the bundle that includes optics title and dynamic reference text.
+
