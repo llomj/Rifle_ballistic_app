@@ -268,7 +268,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Targets — zero distance: drives drop, holdover, clicks, compensation. Under MIL/MOA, Metric/Imperial. */}
-      <section className="mb-6 glass rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
         <button
           type="button"
           onClick={() => { playTapSound(); setTargetsExpanded((e) => !e); }}
@@ -303,7 +303,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Turret table — foldable panel with config and distance|drop|mrad|clicks table */}
-      <section className="mb-6 glass rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
         <button
           type="button"
           onClick={() => { playTapSound(); setTurretTableExpanded((e) => !e); }}
@@ -401,7 +401,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Rifle — list of rifles; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="mb-6 glass rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
         <button
           type="button"
           onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
@@ -450,7 +450,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Ammunition — filtered by rifle caliber; list persists so user can re-select. */}
-      <section className="mb-6 glass rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
         <button
           type="button"
           onClick={() => { playTapSound(); setAmmunitionExpanded((e) => !e); }}
@@ -532,7 +532,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Scope — list of scopes; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="mb-6 glass rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
         <button
           type="button"
           onClick={() => { playTapSound(); setScopeExpanded((e) => !e); }}
