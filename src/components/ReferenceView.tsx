@@ -200,6 +200,7 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
 
   return (
     <div className="space-y-3 animate-in fade-in duration-300 pb-8">
+      <h1 className="text-emerald-400 font-bold text-xl pt-0 pb-1">{t('ballistic.ballistics')}</h1>
       <CliLine role="yellow">{t('ballistic.referenceTitle')}</CliLine>
       <CliLine role="yellow">{t('ballistic.goodFor')}</CliLine>
       <CliSep />
