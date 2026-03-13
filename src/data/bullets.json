@@ -1,5 +1,5 @@
 [
-  {"id":"300winmag-180gr-g1","name":"7.62mm (.300) 180 gr SP G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":11.66,"bcG1":0.439,"bcG7":0.225},
+  {"id":"300winmag-180gr-g1","name":".300 Win Mag 180 gr SP G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":11.66,"bcG1":0.439,"bcG7":0.225},
   {"id":"300winmag-165gr-g1","name":".300 Win Mag 165 gr BTSP G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":10.69,"bcG1":0.435,"bcG7":0.223},
   {"id":"300winmag-200gr-g1","name":".300 Win Mag 200 gr ELD-X G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":12.96,"bcG1":0.636,"bcG7":0.325},
   {"id":"300winmag-150gr-g1","name":".300 Win Mag 150 gr SST G1","caliber":".300 Win Mag","caliberKey":"300winmag","diameterMm":7.82,"weightGrams":9.72,"bcG1":0.415,"bcG7":0.212},
