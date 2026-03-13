@@ -94,16 +94,24 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   );
   const filteredAmmunitionList = useMemo(() => {
     const q = bulletFilterQuery.trim().toLowerCase();
-    if (!q) return ammunitionForRifle.slice(0, 200);
-    return ammunitionForRifle
-      .filter(
-        (b) =>
-          b.name.toLowerCase().includes(q) ||
-          b.caliber.toLowerCase().includes(q) ||
-          b.caliberKey.toLowerCase().includes(q)
-      )
-      .slice(0, 200);
-  }, [ammunitionForRifle, bulletFilterQuery]);
+    const base = q
+      ? ammunitionForRifle.filter(
+          (b) =>
+            b.name.toLowerCase().includes(q) ||
+            b.caliber.toLowerCase().includes(q) ||
+            b.caliberKey.toLowerCase().includes(q)
+        ).slice(0, 200)
+      : ammunitionForRifle.slice(0, 200);
+    // Ensure current profile bullet is in list and first when it matches this rifle (e.g. default .300 Win Mag 180 gr).
+    if (rifle && bullet && bullet.caliberKey === rifle.caliberKey) {
+      if (!base.some((b) => b.id === bullet.id)) return [bullet, ...base];
+      if (base[0].id !== bullet.id) {
+        const rest = base.filter((b) => b.id !== bullet.id);
+        return [bullet, ...rest];
+      }
+    }
+    return base;
+  }, [ammunitionForRifle, bulletFilterQuery, rifle, bullet]);
   const selectedCaliberKey = rifle?.caliberKey ?? filterCaliberKey ?? bullet?.caliberKey ?? (caliberOptions[0]?.caliberKey ?? '');
 
   useEffect(() => {
