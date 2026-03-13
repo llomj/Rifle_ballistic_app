@@ -7,9 +7,12 @@ import { IdLogEntry, IdLogRifle } from './types';
 import { LEVELS, XP_PER_QUESTION, QUESTIONS_PER_LEVEL, getStarsFromProgress, getStarsFromAccuracy, getStarsFromRandomCorrect, getRandomModeScore, getPersonaFromRandomScore, PERSONA_EMOJI } from './constants';
 import { useLanguage } from './contexts/LanguageContext';
 import { useBallisticSettings } from './contexts/BallisticSettingsContext';
+import { useBallisticProfile } from './contexts/BallisticProfileContext';
 import { formatTranslation } from './translations';
 import { playStarMelodyShort, playStarMelodyLong, playUITapSound, triggerHaptic } from './utils/sounds';
 import { SoundProvider } from './contexts/SoundContext';
+import { CIRCLE_SLOT_HEIGHT } from './constants/ballisticUI';
+import { DEFAULT_BALLISTIC_PROFILE } from './data/ballistic';
 
 const LOCAL_STORAGE_KEY = 'cli_exercises_learn_stats_v1';
 const SOUND_STORAGE_KEY = 'cli_exercises_sound_v1';
@@ -82,6 +85,7 @@ const ViewLoading: React.FC = () => (
 const App: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const { compassMode, setCompassMode, elevationEnabled, setElevationEnabled, theme } = useBallisticSettings();
+  const { currentProfile, savedProfiles, loadProfile } = useBallisticProfile();
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
   const [view, setView] = useState<'hub' | 'quiz' | 'log' | 'glossary'>('hub');
   const [showResult, setShowResult] = useState<{
@@ -100,6 +104,8 @@ const App: React.FC = () => {
   const [ballisticView, setBallisticView] = useState<'first' | 'hub' | 'ballistics' | 'distance' | 'height'>('first');
   const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets'>('ballistics');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -439,21 +445,33 @@ const App: React.FC = () => {
   return (
     <SoundProvider soundEnabled={soundEnabled} onPlay={() => void playUITapSound()}>
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]" data-theme={theme}>
-      {/* Settings at bottom centre — aligned with profile/info icon row. On first page, settings is in FirstPageView row; on other views show here. */}
-      {ballisticView !== 'first' && (
-        <div className="fixed bottom-0 left-0 right-0 z-[110] min-h-[10rem] pb-[env(safe-area-inset-bottom)] flex items-center justify-center bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
-          <button
-            onClick={() => {
-              if (soundEnabled) void playUITapSound();
-              setShowSettingsMenu(!showSettingsMenu);
-            }}
-            className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
-            title={t('settings.settings')}
-          >
-            <i className="fas fa-gear text-xl"></i>
-          </button>
-        </div>
-      )}
+      {/* Fixed bar: profile | settings | info — same level, same size/transparency, stays fixed when scrolling */}
+      <div className="fixed bottom-0 left-0 right-0 z-[110] min-h-[10rem] pb-[env(safe-area-inset-bottom)] flex items-center justify-between px-8 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
+        <button
+          onClick={() => { if (soundEnabled) void playUITapSound(); setShowProfileModal(true); }}
+          className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
+          title={t('ballistic.rifleProfile')}
+          aria-label={t('ballistic.rifleProfile')}
+        >
+          <i className="fas fa-user text-xl" />
+        </button>
+        <button
+          onClick={() => { if (soundEnabled) void playUITapSound(); setShowSettingsMenu(!showSettingsMenu); }}
+          className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
+          title={t('settings.settings')}
+          aria-label={t('settings.settings')}
+        >
+          <i className="fas fa-gear text-xl" />
+        </button>
+        <button
+          onClick={() => { if (soundEnabled) void playUITapSound(); setShowInfoModal(true); }}
+          className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
+          title={t('firstPage.infoTitle')}
+          aria-label={t('firstPage.infoTitle')}
+        >
+          <i className="fas fa-circle-info text-xl" />
+        </button>
+      </div>
       <SettingsMenu
         isOpen={showSettingsMenu}
         onClose={() => setShowSettingsMenu(false)}
@@ -486,6 +504,98 @@ const App: React.FC = () => {
           onToggleElevation={() => setElevationEnabled(!elevationEnabled)}
           onResetApp={() => setShowResetModal(true)}
       />
+
+      {/* Profile modal — same as FirstPageView */}
+      {showProfileModal && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center"
+          onClick={() => setShowProfileModal(false)}
+        >
+          <div
+            className="w-full flex-1 min-h-0 px-4 pt-4 pb-8 overflow-y-auto overflow-x-hidden overscroll-contain"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full mx-auto border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-theme-accent font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
+                <button
+                  type="button"
+                  onClick={() => { if (soundEnabled) void playUITapSound(); setShowProfileModal(false); }}
+                  className="p-1.5 rounded-full text-slate-500 hover:text-theme-accent hover:bg-white/10 transition-colors"
+                  aria-label={t('ballistic.configDone')}
+                >
+                  <i className="fas fa-times text-sm" />
+                </button>
+              </div>
+              <div className="mb-4">
+                <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { if (soundEnabled) void playUITapSound(); loadProfile('default'); }}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                      currentProfile.id === 'default'
+                        ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                        : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                    }`}
+                  >
+                    {DEFAULT_BALLISTIC_PROFILE.userName}
+                  </button>
+                  {savedProfiles.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => { if (soundEnabled) void playUITapSound(); loadProfile(p.id); }}
+                      className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                        currentProfile.id === p.id
+                          ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                          : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                      }`}
+                    >
+                      {p.userName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Suspense fallback={null}>
+                <RifleScopeSection editable showSaveAs />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Info modal — same as FirstPageView */}
+      {showInfoModal && (
+        <div
+          className="fixed inset-0 z-[100] overflow-y-auto"
+          onClick={() => setShowInfoModal(false)}
+        >
+          <div
+            className="flex flex-col items-center px-4 pb-8 min-h-full"
+            style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          >
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-theme-accent font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
+              <p className="text-slate-300 text-xs leading-relaxed mb-2">{t('firstPage.infoText')}</p>
+              <p className="text-slate-400 text-xs leading-relaxed mb-4">{t('firstPage.infoSwipe')}</p>
+              <button
+                type="button"
+                onClick={() => { if (soundEnabled) void playUITapSound(); setShowInfoModal(false); }}
+                className="w-full py-2 rounded-lg bg-theme-accent-20 text-theme-accent text-sm font-medium hover:bg-theme-accent-30 transition-colors"
+              >
+                {t('ballistic.configDone')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="container mx-auto px-4 py-1 max-w-4xl min-h-[calc(100dvh-160px)]">
         {view === 'quiz' ? (
@@ -593,7 +703,6 @@ const App: React.FC = () => {
             <FirstPageView
               onOpenHub={() => setBallisticView('hub')}
               onOpenCalculate={handleOpenCalculate}
-              onOpenSettings={() => setShowSettingsMenu(true)}
             />
           </Suspense>
         ) : ballisticView === 'ballistics' ? (
