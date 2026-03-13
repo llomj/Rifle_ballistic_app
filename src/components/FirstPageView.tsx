@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
+import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
+import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 import { mToFt } from '../utils/ballisticUnits';
 
 interface FirstPageViewProps {
@@ -174,6 +177,8 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     onOpenHub();
   };
 
+  const [showInfo, setShowInfo] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
@@ -288,6 +293,114 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
           <i className="fas fa-mountain-sun text-lg" />
         </button>
       </div>
+      <div className="mt-auto pt-4 pb-2 flex justify-between items-center w-full px-2">
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setShowProfile(true); }}
+          className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
+          aria-label={t('ballistic.rifleProfile')}
+        >
+          <i className="fas fa-user text-lg" />
+        </button>
+        <button
+          type="button"
+          onClick={() => { playTapSound(); setShowInfo(true); }}
+          className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
+          aria-label={t('firstPage.infoTitle')}
+        >
+          <i className="fas fa-circle-info text-lg" />
+        </button>
+      </div>
+      {/* Profile modal — user profile section, transparent like settings menu; inner scroll for bullet/form section */}
+      {showProfile && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center"
+          onClick={() => setShowProfile(false)}
+        >
+          <div
+            className="w-full flex-1 min-h-0 px-4 pt-4 pb-8 overflow-y-auto overflow-x-hidden overscroll-contain"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full mx-auto border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-theme-accent font-semibold text-sm">{t('ballistic.rifleProfile')}</h3>
+              <button
+                type="button"
+                onClick={() => { playTapSound(); setShowProfile(false); }}
+                className="p-1.5 rounded-full text-slate-500 hover:text-theme-accent hover:bg-white/10 transition-colors"
+                aria-label={t('ballistic.configDone')}
+              >
+                <i className="fas fa-times text-sm" />
+              </button>
+            </div>
+            {/* Profiles: Default + saved — same list as in BallisticHub */}
+            <div className="mb-4">
+              <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => { playTapSound(); loadProfile('default'); }}
+                  className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    currentProfile.id === 'default'
+                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  {DEFAULT_BALLISTIC_PROFILE.userName}
+                </button>
+                {savedProfiles.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { playTapSound(); loadProfile(p.id); }}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                      currentProfile.id === p.id
+                        ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
+                        : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                    }`}
+                  >
+                    {p.userName}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <RifleScopeSection editable showSaveAs />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Info modal — just under the circle, same design and transparency as profile */}
+      {showInfo && (
+        <div
+          className="fixed inset-0 z-[100] overflow-y-auto"
+          onClick={() => setShowInfo(false)}
+        >
+          <div
+            className="flex flex-col items-center px-4 pb-8 min-h-full"
+            style={{ paddingTop: `calc(${CIRCLE_SLOT_HEIGHT} + 0.5rem)` }}
+          >
+            <div
+              className="glass rounded-xl p-5 max-w-sm w-full border border-theme-accent-20 shadow-xl animate-in zoom-in duration-200 !bg-slate-900/[0.0009]"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <h3 className="text-theme-accent font-semibold text-sm mb-2">{t('firstPage.infoTitle')}</h3>
+            <p className="text-slate-300 text-xs leading-relaxed mb-2">{t('firstPage.infoText')}</p>
+            <p className="text-slate-400 text-xs leading-relaxed mb-4">{t('firstPage.infoSwipe')}</p>
+            <button
+              type="button"
+              onClick={() => { playTapSound(); setShowInfo(false); }}
+              className="w-full py-2 rounded-lg bg-theme-accent-20 text-theme-accent text-sm font-medium hover:bg-theme-accent-30 transition-colors"
+            >
+              {t('ballistic.configDone')}
+            </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
