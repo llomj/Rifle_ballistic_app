@@ -100,7 +100,7 @@ const App: React.FC = () => {
   const [randomizeTrigger, setRandomizeTrigger] = useState(0);
   const [showRandomModeModal, setShowRandomModeModal] = useState(false);
   const randomMode = stats.randomMode ?? false;
-  const [drillLevels] = useState<number[] | null>(null);
+  const [drillLevels, setDrillLevels] = useState<number[] | null>(null);
   const [ballisticView, setBallisticView] = useState<'first' | 'hub' | 'ballistics' | 'distance' | 'height'>('first');
   const [ballisticTab, setBallisticTab] = useState<'rifles' | 'ballistics' | 'targets'>('ballistics');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
