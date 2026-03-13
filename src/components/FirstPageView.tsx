@@ -14,6 +14,8 @@ interface FirstPageViewProps {
   onOpenHub: () => void;
   /** Swipe right on first page opens calculate section (Distance/Height). */
   onOpenCalculate?: () => void;
+  /** Open settings menu. */
+  onOpenSettings?: () => void;
 }
 
 const SWIPE_THRESHOLD_PX = 80;
@@ -21,7 +23,7 @@ const MAX_VERTICAL_PX = 100;
 const WHEEL_SWIPE_THRESHOLD = 50; // Accumulated |deltaX| for trackpad two-finger swipe
 
 /** First Page: only the clicks circle + settings. User taps circle to open main hub. Swipe right opens calculate section. */
-export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenCalculate }) => {
+export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenCalculate, onOpenSettings }) => {
   const { playTapSound } = useSound();
   const { t } = useLanguage();
   const { measurement, compassMode, elevationEnabled, setElevationEnabled, elevationData } = useBallisticSettings();
@@ -302,6 +304,16 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         >
           <i className="fas fa-user text-lg" />
         </button>
+        {onOpenSettings && (
+          <button
+            type="button"
+            onClick={() => { playTapSound(); onOpenSettings(); }}
+            className="p-2 rounded-full text-slate-500 hover:text-theme-accent-80 hover:bg-white/5 transition-colors"
+            aria-label={t('settings.settings')}
+          >
+            <i className="fas fa-gear text-lg" />
+          </button>
+        )}
         <button
           type="button"
           onClick={() => { playTapSound(); setShowInfo(true); }}

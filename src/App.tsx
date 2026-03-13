@@ -439,19 +439,21 @@ const App: React.FC = () => {
   return (
     <SoundProvider soundEnabled={soundEnabled} onPlay={() => void playUITapSound()}>
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 pb-28 pt-[env(safe-area-inset-top)]" data-theme={theme}>
-      {/* Settings at bottom centre — aligned with profile/info icon row */}
-      <div className="fixed bottom-0 left-0 right-0 z-[110] min-h-[10rem] pb-[env(safe-area-inset-bottom)] flex items-center justify-center bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
-        <button
-          onClick={() => {
-            if (soundEnabled) void playUITapSound();
-            setShowSettingsMenu(!showSettingsMenu);
-          }}
-          className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
-          title={t('settings.settings')}
-        >
-          <i className="fas fa-gear text-xl"></i>
-        </button>
-      </div>
+      {/* Settings at bottom centre — aligned with profile/info icon row. On first page, settings is in FirstPageView row; on other views show here. */}
+      {ballisticView !== 'first' && (
+        <div className="fixed bottom-0 left-0 right-0 z-[110] min-h-[10rem] pb-[env(safe-area-inset-bottom)] flex items-center justify-center bg-gradient-to-t from-slate-950 to-transparent pointer-events-none">
+          <button
+            onClick={() => {
+              if (soundEnabled) void playUITapSound();
+              setShowSettingsMenu(!showSettingsMenu);
+            }}
+            className="w-16 h-16 flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shadow-lg min-w-[64px] min-h-[64px] pointer-events-auto"
+            title={t('settings.settings')}
+          >
+            <i className="fas fa-gear text-xl"></i>
+          </button>
+        </div>
+      )}
       <SettingsMenu
         isOpen={showSettingsMenu}
         onClose={() => setShowSettingsMenu(false)}
@@ -591,6 +593,7 @@ const App: React.FC = () => {
             <FirstPageView
               onOpenHub={() => setBallisticView('hub')}
               onOpenCalculate={handleOpenCalculate}
+              onOpenSettings={() => setShowSettingsMenu(true)}
             />
           </Suspense>
         ) : ballisticView === 'ballistics' ? (
