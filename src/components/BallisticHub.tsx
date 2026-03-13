@@ -153,7 +153,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       )}
 
       {/* Profiles: Default + saved — switch between them */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
+      <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden px-4 py-3 !bg-slate-900/[0.0009]">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
         <div className="flex flex-wrap gap-2">
           <button
@@ -195,7 +195,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* User name — local state only while typing; push to profile on blur/save so panel stays in sync and no dropped letters */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3">
+      <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden px-4 py-3 !bg-slate-900/[0.0009]">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.userName')}</label>
         <input
           ref={userNameInputRef}
@@ -216,7 +216,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Scope unit + Measurement — MIL/MOA on top, Metric/Imperial underneath */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden px-4 py-3 space-y-3">
+      <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden px-4 py-3 space-y-3 !bg-slate-900/[0.0009]">
         <div className="flex gap-2">
             <button
               type="button"
@@ -268,7 +268,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Targets — zero distance: drives drop, holdover, clicks, compensation. Under MIL/MOA, Metric/Imperial. */}
-      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
+      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setTargetsExpanded((e) => !e); }}
@@ -303,7 +303,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Turret table — foldable panel with config and distance|drop|mrad|clicks table */}
-      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
+      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setTurretTableExpanded((e) => !e); }}
@@ -401,7 +401,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Rifle — list of rifles; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
+      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
@@ -450,7 +450,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Ammunition — filtered by rifle caliber; list persists so user can re-select. */}
-      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
+      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setAmmunitionExpanded((e) => !e); }}
@@ -532,7 +532,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Scope — list of scopes; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="mb-6 rounded-2xl border border-white/10 overflow-hidden bg-slate-900/20 backdrop-blur-md">
+      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setScopeExpanded((e) => !e); }}
@@ -581,7 +581,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Full ballistic setup — collapsible */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+      <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setSetupExpanded((e) => !e); }}
@@ -598,7 +598,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Ballistics — opens ballistic section (DistanceView); green, always visible */}
-      <section className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+      <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => {
@@ -625,7 +625,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Save — expandable: save current + list of saved profiles with delete */}
-      <section className="mt-12 mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+      <section className="glass mt-12 mb-6 rounded-xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
         <button
           type="button"
           onClick={() => { playTapSound(); setSavePanelExpanded((e) => !e); }}
