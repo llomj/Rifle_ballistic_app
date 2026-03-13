@@ -11,6 +11,9 @@ import { getUniqueCalibers, getBulletById, getScopeById, getRifleById, getBullet
 import type { CaliberOption } from '../data/catalogs';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
+/** Display name for default profile bullet so it always shows .300 Win Mag 180 gr (avoids cached JSON showing old label). */
+const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
+
 export type BallisticView = 'distance' | 'height';
 
 export type BallisticTab = 'rifles' | 'ballistics' | 'targets';
@@ -465,8 +468,8 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
         >
           <span className="text-sm font-medium text-white shrink-0 min-w-[5.5rem]">{t('ballistic.ammunition')}</span>
-          <span className="text-sm text-theme-accent min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded" title={bullet?.name ?? currentProfile.bulletId}>
-            {(bullet?.name ?? currentProfile.bulletId) || '—'}
+          <span className="text-sm text-theme-accent min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded" title={currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)}>
+            {(currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)) || '—'}
           </span>
           <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${ammunitionExpanded ? 'rotate-180' : ''}`} />
         </button>

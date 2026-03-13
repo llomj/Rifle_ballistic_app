@@ -20,7 +20,9 @@ import {
   searchBullets,
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
-import { computeRecoilEnergyJ, recoilCategory, getScopeMagnificationForMeasure } from '../data/ballistic';
+import { computeRecoilEnergyJ, recoilCategory, getScopeMagnificationForMeasure, DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+
+const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
 
 interface RifleScopeSectionProps {
   /** When true, show editable form (comboboxes + inputs). When false, show read-only summary. */
@@ -423,7 +425,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="white">{t('ballistic.scope')}: {scope?.name ?? currentProfile.scopeId}</CliLine>
           <CliLine role="white">{t('ballistic.scopeHeight')}:{"\t"}{currentProfile.scopeHeightCm != null ? formatScopeHeight(currentProfile.scopeHeightCm, measurement) : '—'} · {t('ballistic.barrelLength')}: {currentProfile.barrelLengthCm != null ? formatBarrelLength(currentProfile.barrelLengthCm, measurement) : '—'} · {t('ballistic.twist')}: {currentProfile.twistRate ?? '—'}</CliLine>
           <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
-          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{bullet?.name ?? currentProfile.bulletId} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${currentProfile.muzzleVelocityMps} m/s`) : '—'}</CliLine>
+          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${currentProfile.muzzleVelocityMps} m/s`) : '—'}</CliLine>
           <CliLine role="white">{t('ballistic.recoil')}:{"\t"}{recoilJ != null ? (measurement === 'imperial' ? `${(recoilJ * 0.737562).toFixed(2)} ft·lb` : `${recoilJ.toFixed(2)} J`) : '—'} · {t('ballistic.coefficient')}: {bcDisplay != null ? `${bcDisplay} G1` : '—'}</CliLine>
         </section>
       )}
