@@ -197,7 +197,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
       </button>
       </div>
       {inputsSectionExpanded && (
-        <div className="w-full max-w-md -mt-[8vh] rounded-xl border border-theme-accent-30 bg-theme-accent-5 overflow-hidden px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
+        <div className="w-full max-w-md -mt-[8vh] max-h-[min(72vh,calc(100dvh-10rem))] overflow-y-auto overscroll-contain touch-pan-y rounded-xl border border-theme-accent-30 bg-theme-accent-5 px-5 pb-5 space-y-4 pt-4 flex-shrink-0 text-[1.2em]">
           {scope && (
             <CliLine role="cyan">
               {measureMag != null
@@ -248,7 +248,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
             </button>
           </div>
           {hasResult ? (
-            <section className="mt-4 pt-4 border-t border-white/10 space-y-1.5 max-h-[14.5rem] overflow-y-auto text-[1.2em]">
+            <section className="mt-4 pt-4 border-t border-white/10 space-y-1.5 text-[1.2em]">
               {turret &&
                 (turret.outOfRange ? (
                   <CliLine role="white">{t('ballistic.targetTooFar')}</CliLine>
