@@ -1,7 +1,10 @@
 /**
  * Ballistic data and formulas. Single source of truth aligned with rifle_distance.py and rifle_height.py.
+ * Trajectory: Ingalls G1 tables + BC (GNU/pg-drag style), not vacuum gravity with a fake decay.
  * Supports MIL and MOA scopes. AGENTS.md §0.
  */
+
+import { dropBoreBelowMetersG1 } from './ingallsG1';
 
 export type ScopeUnit = 'MIL' | 'MOA';
 
@@ -431,28 +434,12 @@ export function getTurretRow(distanceM: number): TurretResult | null {
   };
 }
 
-// --- Trajectory engine (G1 simplified point-mass) ---
-const G = 9.80665;
-const ZERO_DISTANCE_DEFAULT_M = 100;
-
-/** Simple velocity decay: v(x) = v0 / (1 + x / (BC*1000)). Returns time to reach distance (s). */
-function timeToDistance(v0: number, bc: number, distanceM: number): number {
-  if (v0 <= 0 || bc <= 0 || distanceM <= 0) return 0;
-  const k = 1000 * bc;
-  return (distanceM + (distanceM * distanceM) / (2 * k)) / v0;
-}
-
-/** Gravity drop at distance (m) in meters, no zero. */
-function dropGravityM(v0: number, bc: number, distanceM: number): number {
-  const t = timeToDistance(v0, bc, distanceM);
-  return 0.5 * G * t * t;
-}
-
 /**
  * Vertical correction (cm) relative to line of sight zeroed at zeroDist.
  * Positive = bullet hits low (dial up / hold over). Zero at range === zero distance.
  * LOS: straight line from scope height above bore to the point where the bullet
  * crosses LOS at the zero distance (standard rifle zero model).
+ * Drop vs bore: Ingalls G1 + BC (matches field tables for typical hunting loads).
  */
 export function computeDropAtRangeCm(
   bcG1: number,
@@ -463,9 +450,8 @@ export function computeDropAtRangeCm(
 ): number {
   if (bcG1 <= 0 || muzzleVelocityMps <= 0 || rangeM < 0 || zeroDistanceM <= 0) return 0;
   const h = scopeHeightCm / 100;
-  const dropAtZero = dropGravityM(muzzleVelocityMps, bcG1, zeroDistanceM);
-  const dropAtRange = dropGravityM(muzzleVelocityMps, bcG1, rangeM);
-  // Offset (m), positive = bullet below LOS: h - (R/Z)*(h + D_z) + D_R
+  const dropAtZero = dropBoreBelowMetersG1(bcG1, muzzleVelocityMps, zeroDistanceM);
+  const dropAtRange = dropBoreBelowMetersG1(bcG1, muzzleVelocityMps, rangeM);
   const offsetM = h - (rangeM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
   return offsetM * 100;
 }
@@ -503,10 +489,16 @@ export function buildTurretTableFromTrajectory(
     : TURRET_DISTANCE_BANDS;
   for (let i = 0; i < bands.length; i++) {
     const [dMin, dMax] = bands[i];
-    const dMid = (dMin + dMax) / 2;
-    const dropCm = dropAtRangeCm(dMid);
+    // Match printed reference rows: 150 m for 150–170; otherwise band end (200, 250, …).
+    const dSample =
+      customDistances && customDistances.length > 0
+        ? (dMin + dMax) / 2
+        : dMin === 150 && dMax === 170
+          ? 150
+          : dMax;
+    const dropCm = dropAtRangeCm(dSample);
     const dropM = dropCm / 100;
-    const mrad = dropM / (dMid / 1000);
+    const mrad = dropM / (dSample / 1000);
     const mradRounded = Math.round(mrad * 100) / 100;
     const moa = mradRounded * (180 / Math.PI) * (60 / 1000);
     const value = scopeUnit === 'MIL' ? mradRounded : moa;

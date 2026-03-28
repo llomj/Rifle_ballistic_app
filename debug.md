@@ -61,3 +61,12 @@ This file documents anomalies found in questions where the logic doesn't make se
 1. **Systematic review**: Go through each level's questions for clarity
 2. **User testing**: Have users report unclear questions
 3. **Validation script**: Run `scripts/validate_cli_questions.py` after changes
+
+---
+
+## Rifle ballistic app — trajectory solver (March 2026)
+
+- **Engine:** Drop vs bore uses **Ingalls G1 tables** scaled by published **G1 BC** (same family as GNU exterior ballistics / `pg-drag`: velocity vs range, time of flight, then \( \frac{1}{2} g t^2 \) drop). This replaces an earlier toy model (gravity + fake velocity decay) that did not match real tables.
+- **Zero / LOS:** Elevation **relative to line of sight** at the profile zero distance uses the linear LOS crossing model (scope height + bullet path vs zero range); at the zero range, correction is 0 cm / 0 clicks.
+- **Reference card** (`rifle_distance.py` / AGENTS.md turret lines): numbers are a **fixed** hunting card; the live solver varies with **MV, BC, scope height, zero**. Mid-range rows (e.g. 150–400 m) should track the card closely for the default .300 Win Mag load; very long range may differ from any printed card due to atmosphere, G7 vs G1, etc.
+- **G7 bullets:** The app may pass **G7 BC** into the G1 Ingalls path when the catalog marks G7 — acceptable for a field app; for best G7 long-range accuracy, a future **G7 drag curve** would be needed.
