@@ -29,7 +29,7 @@ const precacheUrls = files.map((f) => {
   return JSON.stringify(url);
 });
 
-const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v6';
+const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v7';
 const PRECACHE_URLS = [${precacheUrls.join(',\n  ')}];
 
 self.addEventListener('install', (e) => {
@@ -46,6 +46,21 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  // HTML navigations: network-first so new deploys are not stuck behind stale index.html in cache.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === 'basic') {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;

@@ -5,13 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rifle Ballistic App</title>
     <script>
-        // Redirect to app base for GitHub Pages (e.g. /rifle_ballistic_app/)
-        const seg = location.pathname.split('/').filter(Boolean)[0];
-        const basePath = '/' + (seg || 'rifle_ballistic_app') + '/';
-        const path = window.location.pathname;
-        if (path !== basePath && path !== basePath.replace(/\/$/, '')) {
+        // GitHub Pages path is case-sensitive. This repo is deployed at /Rifle_ballistic_app/ (capital R).
+        // Lowercase /rifle_ballistic_app/ returns 404; old default left users stuck on this page with no redirect.
+        (function () {
+            var CORRECT = 'Rifle_ballistic_app';
+            var parts = location.pathname.split('/').filter(Boolean);
+            var first = parts[0] || '';
+            var path = location.pathname;
+            var basePath = '/' + CORRECT + '/';
+            var qs = location.search || '';
+            var hash = location.hash || '';
+
+            if (first.toLowerCase() === 'rifle_ballistic_app' && first !== CORRECT) {
+                var rest = parts.slice(1).join('/');
+                window.location.replace(basePath + rest + qs + hash);
+                return;
+            }
+            if (!first) {
+                window.location.replace(basePath);
+                return;
+            }
+            if (first === CORRECT) {
+                if (path !== basePath && path !== basePath.replace(/\/$/, '')) {
+                    window.location.replace(basePath);
+                }
+                return;
+            }
             window.location.replace(basePath);
-        }
+        })();
     </script>
 </head>
 <body>
