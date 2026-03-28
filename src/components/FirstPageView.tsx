@@ -9,6 +9,7 @@ import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 import { mToFt } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
+import { inclinationFromCalibratedPitch, lowpassAngle, pitchDegFromBetaGamma } from '../utils/inclinometer';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -26,7 +27,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   const { playTapSound } = useSound();
   const { t } = useLanguage();
   const { measurement, compassMode, elevationEnabled, setElevationEnabled, elevationData } = useBallisticSettings();
-  const { currentProfile, savedProfiles, loadProfile } = useBallisticProfile();
+  const { currentProfile, savedProfiles, loadProfile, updateCurrentProfile } = useBallisticProfile();
   const [heading, setHeading] = useState<number | null>(null);
   const { getTurretForExactDistance, getWindForExactDistance } = useTrajectoryTables();
   const [clicksMeters, setClicksMeters] = useState('');
@@ -169,6 +170,79 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     };
   }, [compassMode]);
 
+  useEffect(() => {
+    if (!inclinActive) {
+      inclinSmoothedRef.current = null;
+      setInclinLivePitch(null);
+      setInclinPitchRef(null);
+      setInclinGammaAbs(null);
+      setInclinHadReading(false);
+      setInclinSensorMissing(false);
+      inclinGotEventRef.current = false;
+      if (inclinRafRef.current != null) {
+        cancelAnimationFrame(inclinRafRef.current);
+        inclinRafRef.current = null;
+      }
+      return;
+    }
+    const handler = (e: DeviceOrientationEvent) => {
+      if (e.beta == null || e.gamma == null || Number.isNaN(e.beta) || Number.isNaN(e.gamma)) return;
+      inclinGotEventRef.current = true;
+      setInclinSensorMissing(false);
+      const pitch = pitchDegFromBetaGamma(e.beta, e.gamma);
+      inclinSmoothedRef.current = lowpassAngle(inclinSmoothedRef.current, pitch);
+      setInclinGammaAbs(Math.abs(e.gamma));
+      setInclinHadReading(true);
+      if (inclinRafRef.current == null) {
+        inclinRafRef.current = requestAnimationFrame(() => {
+          inclinRafRef.current = null;
+          const v = inclinSmoothedRef.current;
+          if (v != null && Number.isFinite(v)) setInclinLivePitch(v);
+        });
+      }
+    };
+    window.addEventListener('deviceorientation', handler);
+    return () => {
+      window.removeEventListener('deviceorientation', handler);
+      if (inclinRafRef.current != null) {
+        cancelAnimationFrame(inclinRafRef.current);
+        inclinRafRef.current = null;
+      }
+    };
+  }, [inclinActive]);
+
+  useEffect(() => {
+    if (!inclinActive) return;
+    setInclinSensorMissing(false);
+    inclinGotEventRef.current = false;
+    const t = window.setTimeout(() => {
+      if (!inclinGotEventRef.current) setInclinSensorMissing(true);
+    }, 3200);
+    return () => clearTimeout(t);
+  }, [inclinActive]);
+
+  const toggleInclinometer = () => {
+    playTapSound();
+    if (inclinActive) {
+      setInclinActive(false);
+      return;
+    }
+    const req =
+      typeof DeviceOrientationEvent !== 'undefined' && 'requestPermission' in DeviceOrientationEvent
+        ? (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission()
+        : Promise.resolve('granted');
+    req
+      .then((result) => {
+        if (result === 'granted') setInclinActive(true);
+      })
+      .catch(() => {});
+  };
+
+  const inclinSlopeDeg =
+    inclinLivePitch != null && inclinPitchRef != null
+      ? inclinationFromCalibratedPitch(inclinLivePitch, inclinPitchRef)
+      : null;
+
   const handleOpenHub = () => {
     if (swipeJustFired.current) {
       swipeJustFired.current = false;
@@ -180,6 +254,16 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
 
   const [showInfo, setShowInfo] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  /** Phone clinometer: live pitch and calibration for shotInclinationDeg */
+  const [inclinActive, setInclinActive] = useState(false);
+  const [inclinLivePitch, setInclinLivePitch] = useState<number | null>(null);
+  const [inclinPitchRef, setInclinPitchRef] = useState<number | null>(null);
+  const [inclinGammaAbs, setInclinGammaAbs] = useState<number | null>(null);
+  const [inclinHadReading, setInclinHadReading] = useState(false);
+  const [inclinSensorMissing, setInclinSensorMissing] = useState(false);
+  const inclinSmoothedRef = useRef<number | null>(null);
+  const inclinRafRef = useRef<number | null>(null);
+  const inclinGotEventRef = useRef(false);
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
@@ -298,8 +382,8 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         </div>
       </button>
       </div>
-      {/* Elevation toggle (under compass), Profile and Info icons */}
-      <div className="mt-2 flex items-center justify-center gap-1">
+      {/* Elevation + slope clinometer (under compass), Profile and Info icons */}
+      <div className="mt-2 flex items-center justify-center gap-1 flex-wrap">
         <button
           type="button"
           onClick={() => { playTapSound(); setElevationEnabled(!elevationEnabled); }}
@@ -309,7 +393,77 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
         >
           <i className="fas fa-mountain-sun text-lg" />
         </button>
+        <button
+          type="button"
+          onClick={toggleInclinometer}
+          className={`p-2 rounded-full transition-colors ${inclinActive ? 'text-theme-accent bg-theme-accent-20' : 'text-slate-500 hover:text-theme-accent-80 hover:bg-white/5'}`}
+          aria-label={t('firstPage.inclinToggle')}
+          aria-pressed={inclinActive}
+        >
+          <i className="fas fa-arrow-trend-up text-lg" />
+        </button>
       </div>
+      {inclinActive && (
+        <div className="mt-2 w-full max-w-sm mx-auto px-1 flex flex-col items-center gap-1.5 text-[11px] text-slate-300 font-mono">
+          {inclinSensorMissing && (
+            <span className="text-slate-500 text-center leading-tight">{t('firstPage.inclinNoSensor')}</span>
+          )}
+          {inclinHadReading && inclinGammaAbs != null && inclinGammaAbs > 55 && (
+            <span className="text-amber-400/90 text-center leading-tight">{t('firstPage.inclinRollWarn')}</span>
+          )}
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span className="tabular-nums">
+              {t('firstPage.inclinLive')}:{' '}
+              {inclinSlopeDeg != null ? `${inclinSlopeDeg > 0 ? '+' : ''}${inclinSlopeDeg}°` : '—'}
+            </span>
+            <span className="text-slate-500 tabular-nums">
+              {t('firstPage.inclinProfile')}:{' '}
+              {currentProfile.shotInclinationDeg != null && Number.isFinite(currentProfile.shotInclinationDeg)
+                ? `${currentProfile.shotInclinationDeg > 0 ? '+' : ''}${currentProfile.shotInclinationDeg}°`
+                : '—'}
+            </span>
+          </div>
+          {inclinPitchRef == null && inclinHadReading && (
+            <span className="text-slate-500 text-center leading-tight">{t('firstPage.inclinNeedCalibrate')}</span>
+          )}
+          <div className="flex flex-wrap justify-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                playTapSound();
+                const v = inclinSmoothedRef.current;
+                if (v != null && Number.isFinite(v)) setInclinPitchRef(v);
+              }}
+              className="px-2.5 py-1 rounded-lg border border-theme-accent-30 text-theme-accent hover:bg-theme-accent-10 transition-colors"
+            >
+              {t('firstPage.inclinCalibrate')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                playTapSound();
+                if (inclinSlopeDeg == null || !Number.isFinite(inclinSlopeDeg)) return;
+                updateCurrentProfile({ shotInclinationDeg: inclinSlopeDeg });
+              }}
+              disabled={inclinSlopeDeg == null}
+              className="px-2.5 py-1 rounded-lg border border-theme-accent-30 text-theme-accent hover:bg-theme-accent-10 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            >
+              {t('firstPage.inclinApply')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                playTapSound();
+                updateCurrentProfile({ shotInclinationDeg: undefined });
+                setInclinPitchRef(null);
+              }}
+              className="px-2.5 py-1 rounded-lg border border-white/15 text-slate-400 hover:bg-white/5 transition-colors"
+            >
+              {t('firstPage.inclinClear')}
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mt-auto pt-4 pb-2 flex justify-between items-center w-full px-2">
         <button
           type="button"
