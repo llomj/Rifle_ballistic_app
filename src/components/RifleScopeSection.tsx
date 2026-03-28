@@ -168,8 +168,8 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="yellow">{measureLine2}</CliLine>
           <CliLine role="yellow">{measureLine3}</CliLine>
         </div>
-        <div className="rounded border border-emerald-500/35 bg-emerald-500/10 px-2 py-1.5 mt-1">
-          <CliLine role="green">{goodForGameText}</CliLine>
+        <div className="rounded border border-cyan-500/35 bg-cyan-500/10 px-2 py-1.5 mt-1">
+          <CliLine role="cyan">{goodForGameText}</CliLine>
         </div>
       </section>
 
