@@ -10,6 +10,15 @@ import { dropBoreBelowMetersG7 } from './g7Trajectory';
 /** Which drag model backs dropBoreBelow* for computeDropAtRangeCm. */
 export type TrajectoryDragModel = 'G1' | 'G7';
 
+/** Optional modifiers for vertical drop vs LOS (see computeDropAtRangeCm). */
+export interface ComputeDropAtRangeOptions {
+  /**
+   * Inclination from horizontal in degrees (+ uphill, − downhill).
+   * Uses horizontal equivalent range R·cos(θ) for trajectory drop vs a flat LOS zero.
+   */
+  inclinationDegFromHorizontal?: number;
+}
+
 export type ScopeUnit = 'MIL' | 'MOA';
 
 /** Catalog item: rifle from rifles.json */
@@ -90,6 +99,11 @@ export interface BulletCatalogItem {
   bulletShape?: string;
   /** Optional: drag model (G1, G7, etc.). Default G1 for bcG1. */
   dragModel?: string;
+  /**
+   * Optional: barrel length (cm) for which factory / catalog muzzle velocity is quoted.
+   * When set with the user profile barrel length, MV can be adjusted for barrel difference (estimate).
+   */
+  referenceBarrelLengthCm?: number;
 }
 
 /** User ballistic setup: rifle + scope + bullet + inputs. Saved with userName. */
@@ -116,6 +130,15 @@ export interface BallisticProfile {
   scopeUnit?: ScopeUnit;
   /** Measurement system. Stored per profile. */
   measurement?: 'metric' | 'imperial';
+  /**
+   * Shot inclination from horizontal (degrees). Positive = uphill, negative = downhill.
+   * Used for horizontal-equivalent range in drop (rifleman-style). 0 = flat.
+   */
+  shotInclinationDeg?: number;
+  /** Field powder / ambient temperature (°C). With mvReferenceTempC, adjusts MV for trajectory. */
+  powderTempC?: number;
+  /** Temperature (°C) at which the entered muzzle velocity was measured. Default 15 °C when powder temp is set. */
+  mvReferenceTempC?: number;
 }
 
 /** Whether a bullet's caliberKey matches a rifle's (for filtering). */
@@ -444,6 +467,7 @@ export function getTurretRow(distanceM: number): TurretResult | null {
  * LOS: straight line from scope height above bore to the point where the bullet
  * crosses LOS at the zero distance (standard rifle zero model).
  * Drop vs bore: G1 uses Ingalls + G1 BC; G7 uses G7 CD(Mach) integration + G7 BC (same LOS model).
+ * Inclined fire: horizontal equivalent range R·cos(θ) drives bore drop; LOS term uses the same horizontal distance (flat zero).
  */
 export function computeDropAtRangeCm(
   bc: number,
@@ -451,15 +475,24 @@ export function computeDropAtRangeCm(
   zeroDistanceM: number,
   scopeHeightCm: number,
   rangeM: number,
-  dragModel: TrajectoryDragModel = 'G1'
+  dragModel: TrajectoryDragModel = 'G1',
+  options?: ComputeDropAtRangeOptions
 ): number {
   if (bc <= 0 || muzzleVelocityMps <= 0 || rangeM < 0 || zeroDistanceM <= 0) return 0;
+  const inc =
+    options?.inclinationDegFromHorizontal != null &&
+    Number.isFinite(options.inclinationDegFromHorizontal)
+      ? options.inclinationDegFromHorizontal
+      : 0;
+  const cos = Math.cos((inc * Math.PI) / 180);
+  const rangeHorizontalM = rangeM * cos;
   const h = scopeHeightCm / 100;
   const dropBore =
     dragModel === 'G7' ? dropBoreBelowMetersG7 : dropBoreBelowMetersG1;
   const dropAtZero = dropBore(bc, muzzleVelocityMps, zeroDistanceM);
-  const dropAtRange = dropBore(bc, muzzleVelocityMps, rangeM);
-  const offsetM = h - (rangeM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
+  const dropAtRange = dropBore(bc, muzzleVelocityMps, rangeHorizontalM);
+  const offsetM =
+    h - (rangeHorizontalM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
   return offsetM * 100;
 }
 

@@ -20,7 +20,13 @@ import {
   searchBullets,
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
-import { computeRecoilEnergyJ, recoilCategory, getScopeMagnificationForMeasure, DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+import {
+  computeRecoilEnergyJ,
+  recoilCategory,
+  getScopeMagnificationForMeasure,
+  DEFAULT_BALLISTIC_PROFILE,
+} from '../data/ballistic';
+import { computeEffectiveMuzzleVelocityMps, getReferenceBarrelLengthCm } from '../data/ballisticMvAdjust';
 
 const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
 
@@ -44,15 +50,34 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
 
+  const effectiveMuzzleVelocityMps = useMemo(
+    () =>
+      computeEffectiveMuzzleVelocityMps({
+        baseMuzzleVelocityMps: currentProfile.muzzleVelocityMps,
+        powderTempC: currentProfile.powderTempC,
+        mvReferenceTempC: currentProfile.mvReferenceTempC,
+        barrelLengthCm: currentProfile.barrelLengthCm,
+        referenceBarrelLengthCm: getReferenceBarrelLengthCm(bullet),
+      }),
+    [
+      currentProfile.muzzleVelocityMps,
+      currentProfile.powderTempC,
+      currentProfile.mvReferenceTempC,
+      currentProfile.barrelLengthCm,
+      bullet?.referenceBarrelLengthCm,
+      bullet?.id,
+    ]
+  );
+
   const recoilJ = useMemo(() => {
     if (!rifle?.rifleWeightKg || !bullet) return null;
     return computeRecoilEnergyJ(
       rifle.rifleWeightKg,
       bullet.weightGrams,
-      currentProfile.muzzleVelocityMps,
+      effectiveMuzzleVelocityMps,
       currentProfile.bulletGram
     );
-  }, [rifle, bullet, currentProfile.muzzleVelocityMps, currentProfile.bulletGram]);
+  }, [rifle, bullet, effectiveMuzzleVelocityMps, currentProfile.bulletGram]);
 
   const recoilCat = recoilJ != null ? recoilCategory(recoilJ) : null;
   const bcDisplay = currentProfile.bcOverride ?? bullet?.bcG1 ?? null;
@@ -339,6 +364,70 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             />
             <span className="text-slate-500 shrink-0">{measurement === 'imperial' ? 'fps' : 'm/s'}</span>
           </div>
+          {Math.abs(effectiveMuzzleVelocityMps - currentProfile.muzzleVelocityMps) > 0.05 && (
+            <div className="flex items-center gap-2 text-slate-500">
+              <span className={`${labelCls} w-28`}>{t('ballistic.trajectorySpeed')}</span>
+              <span className="text-theme-accent font-mono text-xs">
+                {measurement === 'imperial'
+                  ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps`
+                  : `${effectiveMuzzleVelocityMps.toFixed(1)} m/s`}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.shotInclination')}</span>
+            <input
+              type="number"
+              step="0.5"
+              value={currentProfile.shotInclinationDeg ?? ''}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ shotInclinationDeg: undefined });
+                  return;
+                }
+                updateCurrentProfile({ shotInclinationDeg: parseFloat(e.target.value) || 0 });
+              }}
+              placeholder="0"
+              className={`${inputCls} ${numInputCls}`}
+            />
+            <span className="text-slate-500 shrink-0 text-[10px] max-w-[8rem] leading-tight">{t('ballistic.shotInclinationHint')}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.powderTemp')}</span>
+            <input
+              type="number"
+              step="0.5"
+              value={currentProfile.powderTempC ?? ''}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ powderTempC: undefined });
+                  return;
+                }
+                updateCurrentProfile({ powderTempC: parseFloat(e.target.value) });
+              }}
+              placeholder="—"
+              className={`${inputCls} ${numInputCls}`}
+            />
+            <span className="text-slate-500 shrink-0">°C</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.mvRefTemp')}</span>
+            <input
+              type="number"
+              step="0.5"
+              value={currentProfile.mvReferenceTempC ?? ''}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ mvReferenceTempC: undefined });
+                  return;
+                }
+                updateCurrentProfile({ mvReferenceTempC: parseFloat(e.target.value) });
+              }}
+              placeholder="15"
+              className={`${inputCls} ${numInputCls}`}
+            />
+            <span className="text-slate-500 shrink-0">°C</span>
+          </div>
           <div className="flex items-center gap-2">
             <span className={`${labelCls} w-28`}>{t('ballistic.recoil')}</span>
             <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 flex-1 min-w-0 text-slate-300 font-mono text-xs">
@@ -426,6 +515,23 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="white">{t('ballistic.scopeHeight')}:{"\t"}{currentProfile.scopeHeightCm != null ? formatScopeHeight(currentProfile.scopeHeightCm, measurement) : '—'} · {t('ballistic.barrelLength')}: {currentProfile.barrelLengthCm != null ? formatBarrelLength(currentProfile.barrelLengthCm, measurement) : '—'} · {t('ballistic.twist')}: {currentProfile.twistRate ?? '—'}</CliLine>
           <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
           <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${currentProfile.muzzleVelocityMps} m/s`) : '—'}</CliLine>
+          {(() => {
+            const parts: string[] = [];
+            if (currentProfile.shotInclinationDeg != null && currentProfile.shotInclinationDeg !== 0) {
+              parts.push(`${t('ballistic.shotInclination')}: ${currentProfile.shotInclinationDeg}°`);
+            }
+            if (currentProfile.powderTempC != null) {
+              parts.push(`${t('ballistic.powderTemp')}: ${currentProfile.powderTempC} °C`);
+            }
+            if (currentProfile.mvReferenceTempC != null) {
+              parts.push(`${t('ballistic.mvRefTemp')}: ${currentProfile.mvReferenceTempC} °C`);
+            }
+            if (parts.length === 0) return null;
+            return <CliLine role="white">{parts.join(' · ')}</CliLine>;
+          })()}
+          {Math.abs(effectiveMuzzleVelocityMps - currentProfile.muzzleVelocityMps) > 0.05 ? (
+            <CliLine role="yellow">{t('ballistic.trajectorySpeed')}: {measurement === 'imperial' ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps` : `${effectiveMuzzleVelocityMps.toFixed(1)} m/s`}</CliLine>
+          ) : null}
           <CliLine role="white">{t('ballistic.recoil')}:{"\t"}{recoilJ != null ? (measurement === 'imperial' ? `${(recoilJ * 0.737562).toFixed(2)} ft·lb` : `${recoilJ.toFixed(2)} J`) : '—'} · {t('ballistic.coefficient')}: {bcDisplay != null ? `${bcDisplay} G1` : '—'}</CliLine>
         </section>
       )}

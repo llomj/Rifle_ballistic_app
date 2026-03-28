@@ -97,6 +97,7 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 - **Primer**: Small cap that ignites the powder when struck by the firing pin. Boxer (one flash hole) and Berdan (two holes) are common.
 - **Hand load / handload**: Ammunition assembled by the shooter (reloading). Allows custom bullet, powder, and velocity.
 - **Factory load**: Commercially loaded ammunition. Velocity and BC are typically published or measurable.
+- **Reference barrel length (catalog)**: Barrel length (e.g. cm) for which a factory or catalog muzzle velocity is quoted. When set on a bullet and the user’s rifle barrel length differs, the app can apply a **rough** MV correction (estimate; actual results vary by load and rifle).
 
 ---
 
@@ -112,6 +113,8 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 - **Windage**: Horizontal adjustment or hold for wind (or mechanical zero).
 - **Wind drift**: Horizontal displacement of the bullet caused by crosswind. Depends on time of flight, wind speed, and BC.
 - **Time of flight**: Duration from muzzle to target. Affects drop and wind drift.
+- **Inclined fire (uphill / downhill)**: Shooting at a target not level with the shooter. The app uses **horizontal equivalent range** (line-of-sight range × cos(angle)) for drop vs a **flat** zero—common “rifleman” style approximation. Large angles and precision work may need more advanced models.
+- **Powder / MV reference temperature**: Muzzle velocity varies with temperature (powder and air). If you enter **powder temp** and **MV reference temp**, the app adjusts MV with a small linear coefficient (approximate). If your MV was measured with a chronograph at **your** barrel, leave powder temp empty or match reference temp to field conditions to avoid double correction.
 - **Energy (muzzle / at range)**: Kinetic energy of the bullet (e.g. in joules or ft·lbf). Often used for terminal effect or legal minimums.
 - **Recoil**: Rearward force on the shooter from the bullet and propellant gases. Affects follow-up shots and comfort.
 
@@ -172,3 +175,11 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 | gr     | Grains |
 
 This glossary is the master reference for the rifle ballistic app. All in-app definitions and help text should align with it.
+
+---
+
+## Correspondance française (résumé)
+
+- **Longueur de canon de référence (catalogue)** : Longueur de canon pour laquelle une vitesse initiale d’usine ou catalogue est donnée. Sert à une correction **approximative** de la V₀ si votre canon diffère.
+- **Tir en pente** : Cible plus haute ou plus basse que le tireur. L’app utilise la **portée horizontale équivalente** (portée visée × cos(angle)) pour la chute, avec zéro pris à plat.
+- **Température poudre / température de référence V₀** : La V₀ varie avec la température. Entrées optionnelles pour ajuster la V₀ de façon linéaire (approximation). Si votre V₀ provient d’un chronographe sur **votre** arme, laissez les champs vides ou alignez la température de référence sur le terrain.

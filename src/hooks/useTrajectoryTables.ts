@@ -16,6 +16,10 @@ import {
   type CompensationRow,
 } from '../data/ballistic';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
+import {
+  computeEffectiveMuzzleVelocityMps,
+  getReferenceBarrelLengthCm,
+} from '../data/ballisticMvAdjust';
 
 /** Returns turret table, compensation table, getTurretRow, and getTurretForExactDistance for the current profile. Uses trajectory when bullet + scope + BC + MV are available; otherwise falls back to static table. Zero distance from profile drives drop, holdover, clicks. */
 export function useTrajectoryTables(): {
@@ -85,8 +89,19 @@ export function useTrajectoryTables(): {
     }
 
     const zeroM = currentProfile.zeroDistanceM ?? 100;
+    const mvEff = computeEffectiveMuzzleVelocityMps({
+      baseMuzzleVelocityMps: mv,
+      powderTempC: currentProfile.powderTempC,
+      mvReferenceTempC: currentProfile.mvReferenceTempC,
+      barrelLengthCm: currentProfile.barrelLengthCm,
+      referenceBarrelLengthCm: getReferenceBarrelLengthCm(bullet),
+    });
+    const inc = currentProfile.shotInclinationDeg;
     const dropAtRange = (rangeM: number) =>
-      computeDropAtRangeCm(bc, mv, zeroM, scopeH, rangeM, trajectoryModel);
+      computeDropAtRangeCm(bc, mvEff, zeroM, scopeH, rangeM, trajectoryModel, {
+        inclinationDegFromHorizontal:
+          inc != null && Number.isFinite(inc) ? inc : undefined,
+      });
 
     const customDistances = generateDistancesFromInterval(
       clicksConfig.minM,
@@ -120,6 +135,10 @@ export function useTrajectoryTables(): {
     currentProfile.muzzleVelocityMps,
     currentProfile.scopeHeightCm,
     currentProfile.zeroDistanceM,
+    currentProfile.shotInclinationDeg,
+    currentProfile.powderTempC,
+    currentProfile.mvReferenceTempC,
+    currentProfile.barrelLengthCm,
     scopeUnit,
     clicksConfig.minM,
     clicksConfig.maxM,
