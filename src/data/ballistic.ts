@@ -448,7 +448,12 @@ function dropGravityM(v0: number, bc: number, distanceM: number): number {
   return 0.5 * G * t * t;
 }
 
-/** Drop relative to LOS zeroed at zeroDist, in cm. scopeHeight in cm. */
+/**
+ * Vertical correction (cm) relative to line of sight zeroed at zeroDist.
+ * Positive = bullet hits low (dial up / hold over). Zero at range === zero distance.
+ * LOS: straight line from scope height above bore to the point where the bullet
+ * crosses LOS at the zero distance (standard rifle zero model).
+ */
 export function computeDropAtRangeCm(
   bcG1: number,
   muzzleVelocityMps: number,
@@ -456,13 +461,13 @@ export function computeDropAtRangeCm(
   scopeHeightCm: number,
   rangeM: number
 ): number {
-  if (bcG1 <= 0 || muzzleVelocityMps <= 0 || rangeM < 0) return 0;
-  const scopeH = scopeHeightCm / 100;
+  if (bcG1 <= 0 || muzzleVelocityMps <= 0 || rangeM < 0 || zeroDistanceM <= 0) return 0;
+  const h = scopeHeightCm / 100;
   const dropAtZero = dropGravityM(muzzleVelocityMps, bcG1, zeroDistanceM);
   const dropAtRange = dropGravityM(muzzleVelocityMps, bcG1, rangeM);
-  const losAtRange = scopeH + (rangeM / zeroDistanceM) * (dropAtZero + scopeH);
-  const dropRel = dropAtRange - losAtRange;
-  return dropRel * 100;
+  // Offset (m), positive = bullet below LOS: h - (R/Z)*(h + D_z) + D_R
+  const offsetM = h - (rangeM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
+  return offsetM * 100;
 }
 
 /** Distance bands for turret table (same as static TURRET_TABLE). */
