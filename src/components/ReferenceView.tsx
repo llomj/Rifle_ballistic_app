@@ -321,7 +321,11 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         expanded={targetHeightsExpanded}
         onToggle={() => { playTapSound(); setTargetHeightsExpanded((e) => !e); }}
       >
-        <CliLine role="yellow">{t('ballistic.targetHeightsNote')}</CliLine>
+        <div className="pt-4 min-h-0 max-h-[min(55vh,22rem)] overflow-y-auto overflow-x-hidden overscroll-contain [-webkit-overflow-scrolling:touch]">
+          <CliLine role="yellow" wrap>
+            {t('ballistic.targetHeightsNote')}
+          </CliLine>
+        </div>
       </CollapsiblePanel>
 
       <CollapsiblePanel
