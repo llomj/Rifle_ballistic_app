@@ -92,5 +92,17 @@
   {"id":"burris-xtrii-5-25x50","name":"Burris XTR II 5-25x50","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"5-25x","tubeDiameterMm":34},
   {"id":"burris-xtriii-5-30x56","name":"Burris XTR III 5-30x56","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"5-30x","tubeDiameterMm":34},
   {"id":"trijicon-credo-hx-2-12x42","name":"Trijicon Credo HX 2-12x42","unit":"MOA","clickValue":0.25,"ffpOrSfp":"SFP","magnificationRange":"2-12x","tubeDiameterMm":30},
-  {"id":"trijicon-tenmile-3-18x44","name":"Trijicon Tenmile 3-18x44","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"3-18x","tubeDiameterMm":30}
+  {"id":"trijicon-tenmile-3-18x44","name":"Trijicon Tenmile 3-18x44","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"3-18x","tubeDiameterMm":30},
+  {"id":"leica-fortis-6-2-5-15x56","name":"Leica Fortis 6 2.5-15x56 i","unit":"MOA","clickValue":0.25,"ffpOrSfp":"SFP","magnificationRange":"2.5-15x","brand":"Leica","tubeDiameterMm":30,"reticleType":"4a"},
+  {"id":"delta-stryker-hd-4-5-30x56","name":"Delta Optical Stryker HD 4.5-30x56 FFP","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"4.5-30x","brand":"Delta Optical","tubeDiameterMm":34,"reticleType":"DLR-1"},
+  {"id":"sightron-siii-6-24x50-ffp","name":"Sightron SIII 6-24x50 LR FFP","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x","brand":"Sightron","tubeDiameterMm":30,"reticleType":"Mil-Dot"},
+  {"id":"maven-rs44-5-30x56","name":"Maven RS.4 5-30x56 FFP","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"5-30x","brand":"Maven","tubeDiameterMm":34,"reticleType":"SHR-W"},
+  {"id":"primary-arms-glx-4-16x50","name":"Primary Arms GLX 4-16x50 FFP Athena BPR MIL","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"4-16x","brand":"Primary Arms","tubeDiameterMm":30},
+  {"id":"steiner-predator-8-4-16x42","name":"Steiner Predator 8 4-16x42","unit":"MOA","clickValue":0.25,"ffpOrSfp":"SFP","magnificationRange":"4-16x","brand":"Steiner","tubeDiameterMm":30,"reticleType":"German #4"},
+  {"id":"vortex-venom-5-25x56","name":"Vortex Venom 5-25x56 FFP EBR-7C","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"5-25x","brand":"Vortex","tubeDiameterMm":34,"reticleType":"EBR-7C","zeroStop":true},
+  {"id":"blaser-infinity-4-20x58","name":"Blaser Infinity 4-20x58 ic","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"4-20x","brand":"Blaser","tubeDiameterMm":36,"reticleType":"4i"},
+  {"id":"swarovski-ds-5-25x52","name":"Swarovski dS 5-25x52 P Gen II","unit":"MOA","clickValue":0.25,"ffpOrSfp":"SFP","magnificationRange":"5-25x","brand":"Swarovski","tubeDiameterMm":40,"reticleType":"4A-I"},
+  {"id":"kahles-k624i-6-24x56","name":"Kahles K624i 6-24x56","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x","brand":"Kahles","tubeDiameterMm":34,"reticleType":"SKMR3","zeroStop":true},
+  {"id":"bushnell-matchpro-6-24x50","name":"Bushnell Match Pro 6-24x50 Deploy MIL","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"6-24x","brand":"Bushnell","tubeDiameterMm":30,"reticleType":"Deploy MIL"},
+  {"id":"nightforce-nx8-2-5-20x50","name":"Nightforce NX8 2.5-20x50 F1","unit":"MIL","clickValue":0.1,"ffpOrSfp":"FFP","magnificationRange":"2.5-20x","brand":"Nightforce","tubeDiameterMm":30,"reticleType":"Mil-C","zeroStop":true}
 ]
