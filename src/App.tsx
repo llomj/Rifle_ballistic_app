@@ -103,11 +103,19 @@ const App: React.FC = () => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return localStorage.getItem(SOUND_STORAGE_KEY) !== 'false';
+    try {
+      return localStorage.getItem(SOUND_STORAGE_KEY) !== 'false';
+    } catch {
+      return true;
+    }
   });
   const [hapticEnabled, setHapticEnabled] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return localStorage.getItem(HAPTIC_STORAGE_KEY) !== 'false';
+    try {
+      return localStorage.getItem(HAPTIC_STORAGE_KEY) !== 'false';
+    } catch {
+      return true;
+    }
   });
   const lastSwipeNavRef = useRef(0);
   const SWIPE_COOLDOWN_MS = 600;
@@ -124,10 +132,14 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
+    } catch (_) {}
   }, [soundEnabled]);
   useEffect(() => {
-    localStorage.setItem(HAPTIC_STORAGE_KEY, String(hapticEnabled));
+    try {
+      localStorage.setItem(HAPTIC_STORAGE_KEY, String(hapticEnabled));
+    } catch (_) {}
   }, [hapticEnabled]);
 
   const toggleSound = () => setSoundEnabled((prev) => !prev);
@@ -151,7 +163,12 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    } catch (_) {
+      return;
+    }
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -207,7 +224,9 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stats));
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stats));
+    } catch (_) {}
   }, [stats]);
 
   useEffect(() => {

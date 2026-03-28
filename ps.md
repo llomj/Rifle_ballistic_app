@@ -30,6 +30,8 @@ When adding new content, add both languages in the same commit. Never ship Engli
 3. After changing SW logic, edit `scripts/generate-sw.cjs` and bump `CACHE_NAME` version; rebuild and redeploy.
 4. Test: `npm run build`, serve `dist` with correct base (e.g. `npx serve dist` and open the path that matches your base, or deploy and open the app), go offline in DevTools, reload; the app should load from cache.
 
+**Blank / white screen (loads nothing):** Ensure `LanguageContext` and app `localStorage` use try/catch (Safari private mode throws on `setItem`). Service worker must not use network-only navigation without a fallback to cached `index.html` — cache-first avoids `respondWith(undefined)` when `caches.match` misses the navigation URL.
+
 **If the app does not open on phone (blank / redirect / PWA fails):**
 1. **404 redirect:** `public/404.html` must redirect to the **exact** GitHub Pages folder name for this repo (case-sensitive), e.g. `/Rifle_ballistic_app/`. A **lowercase** path such as `/rifle_ballistic_app/` returns 404 on Pages; the 404 page must rewrite wrong-case URLs to the canonical folder or users see a blank “Redirecting…” page.
 2. **PWA start_url:** The manifest is generated at build time in `scripts/generate-sw.cjs` with `start_url` and icon `src` set to the deploy base path (from `VITE_BASE_REPO`). This ensures "Add to Home Screen" opens the app at the correct URL (e.g. `https://user.github.io/rifle_ballistic_app/`).

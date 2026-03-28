@@ -18,35 +18,49 @@ const LEGACY_LANGUAGE_KEY = 'python_exercises_learn_language';
 // Translation data
 import { translations } from '../translations';
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
+function readInitialLanguage(): Language {
+  try {
     let saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (!saved) {
       const legacy = localStorage.getItem(LEGACY_LANGUAGE_KEY);
       if (legacy === 'fr' || legacy === 'en') {
-        localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
-        try { localStorage.removeItem(LEGACY_LANGUAGE_KEY); } catch (_) {}
+        try {
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
+          localStorage.removeItem(LEGACY_LANGUAGE_KEY);
+        } catch (_) {}
         saved = legacy;
       }
     }
     if (!saved) {
       const prev = localStorage.getItem(PREV_LANGUAGE_STORAGE_KEY);
       if (prev === 'fr') {
-        localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
-        try { localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY); } catch (_) {}
+        try {
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
+          localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY);
+        } catch (_) {}
         saved = 'fr';
       } else {
-        localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
-        try { localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY); } catch (_) {}
+        try {
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
+          localStorage.removeItem(PREV_LANGUAGE_STORAGE_KEY);
+        } catch (_) {}
         saved = 'fr';
       }
     }
     return (saved === 'en' ? 'en' : 'fr') as Language;
-  });
+  } catch {
+    return 'fr';
+  }
+}
+
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>(readInitialLanguage);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    } catch (_) {}
   };
 
   const t = (key: string): string => {

@@ -29,7 +29,7 @@ const precacheUrls = files.map((f) => {
   return JSON.stringify(url);
 });
 
-const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v7';
+const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v8';
 const PRECACHE_URLS = [${precacheUrls.join(',\n  ')}];
 
 self.addEventListener('install', (e) => {
@@ -46,28 +46,15 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  // HTML navigations: network-first so new deploys are not stuck behind stale index.html in cache.
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request)
-        .then((res) => {
-          if (res && res.status === 200 && res.type === 'basic') {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
-          }
-          return res;
-        })
-        .catch(() => caches.match(e.request))
-    );
-    return;
-  }
+  // Cache-first for everything (including navigations). Network-first navigations could leave
+  // respondWith(undefined) when fetch fails and caches.match(e.request) misses index.html URL shape.
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;
       return fetch(e.request).then((res) => {
         if (!res || res.status !== 200 || res.type === 'opaque') return res;
         const clone = res.clone();
-        caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+        caches.open(CACHE_NAME).then((c) => c.put(e.request, clone)).catch(() => {});
         return res;
       });
     })
