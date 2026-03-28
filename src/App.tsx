@@ -462,12 +462,10 @@ const App: React.FC = () => {
             setView('hub');
             setBallisticView(tab === 'ballistics' ? 'ballistics' : 'hub');
             setBallisticTab(tab);
-            setShowSettingsMenu(false);
           }}
           onNavigateToProfile={() => {
             setView('hub');
             setBallisticView('hub');
-            setShowSettingsMenu(false);
           }}
           randomMode={randomMode}
           onToggleRandomMode={view === 'hub' || view === 'quiz' ? handleRandomModeToggle : undefined}

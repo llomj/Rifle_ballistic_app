@@ -94,7 +94,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   if (onNavigateToProfile || onNavigateToBallistic) {
     const customizeSubItems: Array<{ icon: string; label: string; onClick: () => void }> = [];
     if (onNavigateToProfile) {
-      customizeSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); onClose(); } });
+      customizeSubItems.push({ icon: 'fa-user', label: t('settings.profile'), onClick: () => { onNavigateToProfile(); } });
     }
     menuItems.push({
       type: 'customize',
@@ -108,7 +108,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
         type: 'item',
         icon: 'fa-bullseye',
         label: t('ballistic.tabBallistics'),
-        onClick: () => { onNavigateToBallistic('ballistics'); onClose(); },
+        onClick: () => { onNavigateToBallistic('ballistics'); },
         active: true,
       } as MenuItem);
     }
@@ -160,7 +160,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
               {/* Default user — always shown, restores default metrics */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => { playTapSound(); loadProfile('default'); onClose(); }}
+                  onClick={() => { playTapSound(); loadProfile('default'); }}
                   className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     currentProfile.id === 'default'
                       ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30'
@@ -174,7 +174,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 savedProfiles.map((p) => (
                   <div key={p.id} className="flex items-center gap-2">
                     <button
-                      onClick={() => { playTapSound(); loadProfile(p.id); onClose(); }}
+                      onClick={() => { playTapSound(); loadProfile(p.id); }}
                       className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                         currentProfile.id === p.id
                           ? 'bg-theme-accent-20 text-theme-accent border border-theme-accent-30'
@@ -353,7 +353,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
               )}
               {onToggleLanguage && (
                 <button
-                  onClick={() => { playTapSound(); onToggleLanguage(); onClose(); }}
+                  onClick={() => { playTapSound(); onToggleLanguage(); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-slate-400 hover:bg-white/10 hover:text-white"
                 >
                   <i className="fas fa-language text-sm w-5 flex-shrink-0" />
@@ -412,14 +412,19 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
 
   return (
     <>
-      {/* Backdrop - z-[110] so Settings stays above modals (z-[100]) */}
+      {/* Backdrop — below menu panel so taps on the panel never hit the overlay */}
       <div
         className="fixed inset-0 z-[110]"
         onClick={onClose}
+        aria-hidden
       />
 
-      {/* Menu - near top-right on mobile, below trigger on desktop */}
-      <div className={`z-[110] min-w-[200px] ${anchorBottom ? 'fixed top-[max(4rem,env(safe-area-inset-top))] right-4' : 'absolute top-full right-0 mt-2'}`}>
+      {/* Menu — higher z than backdrop so controls stay interactive */}
+      <div
+        className={`z-[120] min-w-[200px] ${anchorBottom ? 'fixed top-[max(4rem,env(safe-area-inset-top))] right-4' : 'absolute top-full right-0 mt-2'}`}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="glass rounded-2xl p-2 shadow-2xl border border-white/10 animate-in slide-in-from-top-2 duration-200 !bg-slate-900/[0.0009]">
           {menuItems.map((item, index) => renderItem(item, index))}
 
