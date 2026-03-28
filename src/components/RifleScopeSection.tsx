@@ -3,7 +3,21 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
-import { cmToIn, inToCm, mmToIn, inToMm, msToFps, fpsToMs, kgToLb, mToYd, formatScopeHeight, formatBarrelLength, formatMmLength } from '../utils/ballisticUnits';
+import {
+  cmToIn,
+  inToCm,
+  mmToIn,
+  inToMm,
+  msToFps,
+  fpsToMs,
+  kgToLb,
+  mToYd,
+  kphToMph,
+  mphToKph,
+  formatScopeHeight,
+  formatBarrelLength,
+  formatMmLength,
+} from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
 import { SearchCombobox } from './SearchCombobox';
@@ -428,6 +442,57 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             />
             <span className="text-slate-500 shrink-0">°C</span>
           </div>
+          <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.windSpeed')}</span>
+            <input
+              type="number"
+              min="0"
+              step={measurement === 'imperial' ? 1 : 1}
+              value={
+                currentProfile.windSpeedKph != null && currentProfile.windSpeedKph > 0
+                  ? measurement === 'imperial'
+                    ? Math.round(kphToMph(currentProfile.windSpeedKph) * 10) / 10
+                    : currentProfile.windSpeedKph
+                  : ''
+              }
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ windSpeedKph: undefined });
+                  return;
+                }
+                const raw = parseFloat(e.target.value) || 0;
+                updateCurrentProfile({
+                  windSpeedKph: measurement === 'imperial' ? mphToKph(raw) : raw,
+                });
+              }}
+              placeholder="—"
+              className={`${inputCls} ${numInputCls}`}
+            />
+            <span className="text-slate-500 shrink-0">{measurement === 'imperial' ? 'mph' : 'km/h'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.windFromClock')}</span>
+            <input
+              type="number"
+              min="0"
+              max="360"
+              step="1"
+              value={currentProfile.windFromClockDeg ?? ''}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ windFromClockDeg: undefined });
+                  return;
+                }
+                updateCurrentProfile({ windFromClockDeg: parseFloat(e.target.value) || 0 });
+              }}
+              placeholder="90"
+              className={`${inputCls} ${numInputCls}`}
+            />
+            <span className="text-slate-500 shrink-0 text-[10px] max-w-[7rem] leading-tight">{t('ballistic.windClockHint')}</span>
+          </div>
+          <CliLine role="cyan" wrap>
+            {t('ballistic.windDriftHelp')}
+          </CliLine>
           <div className="flex items-center gap-2">
             <span className={`${labelCls} w-28`}>{t('ballistic.recoil')}</span>
             <div className="rounded border border-theme-accent-30 bg-theme-accent-5 px-2 py-1.5 flex-1 min-w-0 text-slate-300 font-mono text-xs">
@@ -525,6 +590,17 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             }
             if (currentProfile.mvReferenceTempC != null) {
               parts.push(`${t('ballistic.mvRefTemp')}: ${currentProfile.mvReferenceTempC} °C`);
+            }
+            if (currentProfile.windSpeedKph != null && currentProfile.windSpeedKph > 0) {
+              const spd =
+                measurement === 'imperial'
+                  ? `${Math.round(kphToMph(currentProfile.windSpeedKph) * 10) / 10} mph`
+                  : `${currentProfile.windSpeedKph} km/h`;
+              const clk =
+                currentProfile.windFromClockDeg != null && Number.isFinite(currentProfile.windFromClockDeg)
+                  ? `${currentProfile.windFromClockDeg}°`
+                  : '90°';
+              parts.push(`${t('ballistic.windSpeed')}: ${spd} @ ${clk}`);
             }
             if (parts.length === 0) return null;
             return <CliLine role="white">{parts.join(' · ')}</CliLine>;

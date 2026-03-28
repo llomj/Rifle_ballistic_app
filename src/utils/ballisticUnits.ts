@@ -8,6 +8,8 @@ export type MeasurementSystem = 'metric' | 'imperial';
 // --- Conversions ---
 export const mToYd = (m: number) => m * 1.0936139;
 export const ydToM = (yd: number) => yd / 1.0936139;
+export const kphToMph = (kph: number) => kph / 1.609344;
+export const mphToKph = (mph: number) => mph * 1.609344;
 export const cmToIn = (cm: number) => cm / 2.54;
 export const inToCm = (inVal: number) => inVal * 2.54;
 export const mmToIn = (mm: number) => mm / 25.4;

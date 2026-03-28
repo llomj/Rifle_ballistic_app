@@ -8,6 +8,7 @@ import { RifleScopeSection } from './RifleScopeSection';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 import { mToFt } from '../utils/ballisticUnits';
+import { formatTranslation } from '../translations';
 
 interface FirstPageViewProps {
   /** Navigate to main Ballistic Hub */
@@ -27,7 +28,7 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   const { measurement, compassMode, elevationEnabled, setElevationEnabled, elevationData } = useBallisticSettings();
   const { currentProfile, savedProfiles, loadProfile } = useBallisticProfile();
   const [heading, setHeading] = useState<number | null>(null);
-  const { getTurretForExactDistance } = useTrajectoryTables();
+  const { getTurretForExactDistance, getWindForExactDistance } = useTrajectoryTables();
   const [clicksMeters, setClicksMeters] = useState('');
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const onOpenCalculateRef = useRef(onOpenCalculate);
@@ -239,6 +240,22 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
                   : '…'}
             </span>
           )}
+          {clicksMeters.trim() !== '' &&
+            (() => {
+              const raw = parseFloat(String(clicksMeters).replace(',', '.')) || 0;
+              const distM = measurement === 'imperial' ? raw * 0.9144 : raw;
+              if (distM <= 0) return null;
+              const w = getWindForExactDistance(distM);
+              if (!w) return null;
+              return (
+                <span className="text-[10px] text-slate-400 font-mono tabular-nums mt-1 max-w-[220px] text-center leading-tight px-1">
+                  {formatTranslation(t('ballistic.windCorrectionShort'), {
+                    clicks: String(w.windageClicks),
+                    hold: w.holdRight ? t('ballistic.windHoldRight') : t('ballistic.windHoldLeft'),
+                  })}
+                </span>
+              );
+            })()}
           <span className="absolute left-1/2 -translate-x-1/2 text-[10px] text-slate-500 uppercase tracking-wider" style={{ bottom: 44 }}>{t('firstPage.tapToOpen')}</span>
         </div>
 

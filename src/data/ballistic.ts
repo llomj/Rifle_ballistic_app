@@ -4,8 +4,8 @@
  * Supports MIL and MOA scopes. AGENTS.md §0.
  */
 
-import { dropBoreBelowMetersG1 } from './ingallsG1';
-import { dropBoreBelowMetersG7 } from './g7Trajectory';
+import { dropBoreBelowMetersG1, timeOfFlightToRangeG1 } from './ingallsG1';
+import { dropBoreBelowMetersG7, timeOfFlightToRangeG7 } from './g7Trajectory';
 
 /** Which drag model backs dropBoreBelow* for computeDropAtRangeCm. */
 export type TrajectoryDragModel = 'G1' | 'G7';
@@ -139,6 +139,16 @@ export interface BallisticProfile {
   powderTempC?: number;
   /** Temperature (°C) at which the entered muzzle velocity was measured. Default 15 °C when powder temp is set. */
   mvReferenceTempC?: number;
+  /**
+   * Wind speed (km/h) for drift estimate. Crosswind uses windFromClockDeg.
+   * Stored in km/h internally; UI may show mph when measurement is imperial.
+   */
+  windSpeedKph?: number;
+  /**
+   * Where wind blows from on a clock face: 12 = toward target (headwind), 90° = 3 o’clock = shooter’s right (full crosswind).
+   * Degrees clockwise from 12. If wind speed is set and this is omitted, 90° is used (full crosswind).
+   */
+  windFromClockDeg?: number;
 }
 
 /** Whether a bullet's caliberKey matches a rifle's (for filtering). */
@@ -494,6 +504,88 @@ export function computeDropAtRangeCm(
   const offsetM =
     h - (rangeHorizontalM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
   return offsetM * 100;
+}
+
+/** Time of flight (s) to horizontal range (m); same drag model and BC as drop. */
+export function timeOfFlightToRange(
+  bc: number,
+  muzzleVelocityMps: number,
+  rangeM: number,
+  dragModel: TrajectoryDragModel = 'G1'
+): number {
+  if (bc <= 0 || muzzleVelocityMps <= 0 || rangeM <= 0) return 0;
+  return dragModel === 'G7'
+    ? timeOfFlightToRangeG7(bc, muzzleVelocityMps, rangeM)
+    : timeOfFlightToRangeG1(bc, muzzleVelocityMps, rangeM);
+}
+
+const DEFAULT_WIND_CLOCK_DEG = 90;
+
+/** Wind drift solution at one distance; windage in scope unit + clicks (same click value as elevation). */
+export interface WindCorrectionAtRange {
+  driftCm: number;
+  /** Magnitude in MIL or MOA (always ≥ 0). */
+  angleAbs: number;
+  windageClicks: number;
+  /** True = hold / dial windage toward shooter’s right (wind from right pushes impact left). */
+  holdRight: boolean;
+  outOfRange: boolean;
+}
+
+/**
+ * Constant crosswind × time-of-flight (lag) drift; angular correction matches drop small-angle convention.
+ * Clock: 12 = toward target, 90° = from shooter’s right (full crosswind). Uses horizontal range if inclined.
+ */
+export function computeWindCorrectionAtDistance(
+  distanceM: number,
+  windSpeedKph: number,
+  windFromClockDeg: number | undefined,
+  bc: number,
+  muzzleVelocityMps: number,
+  dragModel: TrajectoryDragModel,
+  scopeClickValue: number,
+  scopeUnit: ScopeUnit,
+  maxM: number,
+  options?: ComputeDropAtRangeOptions
+): WindCorrectionAtRange | null {
+  if (
+    !Number.isFinite(distanceM) ||
+    distanceM <= 0 ||
+    !Number.isFinite(windSpeedKph) ||
+    windSpeedKph <= 0 ||
+    scopeClickValue <= 0
+  ) {
+    return null;
+  }
+  const clock =
+    windFromClockDeg != null && Number.isFinite(windFromClockDeg)
+      ? windFromClockDeg
+      : DEFAULT_WIND_CLOCK_DEG;
+  const inc =
+    options?.inclinationDegFromHorizontal != null &&
+    Number.isFinite(options.inclinationDegFromHorizontal)
+      ? options.inclinationDegFromHorizontal
+      : 0;
+  const rangeH = distanceM * Math.cos((inc * Math.PI) / 180);
+  const windMs = windSpeedKph / 3.6;
+  const crosswindFromRightMps = windMs * Math.sin((clock * Math.PI) / 180);
+  const tof = timeOfFlightToRange(bc, muzzleVelocityMps, rangeH, dragModel);
+  if (tof <= 0 || !Number.isFinite(tof)) return null;
+  const lateralDriftM = -crosswindFromRightMps * tof;
+  const correctionM = -lateralDriftM;
+  const mradRaw = rangeH > 0 ? correctionM / (rangeH / 1000) : 0;
+  const mradRounded = Math.round(mradRaw * 100) / 100;
+  const moa = mradRounded * (180 / Math.PI) * (60 / 1000);
+  const value = scopeUnit === 'MIL' ? mradRounded : moa;
+  const angleAbs = Math.round(Math.abs(value) * 100) / 100;
+  const windageClicks = Math.round(Math.abs(value) / scopeClickValue);
+  return {
+    driftCm: Math.abs(lateralDriftM) * 100,
+    angleAbs,
+    windageClicks,
+    holdRight: mradRounded > 0,
+    outOfRange: distanceM > maxM,
+  };
 }
 
 /** Distance bands for turret table (same as static TURRET_TABLE). */

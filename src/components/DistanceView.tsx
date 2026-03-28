@@ -8,7 +8,7 @@ import { getScopeById } from '../data/catalogs';
 import { CIRCLE_SIZE_PX, CIRCLE_SLOT_HEIGHT } from '../constants/ballisticUI';
 
 const DEG_TO_MRAD = (1000 * Math.PI) / 180;
-import { mToYd, cmToIn, ftToM, mToFt, formatTurretLine } from '../utils/ballisticUnits';
+import { mToYd, cmToIn, ftToM, mToFt, formatTurretLine, formatDrop } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
 import { distanceFromHeight, getScopeMagnificationForMeasure } from '../data/ballistic';
@@ -35,7 +35,7 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   const [valueStr, setValueStr] = useState('');
   const [inputsSectionExpanded, setInputsSectionExpanded] = useState(false);
 
-  const { getTurretRowForDistance } = useTrajectoryTables();
+  const { getTurretRowForDistance, getWindForExactDistance } = useTrajectoryTables();
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const scopeUnitForFormula = scope?.unit === 'MIL' || scope?.unit === 'MOA' ? scope.unit : scopeUnit;
   const measureMag = useMemo(() => getScopeMagnificationForMeasure(scope), [scope]);
@@ -50,6 +50,10 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   const turret = useMemo(
     () => (distance != null ? getTurretRowForDistance(distance) : null),
     [distance, getTurretRowForDistance]
+  );
+  const windRow = useMemo(
+    () => (distance != null && distance > 0 ? getWindForExactDistance(distance) : null),
+    [distance, getWindForExactDistance]
   );
   const result = distance != null ? Math.round(distance * 1000) / 1000 : null;
   const isMIL = scopeUnitForFormula === 'MIL';
@@ -260,6 +264,17 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
               <CliLine role="white">{formatTranslation(t('ballistic.reticleEquals'), { value: reticleFormatted })}</CliLine>
               <CliLine role="white">{isMIL ? formatTranslation(t('ballistic.targetHeightResult'), { value: reticleFormatted, mils: String(value), height: heightFormatted }) : formatTranslation(t('ballistic.targetHeightResultMoa'), { value: reticleFormatted, moa: String(value), height: heightFormatted })}</CliLine>
               <CliLine role="white">{isMIL ? `mils = ${value}` : `MOA = ${value}`}</CliLine>
+              {windRow && (
+                <CliLine role="white">
+                  {formatTranslation(t('ballistic.windCorrectionLine'), {
+                    drift: formatDrop(windRow.driftCm, measurement),
+                    angle: windRow.angleAbs.toFixed(2),
+                    unit: scopeUnitForFormula === 'MOA' ? t('ballistic.clicksHeaderMoa') : t('ballistic.clicksHeaderMrad'),
+                    clicks: String(windRow.windageClicks),
+                    hold: windRow.holdRight ? t('ballistic.windHoldRight') : t('ballistic.windHoldLeft'),
+                  })}
+                </CliLine>
+              )}
             </section>
           ) : (
             (heightStr.trim() !== '' || valueStr.trim() !== '') && (

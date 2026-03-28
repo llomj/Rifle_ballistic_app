@@ -9,11 +9,13 @@ import {
   buildTurretTableFromTrajectory,
   buildCompensationTableFromTrajectory,
   computeDropAtRangeCm,
+  computeWindCorrectionAtDistance,
   generateDistancesFromInterval,
   type TrajectoryDragModel,
   type TurretRow,
   type TurretResult,
   type CompensationRow,
+  type WindCorrectionAtRange,
 } from '../data/ballistic';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import {
@@ -21,12 +23,13 @@ import {
   getReferenceBarrelLengthCm,
 } from '../data/ballisticMvAdjust';
 
-/** Returns turret table, compensation table, getTurretRow, and getTurretForExactDistance for the current profile. Uses trajectory when bullet + scope + BC + MV are available; otherwise falls back to static table. Zero distance from profile drives drop, holdover, clicks. */
+/** Returns turret table, compensation table, getTurretRow, getTurretForExactDistance, and wind (when profile wind speed set). Uses trajectory when bullet + scope + BC + MV are available; otherwise falls back to static table. Zero distance from profile drives drop, holdover, clicks. */
 export function useTrajectoryTables(): {
   turretTable: TurretRow[];
   compensationTable: CompensationRow[];
   getTurretRowForDistance: (distanceM: number) => TurretResult | null;
   getTurretForExactDistance: (distanceM: number) => TurretResult | null;
+  getWindForExactDistance: (distanceM: number) => WindCorrectionAtRange | null;
 } {
   const { currentProfile } = useBallisticProfile();
   const { scopeUnit, clicksConfig } = useBallisticSettings();
@@ -85,6 +88,7 @@ export function useTrajectoryTables(): {
           getTurretForExactDistance(distanceM, dropAtRange, clickVal, unit, maxM),
         getTurretForExactDistance: (distanceM: number) =>
           getTurretForExactDistance(distanceM, dropAtRange, clickVal, unit, maxM),
+        getWindForExactDistance: () => null,
       };
     }
 
@@ -120,6 +124,10 @@ export function useTrajectoryTables(): {
     );
 
     const maxM = clicksConfig.maxM;
+    const windKph = currentProfile.windSpeedKph;
+    const windClock = currentProfile.windFromClockDeg;
+    const inclinationOpt =
+      inc != null && Number.isFinite(inc) ? { inclinationDegFromHorizontal: inc } : undefined;
     return {
       turretTable,
       compensationTable,
@@ -127,6 +135,21 @@ export function useTrajectoryTables(): {
         getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit, maxM),
       getTurretForExactDistance: (distanceM: number) =>
         getTurretForExactDistance(distanceM, dropAtRange, scope.clickValue, scope.unit, maxM),
+      getWindForExactDistance: (distanceM: number) => {
+        if (windKph == null || windKph <= 0) return null;
+        return computeWindCorrectionAtDistance(
+          distanceM,
+          windKph,
+          windClock,
+          bc,
+          mvEff,
+          trajectoryModel,
+          scope.clickValue,
+          scope.unit,
+          maxM,
+          inclinationOpt
+        );
+      },
     };
   }, [
     currentProfile.scopeId,
@@ -139,6 +162,8 @@ export function useTrajectoryTables(): {
     currentProfile.powderTempC,
     currentProfile.mvReferenceTempC,
     currentProfile.barrelLengthCm,
+    currentProfile.windSpeedKph,
+    currentProfile.windFromClockDeg,
     scopeUnit,
     clicksConfig.minM,
     clicksConfig.maxM,

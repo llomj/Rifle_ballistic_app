@@ -78,12 +78,20 @@ export function timeOfFlightSeconds(bc: number, muzzleVelocityFps: number, curre
  * Bullet drop from bore line (meters) from gravity only, using Ingalls TOF.
  * Flat-fire approximation; pairs with LOS zero model in computeDropAtRangeCm.
  */
-export function dropBoreBelowMetersG1(bc: number, muzzleVelocityMps: number, rangeM: number): number {
+/** Time of flight (s) to horizontal range rangeM (m), G1 BC + Ingalls, same path as drop. */
+export function timeOfFlightToRangeG1(bc: number, muzzleVelocityMps: number, rangeM: number): number {
   if (bc <= 0 || muzzleVelocityMps <= 0 || rangeM <= 0) return 0;
   const v0Fps = muzzleVelocityMps * FPS_PER_MPS;
   const rangeYards = rangeM * YARDS_PER_M;
   const vAtFps = velocityFpsAtRangeYards(bc, v0Fps, rangeYards);
   const t = timeOfFlightSeconds(bc, v0Fps, vAtFps);
   if (t <= 0 || !Number.isFinite(t)) return 0;
+  return t;
+}
+
+export function dropBoreBelowMetersG1(bc: number, muzzleVelocityMps: number, rangeM: number): number {
+  if (bc <= 0 || muzzleVelocityMps <= 0 || rangeM <= 0) return 0;
+  const t = timeOfFlightToRangeG1(bc, muzzleVelocityMps, rangeM);
+  if (t <= 0) return 0;
   return 0.5 * GRAVITY_MPS2 * t * t;
 }
