@@ -29,7 +29,7 @@ const precacheUrls = files.map((f) => {
   return JSON.stringify(url);
 });
 
-const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v8';
+const swContent = `const CACHE_NAME = 'rifle-ballistic-offline-v9';
 const PRECACHE_URLS = [${precacheUrls.join(',\n  ')}];
 
 self.addEventListener('install', (e) => {

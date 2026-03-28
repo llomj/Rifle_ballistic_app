@@ -31,12 +31,26 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
   const [heading, setHeading] = useState<number | null>(null);
   const { getTurretForExactDistance, getWindForExactDistance } = useTrajectoryTables();
   const [clicksMeters, setClicksMeters] = useState('');
+  const [showInfo, setShowInfo] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [inclinActive, setInclinActive] = useState(false);
+  const [inclinLivePitch, setInclinLivePitch] = useState<number | null>(null);
+  const [inclinPitchRef, setInclinPitchRef] = useState<number | null>(null);
+  const [inclinGammaAbs, setInclinGammaAbs] = useState<number | null>(null);
+  const [inclinHadReading, setInclinHadReading] = useState(false);
+  const [inclinSensorMissing, setInclinSensorMissing] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const onOpenCalculateRef = useRef(onOpenCalculate);
   onOpenCalculateRef.current = onOpenCalculate;
   const swipeJustFired = useRef(false);
   const wheelAccum = useRef(0);
   const wheelCooldown = useRef(0);
+  const inclinSmoothedRef = useRef<number | null>(null);
+  const inclinRafRef = useRef<number | null>(null);
+  const inclinGotEventRef = useRef(false);
+  const smoothedHeading = useRef<number | null>(null);
+  const lastHeadingSet = useRef<number | null>(null);
+  const rafId = useRef<number | null>(null);
 
   const fireSwipeRight = () => {
     swipeJustFired.current = true;
@@ -119,10 +133,6 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
       clearInterval(cooldownInterval);
     };
   }, [onOpenCalculate]);
-
-  const smoothedHeading = useRef<number | null>(null);
-  const lastHeadingSet = useRef<number | null>(null);
-  const rafId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!compassMode) {
@@ -252,18 +262,6 @@ export const FirstPageView: React.FC<FirstPageViewProps> = ({ onOpenHub, onOpenC
     onOpenHub();
   };
 
-  const [showInfo, setShowInfo] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  /** Phone clinometer: live pitch and calibration for shotInclinationDeg */
-  const [inclinActive, setInclinActive] = useState(false);
-  const [inclinLivePitch, setInclinLivePitch] = useState<number | null>(null);
-  const [inclinPitchRef, setInclinPitchRef] = useState<number | null>(null);
-  const [inclinGammaAbs, setInclinGammaAbs] = useState<number | null>(null);
-  const [inclinHadReading, setInclinHadReading] = useState(false);
-  const [inclinSensorMissing, setInclinSensorMissing] = useState(false);
-  const inclinSmoothedRef = useRef<number | null>(null);
-  const inclinRafRef = useRef<number | null>(null);
-  const inclinGotEventRef = useRef(false);
   const radius = CIRCLE_SIZE_PX / 2;
 
   return (
