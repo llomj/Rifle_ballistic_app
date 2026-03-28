@@ -166,7 +166,7 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       <button
         type="button"
         onClick={() => { playTapSound(); onBackToFirstPage(); }}
-        className="w-full py-4 mb-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
+        className="w-full py-4 mb-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-theme-accent font-mono text-base font-semibold"
       >
         {t('ballistic.backToMain')}
       </button>
