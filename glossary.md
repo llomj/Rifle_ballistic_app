@@ -10,7 +10,10 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 - **Bolt-action**: A mechanism where the shooter manually cycles the bolt to chamber a round, lock the breech, fire, extract, and eject. Favoured for accuracy and reliability (e.g. Tikka T3, Remington 700).
 - **Lever-action**: A repeating action operated by a lever (often under the stock) that cycles the next round. Common in hunting and cowboy-style rifles (e.g. Winchester 1894, Marlin 336).
 - **Straight-pull**: A bolt that is cycled by pulling straight back and pushing forward (no rotation). Faster than traditional bolt rotation (e.g. Blaser R8, Merkel Helix).
-- **Caliber**: The nominal internal diameter of the barrel (or bullet diameter), usually in inches (e.g. .308) or millimetres (e.g. 7.62 mm). Often used to name the cartridge (e.g. .308 Winchester).
+- **Caliber**: The nominal internal diameter of the barrel (or bullet diameter), usually in inches (e.g. .308) or millimetres (e.g. 7.62 mm). Often used to name the cartridge (e.g. .308 Winchester). In practice “caliber” can mean several different things: (1) **nominal cartridge name** (e.g. “.30 caliber family”); (2) **bullet diameter** (often ~0.001–0.003 in larger than groove diameter so the bullet engages the rifling); (3) **land diameter** or **groove diameter** in the barrel—manufacturers and standards specify which. Inch designations like **.308** or **.284** refer to bullet or groove diameter in inches (the leading dot is convention, not “point three tenths” in decimals). Metric names like **7.62 mm** or **6.5 mm** are also nominal: two different cartridges can share a “6.5 mm” label but have different case lengths, pressures, and chamber dimensions (e.g. 6.5 Creedmoor vs 6.5×55 Swedish). **Always match ammunition to the exact cartridge name** your rifle is chambered for, not only the bullet diameter.
+- **Lands and grooves / rifling**: Spiral cuts inside the barrel: **lands** are the high parts that touch the bullet; **grooves** are the cuts between them. **Groove diameter** is often what people mean when they say “.308 bore.” **Twist rate** (e.g. 1:10) is one full turn of the rifling per 10 inches of barrel—faster twist stabilizes longer/heavier bullets for a given caliber.
+- **Chambering**: The **specific cartridge** a rifle’s chamber is cut for (e.g. “.308 Winchester” or “6.5 Creedmoor”). The chamber must match the **headspace**, **case dimensions**, and **pressure** standard of that cartridge. Do not assume that two cartridges with similar bullet diameter are interchangeable.
+- **Cartridge naming**: Names combine **caliber/bullet class**, often **case design** or **origin**, and sometimes **powder load** era (e.g. .30-06 Springfield = .30 caliber, adopted 1906). Metric designations often include **case length** (e.g. 7.62×51 mm: bullet diameter × case length in mm). The same nominal bullet size can exist in many cartridges (.308 Win, 7.62×51 NATO, .300 Win Mag share lineage but differ in case, pressure, and performance).
 - **Barrel length**: The length of the rifled tube from breech to muzzle. Affects muzzle velocity, handling, and balance. Typical rifle barrels: 50–66 cm (20–26 in).
 - **Twist rate**: How fast the rifling spins the bullet, expressed as one turn per so many inches (e.g. 1:10 = one turn in 10 inches). Faster twist stabilizes heavier/longer bullets.
 - **Chamber**: The rear part of the barrel that holds the cartridge when the action is closed. Must match the cartridge exactly.
@@ -66,7 +69,7 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 ## Bullets & Projectiles
 
 - **Bullet**: The projectile (not the whole cartridge) fired from the barrel. Can be lead, jacketed, monolithic, or hybrid.
-- **Cartridge**: The complete round: case, primer, powder, and bullet. Often loosely called “bullet” or “round.”
+- **Cartridge**: The complete round: case, primer, powder, and bullet. Often loosely called “bullet” or “round.” The **case** holds everything together and seals pressure; the **primer** ignites the **powder**; expanding gas pushes the **bullet** down the bore. **Caliber** in conversation often refers to the cartridge (e.g. “I shoot a .308”) but technically the cartridge is the full assembly—**chambering** must match the rifle.
 - **Case**: The brass (or other) container that holds primer, powder, and bullet. Provides obturation and extraction.
 - **Caliber (bullet)**: Bullet diameter, e.g. .308 in, 7.62 mm. Must match the barrel’s bore and twist for stability.
 - **Weight (bullet)**: Usually in grains (gr) or grams (g). Heavier bullets often have higher BC and better long-range performance but lower muzzle velocity for same pressure.
@@ -92,7 +95,14 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 
 - **Muzzle velocity**: Speed of the bullet at the muzzle (m/s or ft/s). Key input for ballistic calculators.
 - **Chambering**: The cartridge the rifle is chambered for (e.g. .308 Winchester, 6.5 Creedmoor). Must match the ammunition.
-- **Grain (gr)**: Unit of mass for bullets and powder. 1 grain ≈ 0.0648 g. 7000 grains = 1 pound.
+- **Grain (gr)**: Unit of mass for bullets and powder. 1 grain ≈ 0.0648 g. 7000 grains = 1 pound. Bullet weights are almost always quoted in grains in US/UK markets (e.g. 168 gr, 175 gr); metric users often see grams (g). To convert: **grains × 0.06479891 ≈ grams**; **grams ÷ 0.06479891 ≈ grains**. Heavier bullets (more grains) are usually longer for a given caliber and may need a faster twist; they often have higher BC but lower MV for the same pressure.
+- **Gram (g)**: SI unit of mass. The app may accept bullet mass in g or gr; consistency with your load data matters for energy and trajectory inputs.
+- **Muzzle energy**: Kinetic energy of the bullet at the muzzle: **E = ½ m v²** (mass in kg, velocity in m/s gives joules). Imperial form often quoted as **foot-pounds (ft·lbf)**. Useful for comparing loads and for hunting regulations that specify minimum energy; it is not the only measure of terminal performance.
+- **Velocity units**: Muzzle velocity is given in **metres per second (m/s)** or **feet per second (ft/s)**. 1 ft/s ≈ 0.3048 m/s. Match the unit to your chronograph or factory data when entering MV.
+- **Line of sight vs bore**: The **bore axis** is the centreline of the barrel. The **line of sight** is the straight line from your eye through the scope to the target. The scope is mounted **above** the bore, so the two are not parallel; the bullet starts below the line of sight and crosses it at the zero distance. **Scope height** (bore to scope centre) is required for accurate trajectory solutions.
+- **Subtension**: The **linear size** on a target that an angular mark “covers” at a given distance. Example: **1 mrad subtends 1 m at 1000 m, 10 cm at 100 m, 1 cm at 100 m per 0.1 mrad**. Reticle marks and turret clicks are angular; subtension converts them to cm, inches, or target heights for practical use.
+- **Point-blank range**: For a given zero and acceptable vertical error (e.g. a vital zone on game), the **maximum distance** at which you can hold centre and still hit within that window without holding over. Depends on trajectory shape, zero choice, and target size—not “zero distance” alone.
+- **TMOA vs SMOA**: **True MOA** is 1/60 of a degree (~1.047 in at 100 yd). **Shooter’s MOA (IPHY)** is often treated as **1.000 in at 100 yd** for mental math. The difference is small (~4.7% at 100 yd per “MOA”) but matters when stacking many MOA at long range; know what your scope and ballistic tool assume.
 - **Powder**: Propellant that burns to create gas and propel the bullet. Type and charge weight affect velocity and pressure.
 - **Primer**: Small cap that ignites the powder when struck by the firing pin. Boxer (one flash hole) and Berdan (two holes) are common.
 - **Hand load / handload**: Ammunition assembled by the shooter (reloading). Allows custom bullet, powder, and velocity.
@@ -183,3 +193,13 @@ This glossary is the master reference for the rifle ballistic app. All in-app de
 - **Longueur de canon de référence (catalogue)** : Longueur de canon pour laquelle une vitesse initiale d’usine ou catalogue est donnée. Sert à une correction **approximative** de la V₀ si votre canon diffère.
 - **Tir en pente** : Cible plus haute ou plus basse que le tireur. L’app utilise la **portée horizontale équivalente** (portée visée × cos(angle)) pour la chute, avec zéro pris à plat.
 - **Température poudre / température de référence V₀** : La V₀ varie avec la température. Entrées optionnelles pour ajuster la V₀ de façon linéaire (approximation). Si votre V₀ provient d’un chronographe sur **votre** arme, laissez les champs vides ou alignez la température de référence sur le terrain.
+- **Calibre (nuances)** : Peut désigner diamètre nominal, âmes/cannelures ou famille de cartouches ; toujours se fier au **marquage de chambre** sur le canon, pas seulement au diamètre de balle sur la boîte.
+- **Chambre / chambering** : Cartouche précise pour laquelle la chambre est taillée ; ne pas confondre avec le seul diamètre de projectile.
+- **Grain et gramme** : 1 grain ≈ 0,0648 g ; vérifier l’unité saisie dans l’app (métrique / impérial).
+- **Ligne de mire vs axe de canon** : Décalage vertical (hauteur de lunette) ; la trajectoire est calculée par rapport à la ligne de mire après zérotage.
+- **Énergie à la bouche** : E = ½mv² (J ou ft·lbf) ; utile pour comparaisons et réglementations, pas seul indicateur terminal.
+- **Portée « point-blank »** : Distance où viser au centre reste dans une fenêtre verticale donnée (zone vitale), selon zéro et trajectoire.
+- **Rayage (âmes, cannelures, pas)** : Le pas doit convenir à la longueur de balle ; lien mécanique avec la stabilité.
+- **Subtension** : Lien entre angle (MIL/MOA) et taille linéaire sur la cible à une portée donnée.
+- **TMOA vs SMOA** : Minute d’angle vraie vs pouce à 100 yards ; petit écart qui s’accumule au long range.
+- **Unités de vitesse** : m/s et ft/s (1 ft/s = 0,3048 m/s) ; ne pas mélanger sans conversion.

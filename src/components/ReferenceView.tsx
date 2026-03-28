@@ -4,7 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSound } from '../contexts/SoundContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { useBallisticProfile } from '../contexts/BallisticProfileContext';
-import { mToYd, cmToIn } from '../utils/ballisticUnits';
+import { mToYd, cmToIn, formatDrop } from '../utils/ballisticUnits';
 import { getScopeById } from '../data/catalogs';
 import { getScopeMagnificationForMeasure, generateDistancesFromInterval, MILDOT_ANIMALS, MILDOT_STEEL_PLATES } from '../data/ballistic';
 import { CliSep, CliLine, CliTable } from './CliBlock';
@@ -89,7 +89,16 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
       setMildotHumanHeightStr(String(mildotConfig.humanHeightM));
     }
   }, [showMildotConfigModal, mildotConfig.humanHeightM]);
-  const { turretTable, compensationTable } = useTrajectoryTables();
+  const { turretTable, compensationTable, getWindForExactDistance } = useTrajectoryTables();
+
+  const windSampleDistancesM = useMemo(() => {
+    const min = clicksConfig.minM;
+    const max = clicksConfig.maxM;
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max < min || min <= 0) return [];
+    const mid = Math.round((min + max) / 2);
+    const raw = [min, mid, max].filter((d) => d > 0);
+    return [...new Set(raw)].slice(0, 3);
+  }, [clicksConfig.minM, clicksConfig.maxM]);
 
   const mildotAnimal = useMemo(
     () => MILDOT_ANIMALS.find((a) => a.id === mildotConfig.animalId) ?? MILDOT_ANIMALS[0],
@@ -347,6 +356,46 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         <CliLine role="white">{`${'22 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  4 kph</CliLine>
         <CliLine role="white">{`${'45 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  8 kph</CliLine>
         <CliLine role="white">{`${'90 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  16 kph</CliLine>
+        <CliSep />
+        <CliLine role="yellow">{t('ballistic.windDriftInApp')}</CliLine>
+        <CliLine role="cyan" wrap>
+          {t('ballistic.windDriftInAppDesc')}
+        </CliLine>
+        {currentProfile.windSpeedKph != null && currentProfile.windSpeedKph > 0 ? (
+          <>
+            <CliLine role="white">{t('ballistic.windReferenceSamples')}</CliLine>
+            {windSampleDistancesM.map((d) => {
+              const w = getWindForExactDistance(d);
+              if (!w) {
+                const distOnly = measurement === 'imperial' ? `${Math.round(mToYd(d))} yd` : `${d} m`;
+                return (
+                  <CliLine key={d} role="white">
+                    {`${distOnly}: —`}
+                  </CliLine>
+                );
+              }
+              const distLabel = measurement === 'imperial' ? `${Math.round(mToYd(d))} yd` : `${d} m`;
+              const unitLabel =
+                scope?.unit === 'MOA' ? t('ballistic.clicksHeaderMoa') : t('ballistic.clicksHeaderMrad');
+              return (
+                <CliLine key={d} role="white" wrap>
+                  {`${distLabel}: `}
+                  {formatTranslation(t('ballistic.windReferenceRow'), {
+                    drift: formatDrop(w.driftCm, measurement),
+                    angle: w.angleAbs.toFixed(2),
+                    unit: unitLabel,
+                    clicks: String(w.windageClicks),
+                    hold: w.holdRight ? t('ballistic.windHoldRight') : t('ballistic.windHoldLeft'),
+                  })}
+                </CliLine>
+              );
+            })}
+          </>
+        ) : (
+          <CliLine role="cyan" wrap>
+            {t('ballistic.windReferenceSetSpeed')}
+          </CliLine>
+        )}
       </CollapsiblePanel>
 
       {showConfigModal && (
