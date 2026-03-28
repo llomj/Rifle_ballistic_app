@@ -163,6 +163,14 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
         </div>
       )}
 
+      <button
+        type="button"
+        onClick={() => { playTapSound(); onBackToFirstPage(); }}
+        className="w-full py-4 mb-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
+      >
+        {t('ballistic.backToMain')}
+      </button>
+
       {/* Profiles: Default + saved — switch between them */}
       <section className="glass mb-6 rounded-xl border border-white/10 overflow-hidden px-4 py-3 !bg-slate-900/[0.0009]">
         <label className="text-xs text-slate-400 uppercase tracking-wider block mb-2">{t('ballistic.profiles')}</label>
@@ -692,15 +700,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           </div>
         )}
       </section>
-
-      {/* Back to Main — large bottom button */}
-      <button
-        type="button"
-        onClick={() => { playTapSound(); onBackToFirstPage(); }}
-        className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
-      >
-        {t('ballistic.backToMain')}
-      </button>
     </div>
   );
 };

@@ -207,6 +207,16 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
 
   return (
     <div className="space-y-3 animate-in fade-in duration-300 pb-8">
+      <button
+        type="button"
+        onClick={() => {
+          playTapSound();
+          onBack();
+        }}
+        className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
+      >
+        {t('ballistic.backToMain')}
+      </button>
       <h1 className="text-emerald-400 font-bold text-xl pt-0 pb-1">{t('ballistic.ballistics')}</h1>
       <CliLine role="yellow">{t('ballistic.referenceTitle')}</CliLine>
       <CliLine role="yellow">{t('ballistic.goodFor')}</CliLine>
@@ -338,16 +348,6 @@ export const ReferenceView: React.FC<ReferenceViewProps> = ({ onBack }) => {
         <CliLine role="white">{`${'45 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  8 kph</CliLine>
         <CliLine role="white">{`${'90 ' + t('ballistic.degreesAngle')}`.padEnd(22)}  16 kph</CliLine>
       </CollapsiblePanel>
-
-      <button
-        onClick={() => {
-          playTapSound();
-          onBack();
-        }}
-        className="w-full py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-mono text-base font-semibold"
-      >
-        {t('ballistic.backToMain')}
-      </button>
 
       {showConfigModal && (
         <div
