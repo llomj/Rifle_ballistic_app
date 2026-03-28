@@ -10,6 +10,7 @@ import {
   buildCompensationTableFromTrajectory,
   computeDropAtRangeCm,
   generateDistancesFromInterval,
+  type TrajectoryDragModel,
   type TurretRow,
   type TurretResult,
   type CompensationRow,
@@ -29,10 +30,13 @@ export function useTrajectoryTables(): {
   return useMemo(() => {
     const scope = getScopeById(currentProfile.scopeId);
     const bullet = getBulletById(currentProfile.bulletId);
-    // Use G7 BC when bullet has dragModel G7 (more accurate for long-range); otherwise G1
-    const bc = currentProfile.bcOverride ?? (
-      bullet?.dragModel?.toUpperCase() === 'G7' && bullet?.bcG7 != null ? bullet.bcG7 : bullet?.bcG1
-    );
+    const isG7Bullet = bullet?.dragModel?.toUpperCase() === 'G7';
+    // G7 path: G7 BC + G7 drag curve. Fallback to G1 if G7 bullet has no G7 BC (unless user override).
+    const bc =
+      currentProfile.bcOverride ??
+      (isG7Bullet && bullet?.bcG7 != null ? bullet.bcG7 : bullet?.bcG1);
+    const trajectoryModel: TrajectoryDragModel =
+      isG7Bullet && (currentProfile.bcOverride != null || bullet?.bcG7 != null) ? 'G7' : 'G1';
     const mv = currentProfile.muzzleVelocityMps;
     const scopeH = currentProfile.scopeHeightCm;
 
@@ -82,7 +86,7 @@ export function useTrajectoryTables(): {
 
     const zeroM = currentProfile.zeroDistanceM ?? 100;
     const dropAtRange = (rangeM: number) =>
-      computeDropAtRangeCm(bc, mv, zeroM, scopeH, rangeM);
+      computeDropAtRangeCm(bc, mv, zeroM, scopeH, rangeM, trajectoryModel);
 
     const customDistances = generateDistancesFromInterval(
       clicksConfig.minM,

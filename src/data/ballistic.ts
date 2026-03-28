@@ -1,10 +1,14 @@
 /**
  * Ballistic data and formulas. Single source of truth aligned with rifle_distance.py and rifle_height.py.
- * Trajectory: Ingalls G1 tables + BC (GNU/pg-drag style), not vacuum gravity with a fake decay.
+ * Trajectory: Ingalls G1 + G1 BC, or G7 drag curve + G7 BC (numerical), not vacuum gravity with a fake decay.
  * Supports MIL and MOA scopes. AGENTS.md §0.
  */
 
 import { dropBoreBelowMetersG1 } from './ingallsG1';
+import { dropBoreBelowMetersG7 } from './g7Trajectory';
+
+/** Which drag model backs dropBoreBelow* for computeDropAtRangeCm. */
+export type TrajectoryDragModel = 'G1' | 'G7';
 
 export type ScopeUnit = 'MIL' | 'MOA';
 
@@ -439,19 +443,22 @@ export function getTurretRow(distanceM: number): TurretResult | null {
  * Positive = bullet hits low (dial up / hold over). Zero at range === zero distance.
  * LOS: straight line from scope height above bore to the point where the bullet
  * crosses LOS at the zero distance (standard rifle zero model).
- * Drop vs bore: Ingalls G1 + BC (matches field tables for typical hunting loads).
+ * Drop vs bore: G1 uses Ingalls + G1 BC; G7 uses G7 CD(Mach) integration + G7 BC (same LOS model).
  */
 export function computeDropAtRangeCm(
-  bcG1: number,
+  bc: number,
   muzzleVelocityMps: number,
   zeroDistanceM: number,
   scopeHeightCm: number,
-  rangeM: number
+  rangeM: number,
+  dragModel: TrajectoryDragModel = 'G1'
 ): number {
-  if (bcG1 <= 0 || muzzleVelocityMps <= 0 || rangeM < 0 || zeroDistanceM <= 0) return 0;
+  if (bc <= 0 || muzzleVelocityMps <= 0 || rangeM < 0 || zeroDistanceM <= 0) return 0;
   const h = scopeHeightCm / 100;
-  const dropAtZero = dropBoreBelowMetersG1(bcG1, muzzleVelocityMps, zeroDistanceM);
-  const dropAtRange = dropBoreBelowMetersG1(bcG1, muzzleVelocityMps, rangeM);
+  const dropBore =
+    dragModel === 'G7' ? dropBoreBelowMetersG7 : dropBoreBelowMetersG1;
+  const dropAtZero = dropBore(bc, muzzleVelocityMps, zeroDistanceM);
+  const dropAtRange = dropBore(bc, muzzleVelocityMps, rangeM);
   const offsetM = h - (rangeM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
   return offsetM * 100;
 }
