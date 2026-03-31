@@ -7,10 +7,12 @@ import riflesJson from './rifles.json';
 import scopesJson from './scopes.json';
 import bulletsJson from './bullets.json';
 import calibersJson from './calibers.json';
+import { enrichBulletCatalogItem } from './cartridgeDimensions';
 
 export const RIFLES: RifleCatalogItem[] = riflesJson as RifleCatalogItem[];
 export const SCOPES: ScopeCatalogItem[] = scopesJson as ScopeCatalogItem[];
-export const BULLETS: BulletCatalogItem[] = bulletsJson as BulletCatalogItem[];
+/** Every catalog row is enriched with rim / case / OAL (mm) from `cartridgeDimensions` when missing in JSON. */
+export const BULLETS: BulletCatalogItem[] = (bulletsJson as BulletCatalogItem[]).map(enrichBulletCatalogItem);
 
 export function getRifleById(id: string): RifleCatalogItem | undefined {
   return RIFLES.find((r) => r.id === id);

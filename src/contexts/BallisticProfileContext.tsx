@@ -100,9 +100,10 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       const nextRifle = getRifleById(next.rifleId);
       const caliberChanged =
         rifleChanged && prevRifle?.caliberKey !== nextRifle?.caliberKey;
-      /** Cartridge reference dimensions (rim / case / OAL): refresh when rifle or load identity changes so values do not stick to a previous caliber’s defaults. */
-      const shouldMergeCartridge =
-        next.bulletId && (rifleChanged || bulletResolvedChanged || bulletIdExplicit);
+      /** Rim / case / OAL: any explicit ammo pick, resolved bullet id change, or rifle/caliber change. */
+      const needsCartridgeDims =
+        Boolean(next.bulletId) &&
+        (bulletIdExplicit || bulletResolvedChanged || rifleChanged || caliberChanged);
       /**
        * MV / powder: refresh when the catalog load changes, user picks ammo, or rifle caliber changes
        * (e.g. user chose .30-30 bullet while still on a .300 WM rifle, then selects Marlin — same bullet id, must still replace 922 with catalog MV).
@@ -111,10 +112,10 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       const shouldMergeAmmo =
         next.bulletId &&
         (bulletResolvedChanged || bulletIdExplicit || caliberChanged);
-      if (shouldMergeCartridge || shouldMergeAmmo) {
+      if (needsCartridgeDims || shouldMergeAmmo) {
         const bullet = getBulletById(next.bulletId);
         if (bullet) {
-          if (shouldMergeCartridge) {
+          if (needsCartridgeDims) {
             next = { ...next, ...getProfileCartridgeFieldsFromBullet(bullet) };
           }
           if (shouldMergeAmmo) {

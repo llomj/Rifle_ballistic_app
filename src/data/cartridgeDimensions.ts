@@ -53,6 +53,21 @@ export type ProfileCartridgeFields = Partial<
  * Fields to merge into the current profile when the user selects a catalog bullet.
  * Bullet-level optional fields override the caliber map when present.
  */
+/**
+ * Merge SAAMI/CIP reference dimensions onto a catalog row (per-caliber defaults).
+ * Called when building `BULLETS` so every load carries rim / case / OAL for UI and profile autofill.
+ */
+export function enrichBulletCatalogItem(b: BulletCatalogItem): BulletCatalogItem {
+  const ref = CARTRIDGE_DIMENSIONS_BY_CALIBER_KEY[b.caliberKey];
+  if (!ref) return b;
+  return {
+    ...b,
+    rimDiametersMm: b.rimDiametersMm ?? ref.rimDiametersMm,
+    caseLengthMm: b.caseLengthMm ?? ref.caseLengthMm,
+    overallLengthMm: b.overallLengthMm ?? ref.overallLengthMm,
+  };
+}
+
 export function getProfileCartridgeFieldsFromBullet(
   bullet: BulletCatalogItem
 ): ProfileCartridgeFields {

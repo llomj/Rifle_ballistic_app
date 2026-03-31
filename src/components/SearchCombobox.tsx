@@ -174,7 +174,9 @@ export function SearchCombobox<T>({
                   i === focusedIndex ? 'bg-theme-accent-20 text-theme-accent' : 'text-slate-300 hover:bg-white/5'
                 }`}
                 onMouseEnter={() => setFocusedIndex(i)}
-                onClick={() => {
+                onPointerUp={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  e.preventDefault();
                   onSelect(item);
                   setQuery('');
                   setUserHasTyped(false);
