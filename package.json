@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/generate-sw.cjs",
+    "generate-bullet-mv": "node scripts/generate-bullet-mv.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

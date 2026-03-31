@@ -4,7 +4,7 @@ import {
   BALLISTIC_PROFILES_STORAGE_KEY,
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
-import { getProfileAmmoFieldsFromBullet } from '../data/catalogBulletMv';
+import { getCatalogMuzzleVelocityMps, getProfileAmmoFieldsFromBullet } from '../data/catalogBulletMv';
 import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
 import { getBulletById, getRifleById, resolveBulletIdForRifle } from '../data/catalogs';
 
@@ -80,6 +80,23 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
   useEffect(() => {
     persistSaved(savedProfiles);
   }, [savedProfiles]);
+
+  /**
+   * Heal profiles stuck at the default Tikka .300 Win Mag MV (922 m/s) while a non-.300 WM bullet is selected.
+   * (Merge rules do not always run for old localStorage state.)
+   */
+  useEffect(() => {
+    setCurrentProfileState((prev) => {
+      const bullet = getBulletById(prev.bulletId);
+      if (!bullet) return prev;
+      const legacy = DEFAULT_BALLISTIC_PROFILE.muzzleVelocityMps;
+      if (prev.muzzleVelocityMps !== legacy) return prev;
+      if (bullet.caliberKey === '300winmag') return prev;
+      const catalogMv = getCatalogMuzzleVelocityMps(bullet);
+      if (Math.abs(prev.muzzleVelocityMps - catalogMv) < 0.5) return prev;
+      return { ...prev, muzzleVelocityMps: catalogMv };
+    });
+  }, [currentProfile.bulletId]);
 
   const setCurrentProfile = useCallback((profile: BallisticProfile) => {
     setCurrentProfileState(profileWithBulletMatchingRifle({ ...profile }));
