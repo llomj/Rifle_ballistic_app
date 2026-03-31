@@ -104,6 +104,11 @@ export interface BulletCatalogItem {
    * When set with the user profile barrel length, MV can be adjusted for barrel difference (estimate).
    */
   referenceBarrelLengthCm?: number;
+  /**
+   * Optional: representative muzzle velocity (m/s) for this catalog load (factory / published).
+   * When set, autopopulates profile average speed when this bullet is selected; otherwise a caliber default is used.
+   */
+  muzzleVelocityMps?: number;
   /** Optional: override auto-filled rim diameter (mm) from caliber map. */
   rimDiametersMm?: number;
   /** Optional: override auto-filled case length (mm) from caliber map. */

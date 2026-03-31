@@ -1,4 +1,5 @@
 import type { BulletCatalogItem } from './ballistic';
+import { getDefaultReferenceBarrelLengthCmForCaliber } from './catalogBulletMv';
 import {
   DEFAULT_MV_REFERENCE_TEMP_C,
   MV_CHANGE_MPS_PER_CM_BARREL,
@@ -51,7 +52,9 @@ export function computeEffectiveMuzzleVelocityMps(inputs: MuzzleVelocityAdjustIn
 }
 
 export function getReferenceBarrelLengthCm(bullet: BulletCatalogItem | undefined): number | undefined {
-  return bullet?.referenceBarrelLengthCm != null && bullet.referenceBarrelLengthCm > 0
-    ? bullet.referenceBarrelLengthCm
-    : undefined;
+  if (!bullet) return undefined;
+  if (bullet.referenceBarrelLengthCm != null && bullet.referenceBarrelLengthCm > 0) {
+    return bullet.referenceBarrelLengthCm;
+  }
+  return getDefaultReferenceBarrelLengthCmForCaliber(bullet.caliberKey);
 }

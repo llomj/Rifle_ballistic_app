@@ -4,7 +4,9 @@ import {
   BALLISTIC_PROFILES_STORAGE_KEY,
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
-import { resolveBulletIdForRifle } from '../data/catalogs';
+import { getProfileAmmoFieldsFromBullet } from '../data/catalogBulletMv';
+import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
+import { getBulletById, resolveBulletIdForRifle } from '../data/catalogs';
 
 /** Ensures `bulletId` references a round compatible with `rifleId` (same caliberKey in catalog). */
 function profileWithBulletMatchingRifle(profile: BallisticProfile): BallisticProfile {
@@ -85,7 +87,20 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
 
   const updateCurrentProfile = useCallback((updates: Partial<BallisticProfile>) => {
     setCurrentProfileState((prev) => {
-      const next = profileWithBulletMatchingRifle({ ...prev, ...updates });
+      const bulletIdBefore = prev.bulletId;
+      let next = profileWithBulletMatchingRifle({ ...prev, ...updates });
+      const bulletIdExplicit = updates.bulletId !== undefined;
+      const bulletResolvedChanged = next.bulletId !== bulletIdBefore;
+      if ((bulletResolvedChanged || bulletIdExplicit) && next.bulletId) {
+        const bullet = getBulletById(next.bulletId);
+        if (bullet) {
+          next = {
+            ...next,
+            ...getProfileCartridgeFieldsFromBullet(bullet),
+            ...getProfileAmmoFieldsFromBullet(bullet),
+          };
+        }
+      }
       // When user selects rifle, scope, or ammunition, lock into current profile; persist if saved.
       if (prev.id !== 'default') {
         setSavedProfiles((list) =>

@@ -41,7 +41,13 @@ import {
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
 import { computeEffectiveMuzzleVelocityMps, getReferenceBarrelLengthCm } from '../data/ballisticMvAdjust';
-import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
+import { getCatalogMuzzleVelocityMps } from '../data/catalogBulletMv';
+
+/** Display m/s without unnecessary decimals (922 vs 922.5). */
+function formatMvMpsForDisplay(mps: number): string {
+  const r = Math.round(mps * 10) / 10;
+  return r % 1 === 0 ? String(r) : r.toFixed(1);
+}
 
 const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
 
@@ -341,13 +347,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemId={(b) => b.id}
               getItemLabel={(b) => b.name}
               value={currentProfile.bulletId}
-              onSelect={(b) =>
-                b &&
-                updateCurrentProfile({
-                  bulletId: b.id,
-                  ...getProfileCartridgeFieldsFromBullet(b),
-                })
-              }
+              onSelect={(b) => b && updateCurrentProfile({ bulletId: b.id })}
               search={bulletSearch}
               limit={200}
               placeholder={rifle ? t('ballistic.bullet') : t('ballistic.rifle') + ' first'}
@@ -383,13 +383,28 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             <input
               type="number"
               min="0"
-              step={measurement === 'imperial' ? 1 : 1}
-              value={currentProfile.muzzleVelocityMps != null
-                ? (measurement === 'imperial' ? Math.round(msToFps(currentProfile.muzzleVelocityMps)) : currentProfile.muzzleVelocityMps)
-                : ''}
+              step={measurement === 'imperial' ? 1 : 0.1}
+              inputMode="decimal"
+              value={
+                measurement === 'imperial'
+                  ? Math.round(msToFps(currentProfile.muzzleVelocityMps))
+                  : Math.round(currentProfile.muzzleVelocityMps * 10) / 10
+              }
               onChange={(e) => {
-                const raw = parseFloat(e.target.value) || 0;
-                updateCurrentProfile({ muzzleVelocityMps: measurement === 'imperial' ? fpsToMs(raw) : raw });
+                const v = e.target.value;
+                if (v === '' || v === '-' || v === '.') return;
+                const raw = parseFloat(v);
+                if (!Number.isFinite(raw) || raw < 0) return;
+                updateCurrentProfile({
+                  muzzleVelocityMps: measurement === 'imperial' ? fpsToMs(raw) : raw,
+                });
+              }}
+              onBlur={(e) => {
+                if (e.target.value !== '') return;
+                const b = bullet;
+                updateCurrentProfile({
+                  muzzleVelocityMps: b ? getCatalogMuzzleVelocityMps(b) : currentProfile.muzzleVelocityMps,
+                });
               }}
               className={`${inputCls} ${numInputCls}`}
               placeholder={measurement === 'imperial' ? '3025 fps' : '922 m/s'}
@@ -597,7 +612,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="white">{t('ballistic.scope')}: {scope?.name ?? currentProfile.scopeId}</CliLine>
           <CliLine role="white">{t('ballistic.scopeHeight')}:{"\t"}{currentProfile.scopeHeightCm != null ? formatScopeHeight(currentProfile.scopeHeightCm, measurement) : '—'} · {t('ballistic.barrelLength')}: {currentProfile.barrelLengthCm != null ? formatBarrelLength(currentProfile.barrelLengthCm, measurement) : '—'} · {t('ballistic.twist')}: {currentProfile.twistRate ?? '—'}</CliLine>
           <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
-          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${currentProfile.muzzleVelocityMps} m/s`) : '—'}</CliLine>
+          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${formatMvMpsForDisplay(currentProfile.muzzleVelocityMps)} m/s`) : '—'}</CliLine>
           {(() => {
             const parts: string[] = [];
             if (currentProfile.shotInclinationDeg != null && currentProfile.shotInclinationDeg !== 0) {
