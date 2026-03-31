@@ -4,8 +4,9 @@
  * Supports MIL and MOA scopes. AGENTS.md §0.
  */
 
-import { dropBoreBelowMetersG1, timeOfFlightToRangeG1 } from './ingallsG1';
+import { dropBoreBelowMetersG1, timeOfFlightToRangeG1, dvdtMps2G1 } from './ingallsG1';
 import { dropBoreBelowMetersG7, timeOfFlightToRangeG7 } from './g7Trajectory';
+import { interpolateCdG7 } from './g7DragTable';
 
 /** Which drag model backs dropBoreBelow* for computeDropAtRangeCm. */
 export type TrajectoryDragModel = 'G1' | 'G7';
@@ -17,9 +18,221 @@ export interface ComputeDropAtRangeOptions {
    * Uses horizontal equivalent range R·cos(θ) for trajectory drop vs a flat LOS zero.
    */
   inclinationDegFromHorizontal?: number;
+  /**
+   * Air density factor relative to ISA sea level (ρ/ρ0). 1 = sea level.
+   * Approximates atmosphere effect on drag (and thus TOF, drop, wind) without full meteo inputs.
+   */
+  airDensityFactor?: number;
 }
 
 export type ScopeUnit = 'MIL' | 'MOA';
+
+const GRAVITY_MPS2 = 9.80665;
+const SPEED_OF_SOUND_MPS = 340.29;
+// Same constant as g7Trajectory.ts; kept here so the 2D solver uses identical scaling.
+const G7_DRAG_SCALE_K = 2.08551e-4;
+
+type DragModelFn = (bc: number, vMps: number) => number; // dv/dt (m/s²), negative
+
+function dvdtMps2G7(bcG7: number, velocityMps: number): number {
+  if (bcG7 <= 0 || !Number.isFinite(velocityMps) || velocityMps <= 0) return 0;
+  const mach = velocityMps / SPEED_OF_SOUND_MPS;
+  const cd = interpolateCdG7(mach);
+  const dragTerm = (cd * G7_DRAG_SCALE_K) / bcG7;
+  const dvdt = -velocityMps * dragTerm;
+  if (!Number.isFinite(dvdt)) return 0;
+  return Math.max(-5000, Math.min(0, dvdt));
+}
+
+function getDvdtFn(dragModel: TrajectoryDragModel): DragModelFn {
+  return dragModel === 'G7' ? dvdtMps2G7 : dvdtMps2G1;
+}
+
+/**
+ * ISA density ratio ρ/ρ0 from altitude (m). Troposphere approximation.
+ * Good enough for ballistics drag scaling out to typical hunting altitudes.
+ */
+export function isaDensityRatioFromAltitudeM(altitudeM: number): number {
+  if (!Number.isFinite(altitudeM)) return 1;
+  const h = Math.max(-500, Math.min(11000, altitudeM));
+  const T0 = 288.15; // K
+  const L = 0.0065; // K/m
+  const g = 9.80665;
+  const R = 287.05; // J/(kg·K)
+  const T = T0 - L * h;
+  const exponent = (g / (R * L)) - 1;
+  const ratio = Math.pow(T / T0, exponent);
+  if (!Number.isFinite(ratio) || ratio <= 0) return 1;
+  return Math.max(0.4, Math.min(1.3, ratio));
+}
+
+interface SimResultAtX {
+  yM: number;
+  tS: number;
+  vMps: number;
+}
+
+interface SimResult3DAtX {
+  yM: number;
+  zM: number; // +right
+  tS: number;
+  vMps: number;
+}
+
+/**
+ * Simple 2D point-mass integrator (no atmosphere, no spin drift, no Coriolis).
+ * - State: x, y, vx, vy
+ * - Drag acts opposite velocity with magnitude dv/dt from the chosen drag model.
+ * - Gravity acts downward (−g).
+ *
+ * Integration is done in small horizontal steps (dx) for stability.
+ */
+function simulatePointMassToX(
+  targetX: number,
+  bc: number,
+  muzzleVelocityMps: number,
+  launchAngleRad: number,
+  dvdtFn: DragModelFn
+): SimResultAtX {
+  const dx = 0.5; // m
+  const maxIter = Math.ceil(Math.max(1, targetX) / dx) + 20000;
+  let x = 0;
+  let y = 0;
+  let t = 0;
+  let vx = muzzleVelocityMps * Math.cos(launchAngleRad);
+  let vy = muzzleVelocityMps * Math.sin(launchAngleRad);
+
+  for (let i = 0; i < maxIter && x < targetX - 1e-9; i++) {
+    const step = Math.min(dx, targetX - x);
+    const v = Math.hypot(vx, vy);
+    if (v < 1) break;
+    if (vx <= 0) break;
+
+    const dt = step / vx;
+    const dvdt = dvdtFn(bc, v); // negative
+    const axDrag = (dvdt * vx) / v;
+    const ayDrag = (dvdt * vy) / v;
+    const ax = axDrag;
+    const ay = ayDrag - GRAVITY_MPS2;
+
+    // Semi-implicit Euler: update velocity then position
+    vx += ax * dt;
+    vy += ay * dt;
+    x += step;
+    y += vy * dt;
+    t += dt;
+  }
+
+  return { yM: y, tS: t, vMps: Math.hypot(vx, vy) };
+}
+
+/**
+ * 3D point-mass integration with constant wind treated as moving air mass.
+ * Axes: x toward target, y up, z right.
+ *
+ * Wind convention in this app: windFromClockDeg is "from" direction where 90° means from shooter’s right.
+ * We convert it to an air velocity vector; drag depends on relative airspeed (bullet - wind).
+ */
+function simulatePointMass3DToX(
+  targetX: number,
+  bc: number,
+  muzzleVelocityMps: number,
+  launchAngleRad: number,
+  windFromRightMps: number,
+  dvdtFn: DragModelFn
+): SimResult3DAtX {
+  const dx = 0.5; // m
+  const maxIter = Math.ceil(Math.max(1, targetX) / dx) + 20000;
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  let t = 0;
+  let vx = muzzleVelocityMps * Math.cos(launchAngleRad);
+  let vy = muzzleVelocityMps * Math.sin(launchAngleRad);
+  let vz = 0;
+
+  // Wind from right means air moves toward left (negative z).
+  const windVz = -windFromRightMps;
+
+  for (let i = 0; i < maxIter && x < targetX - 1e-9; i++) {
+    const step = Math.min(dx, targetX - x);
+    const v = Math.hypot(vx, vy, vz);
+    if (v < 1) break;
+    if (vx <= 0) break;
+
+    const dt = step / vx;
+
+    const vRelX = vx;
+    const vRelY = vy;
+    const vRelZ = vz - windVz;
+    const vRel = Math.hypot(vRelX, vRelY, vRelZ);
+    if (vRel < 1e-6) break;
+
+    const dvdt = dvdtFn(bc, vRel); // negative magnitude along -vRel
+    const axDrag = (dvdt * vRelX) / vRel;
+    const ayDrag = (dvdt * vRelY) / vRel;
+    const azDrag = (dvdt * vRelZ) / vRel;
+
+    const ax = axDrag;
+    const ay = ayDrag - GRAVITY_MPS2;
+    const az = azDrag;
+
+    vx += ax * dt;
+    vy += ay * dt;
+    vz += az * dt;
+    x += step;
+    y += vy * dt;
+    z += vz * dt;
+    t += dt;
+  }
+
+  return { yM: y, zM: z, tS: t, vMps: Math.hypot(vx, vy, vz) };
+}
+
+/**
+ * Solve launch angle so the bullet intersects the (flat) line of sight at the zero distance.
+ * We treat the line of sight as horizontal at y = scopeHeightM (scope above bore).
+ */
+function solveLaunchAngleForZero(
+  bc: number,
+  muzzleVelocityMps: number,
+  zeroDistanceM: number,
+  scopeHeightM: number,
+  dvdtFn: DragModelFn
+): number {
+  // Reasonable bracket: 0 to ~6 degrees.
+  let lo = 0;
+  let hi = 0.12;
+
+  const f = (a: number) => simulatePointMassToX(zeroDistanceM, bc, muzzleVelocityMps, a, dvdtFn).yM - scopeHeightM;
+  let flo = f(lo);
+  let fhi = f(hi);
+
+  // If hi isn't enough (slow/heavy), expand a bit.
+  let expand = 0;
+  while (fhi < 0 && expand < 10) {
+    hi *= 1.4;
+    fhi = f(hi);
+    expand++;
+    if (hi > 0.35) break; // ~20°
+  }
+  // If we still cannot bracket, fall back to 0 to avoid NaN.
+  if (!(flo <= 0 && fhi >= 0)) return 0;
+
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    const fm = f(mid);
+    if (Math.abs(fm) < 1e-5) return mid;
+    if (fm > 0) {
+      hi = mid;
+      fhi = fm;
+    } else {
+      lo = mid;
+      flo = fm;
+    }
+  }
+  return (lo + hi) / 2;
+}
 
 /** Catalog item: rifle from rifles.json */
 export interface RifleCatalogItem {
@@ -521,14 +734,29 @@ export function computeDropAtRangeCm(
       : 0;
   const cos = Math.cos((inc * Math.PI) / 180);
   const rangeHorizontalM = rangeM * cos;
-  const h = scopeHeightCm / 100;
-  const dropBore =
-    dragModel === 'G7' ? dropBoreBelowMetersG7 : dropBoreBelowMetersG1;
-  const dropAtZero = dropBore(bc, muzzleVelocityMps, zeroDistanceM);
-  const dropAtRange = dropBore(bc, muzzleVelocityMps, rangeHorizontalM);
-  const offsetM =
-    h - (rangeHorizontalM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
-  return offsetM * 100;
+  const scopeHeightM = scopeHeightCm / 100;
+  const density = options?.airDensityFactor != null && Number.isFinite(options.airDensityFactor)
+    ? Math.max(0.3, Math.min(1.5, options.airDensityFactor))
+    : 1;
+
+  // 2D point-mass: solve launch angle that hits the LOS at zero, then compute drop at range.
+  // Falls back to legacy ½ g t² model if something goes wrong.
+  try {
+    const baseDvdtFn = getDvdtFn(dragModel);
+    const dvdtFn: DragModelFn = (bcIn, vIn) => density * baseDvdtFn(bcIn, vIn);
+    const alpha = solveLaunchAngleForZero(bc, muzzleVelocityMps, zeroDistanceM, scopeHeightM, dvdtFn);
+    const yAtRange = simulatePointMassToX(rangeHorizontalM, bc, muzzleVelocityMps, alpha, dvdtFn).yM;
+    const dropM = scopeHeightM - yAtRange; // positive = bullet below LOS
+    if (!Number.isFinite(dropM)) return 0;
+    return dropM * 100;
+  } catch (_) {
+    const dropBore = dragModel === 'G7' ? dropBoreBelowMetersG7 : dropBoreBelowMetersG1;
+    const dropAtZero = dropBore(bc, muzzleVelocityMps, zeroDistanceM);
+    const dropAtRange = dropBore(bc, muzzleVelocityMps, rangeHorizontalM);
+    const h = scopeHeightM;
+    const offsetM = h - (rangeHorizontalM / zeroDistanceM) * (h + dropAtZero) + dropAtRange;
+    return offsetM * 100;
+  }
 }
 
 /** Time of flight (s) to horizontal range (m); same drag model and BC as drop. */
@@ -594,10 +822,20 @@ export function computeWindCorrectionAtDistance(
   const rangeH = distanceM * Math.cos((inc * Math.PI) / 180);
   const windMs = windSpeedKph / 3.6;
   const crosswindFromRightMps = windMs * Math.sin((clock * Math.PI) / 180);
-  const tof = timeOfFlightToRange(bc, muzzleVelocityMps, rangeH, dragModel);
-  if (tof <= 0 || !Number.isFinite(tof)) return null;
-  const lateralDriftM = -crosswindFromRightMps * tof;
-  const correctionM = -lateralDriftM;
+  const density = options?.airDensityFactor != null && Number.isFinite(options.airDensityFactor)
+    ? Math.max(0.3, Math.min(1.5, options.airDensityFactor))
+    : 1;
+
+  // Use the same 3D point-mass model as drop: solve launch angle from zero is handled outside,
+  // but for wind correction here we approximate using a flat-fire launch angle (0) and drag+wind.
+  // This is still a large improvement over wind × TOF because it uses relative airspeed and deceleration.
+  const baseDvdtFn = getDvdtFn(dragModel);
+  const dvdtFn: DragModelFn = (bcIn, vIn) => density * baseDvdtFn(bcIn, vIn);
+
+  const sim = simulatePointMass3DToX(rangeH, bc, muzzleVelocityMps, 0, crosswindFromRightMps, dvdtFn);
+  if (sim.tS <= 0 || !Number.isFinite(sim.tS)) return null;
+  const lateralDriftM = sim.zM; // +right
+  const correctionM = -lateralDriftM; // aim/dial opposite drift
   const mradRaw = rangeH > 0 ? correctionM / (rangeH / 1000) : 0;
   const mradRounded = Math.round(mradRaw * 100) / 100;
   const moa = mradRounded * (180 / Math.PI) * (60 / 1000);

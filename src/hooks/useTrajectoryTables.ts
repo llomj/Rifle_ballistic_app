@@ -22,6 +22,7 @@ import {
   computeEffectiveMuzzleVelocityMps,
   getReferenceBarrelLengthCm,
 } from '../data/ballisticMvAdjust';
+import { isaDensityRatioFromAltitudeM } from '../data/ballistic';
 
 /** Returns turret table, compensation table, getTurretRow, getTurretForExactDistance, and wind (when profile wind speed set). Uses trajectory when bullet + scope + BC + MV are available; otherwise falls back to static table. Zero distance from profile drives drop, holdover, clicks. */
 export function useTrajectoryTables(): {
@@ -32,7 +33,7 @@ export function useTrajectoryTables(): {
   getWindForExactDistance: (distanceM: number) => WindCorrectionAtRange | null;
 } {
   const { currentProfile } = useBallisticProfile();
-  const { scopeUnit, clicksConfig } = useBallisticSettings();
+  const { scopeUnit, clicksConfig, elevationEnabled, elevationData } = useBallisticSettings();
 
   return useMemo(() => {
     const scope = getScopeById(currentProfile.scopeId);
@@ -101,10 +102,15 @@ export function useTrajectoryTables(): {
       referenceBarrelLengthCm: getReferenceBarrelLengthCm(bullet),
     });
     const inc = currentProfile.shotInclinationDeg;
+    const densityFactor =
+      elevationEnabled && elevationData.altitudeM != null && Number.isFinite(elevationData.altitudeM)
+        ? isaDensityRatioFromAltitudeM(elevationData.altitudeM)
+        : 1;
     const dropAtRange = (rangeM: number) =>
       computeDropAtRangeCm(bc, mvEff, zeroM, scopeH, rangeM, trajectoryModel, {
         inclinationDegFromHorizontal:
           inc != null && Number.isFinite(inc) ? inc : undefined,
+        airDensityFactor: densityFactor,
       });
 
     const customDistances = generateDistancesFromInterval(
@@ -128,6 +134,8 @@ export function useTrajectoryTables(): {
     const windClock = currentProfile.windFromClockDeg;
     const inclinationOpt =
       inc != null && Number.isFinite(inc) ? { inclinationDegFromHorizontal: inc } : undefined;
+    const windOptions =
+      inclinationOpt || densityFactor !== 1 ? { ...inclinationOpt, airDensityFactor: densityFactor } : undefined;
     return {
       turretTable,
       compensationTable,
@@ -147,7 +155,7 @@ export function useTrajectoryTables(): {
           scope.clickValue,
           scope.unit,
           maxM,
-          inclinationOpt
+          windOptions
         );
       },
     };
@@ -164,6 +172,8 @@ export function useTrajectoryTables(): {
     currentProfile.barrelLengthCm,
     currentProfile.windSpeedKph,
     currentProfile.windFromClockDeg,
+    elevationEnabled,
+    elevationData.altitudeM,
     scopeUnit,
     clicksConfig.minM,
     clicksConfig.maxM,

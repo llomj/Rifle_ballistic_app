@@ -11,7 +11,7 @@ const DEG_TO_MRAD = (1000 * Math.PI) / 180;
 import { cmToIn, ydToM, mToFt, formatTurretLine, formatDrop } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
-import { heightFromDistanceMils, heightFromDistanceMOA, getScopeMagnificationForMeasure } from '../data/ballistic';
+import { heightFromDistanceMils, heightFromDistanceMOA, getScopeMagnificationForMeasure, MOA_METERS_PER_TRUE_MOA } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 
 interface HeightViewProps {
@@ -59,7 +59,7 @@ export const HeightView: React.FC<HeightViewProps> = ({
   const result = height != null ? Math.round(height * 1000) / 1000 : null;
   const reticleCm =
     result != null && value > 0
-      ? isMIL ? Math.round((distance / 10) * 100) / 100 : Math.round((2.91 * distance / 100) * 100) / 100
+      ? isMIL ? Math.round((distance / 10) * 100) / 100 : Math.round(((distance * 100) / MOA_METERS_PER_TRUE_MOA) * 100) / 100
       : null;
   const hasResult = result != null && result > 0;
   const resultFormatted = result != null

@@ -11,7 +11,7 @@ const DEG_TO_MRAD = (1000 * Math.PI) / 180;
 import { mToYd, cmToIn, ftToM, mToFt, formatTurretLine, formatDrop } from '../utils/ballisticUnits';
 import { formatTranslation } from '../translations';
 import { CliLine } from './CliBlock';
-import { distanceFromHeight, getScopeMagnificationForMeasure } from '../data/ballistic';
+import { distanceFromHeight, getScopeMagnificationForMeasure, MOA_METERS_PER_TRUE_MOA } from '../data/ballistic';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
 
 interface DistanceViewProps {
@@ -57,8 +57,11 @@ export const DistanceView: React.FC<DistanceViewProps> = ({
   );
   const result = distance != null ? Math.round(distance * 1000) / 1000 : null;
   const isMIL = scopeUnitForFormula === 'MIL';
+  // Linear size on target for 1 mil (0.001 rad) or 1 true MOA at the computed range.
   const reticleCm = result != null && value > 0
-    ? isMIL ? Math.round((result / 10) * 100) / 100 : Math.round((2.91 * result / 100) * 100) / 100
+    ? isMIL
+      ? Math.round((result / 10) * 100) / 100
+      : Math.round(((result * 100) / MOA_METERS_PER_TRUE_MOA) * 100) / 100
     : null;
   const hasResult = result != null && result > 0;
   const resultFormatted = result != null

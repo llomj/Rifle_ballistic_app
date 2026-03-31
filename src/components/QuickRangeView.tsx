@@ -1,14 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
-import { distanceFromHeight, type ScopeUnit } from '../data/ballistic';
+import { distanceFromHeight } from '../data/ballistic';
 import { mToYd, ftToM } from '../utils/ballisticUnits';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
+import { useBallisticProfile } from '../contexts/BallisticProfileContext';
+import { getScopeById } from '../data/catalogs';
 
 /** Quick Range: target height + mils/MOA → distance, holdover, clicks. Field-friendly, instant. */
 export const QuickRangeView: React.FC = () => {
   const { t } = useLanguage();
   const { scopeUnit, measurement } = useBallisticSettings();
+  const { currentProfile } = useBallisticProfile();
+  const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
+  const scopeUnitForFormula = scope?.unit === 'MIL' || scope?.unit === 'MOA' ? scope.unit : scopeUnit;
   const { getTurretRowForDistance } = useTrajectoryTables();
   const [heightStr, setHeightStr] = useState('');
   const [valueStr, setValueStr] = useState('');
@@ -19,8 +24,8 @@ export const QuickRangeView: React.FC = () => {
 
   const distanceM = useMemo(() => {
     if (height <= 0 || value <= 0) return null;
-    return distanceFromHeight(height, value, scopeUnit);
-  }, [height, value, scopeUnit]);
+    return distanceFromHeight(height, value, scopeUnitForFormula);
+  }, [height, value, scopeUnitForFormula]);
 
   const turret = useMemo(
     () => (distanceM != null ? getTurretRowForDistance(distanceM) : null),
@@ -28,7 +33,7 @@ export const QuickRangeView: React.FC = () => {
   );
 
   const hasResult = distanceM != null && distanceM > 0;
-  const isMIL = scopeUnit === 'MIL';
+  const isMIL = scopeUnitForFormula === 'MIL';
 
   return (
     <div className="space-y-4">
