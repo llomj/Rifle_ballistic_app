@@ -11,6 +11,7 @@ import {
 } from '../data/catalogBulletMv';
 import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
 import { getBulletById, getRifleById, resolveBulletIdForRifle } from '../data/catalogs';
+import { fpsToMs } from '../utils/ballisticUnits';
 
 /**
  * Fills rim / case / OAL / bullet diameter from the catalog bullet when the profile has gaps.
@@ -49,10 +50,26 @@ function profileWithBulletMatchingRifle(profile: BallisticProfile): BallisticPro
   return { ...profile, bulletId };
 }
 
+/**
+ * Canonical MV storage is m/s. If a legacy profile accidentally stored fps in `muzzleVelocityMps`,
+ * normalize it during hydration so metrics (drop/recoil/TOF) remain correct.
+ *
+ * Heuristic: any value > 1500 is almost certainly fps (1500 m/s is implausible for rifles).
+ */
+function normalizeMuzzleVelocityMps(profile: BallisticProfile): BallisticProfile {
+  const v = profile.muzzleVelocityMps;
+  if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) return profile;
+  if (v > 1500) {
+    return { ...profile, muzzleVelocityMps: fpsToMs(v) };
+  }
+  return profile;
+}
+
 /** Align rifle/bullet, rim/case/OAL, then powder charge for first paint / localStorage loads. */
 function hydrateProfileFromBulletCatalog(profile: BallisticProfile): BallisticProfile {
   const aligned = profileWithBulletMatchingRifle(profile);
-  return fillMissingAmmoFieldsFromBullet(fillMissingCartridgeFieldsFromBullet(aligned));
+  const filled = fillMissingAmmoFieldsFromBullet(fillMissingCartridgeFieldsFromBullet(aligned));
+  return normalizeMuzzleVelocityMps(filled);
 }
 
 interface BallisticProfileContextType {
