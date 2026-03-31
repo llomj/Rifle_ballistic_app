@@ -6,7 +6,7 @@ import {
 } from '../data/ballistic';
 import { getProfileAmmoFieldsFromBullet } from '../data/catalogBulletMv';
 import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
-import { getBulletById, resolveBulletIdForRifle } from '../data/catalogs';
+import { getBulletById, getRifleById, resolveBulletIdForRifle } from '../data/catalogs';
 
 /** Ensures `bulletId` references a round compatible with `rifleId` (same caliberKey in catalog). */
 function profileWithBulletMatchingRifle(profile: BallisticProfile): BallisticProfile {
@@ -96,12 +96,21 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       const bulletIdExplicit = updates.bulletId !== undefined;
       const bulletResolvedChanged = next.bulletId !== bulletIdBefore;
       const rifleChanged = updates.rifleId !== undefined;
+      const prevRifle = getRifleById(prev.rifleId);
+      const nextRifle = getRifleById(next.rifleId);
+      const caliberChanged =
+        rifleChanged && prevRifle?.caliberKey !== nextRifle?.caliberKey;
       /** Cartridge reference dimensions (rim / case / OAL): refresh when rifle or load identity changes so values do not stick to a previous caliber’s defaults. */
       const shouldMergeCartridge =
         next.bulletId && (rifleChanged || bulletResolvedChanged || bulletIdExplicit);
-      /** MV / powder: only when the catalog load changes — do not reset tuned MV when switching same-caliber rifles. */
+      /**
+       * MV / powder: refresh when the catalog load changes, user picks ammo, or rifle caliber changes
+       * (e.g. user chose .30-30 bullet while still on a .300 WM rifle, then selects Marlin — same bullet id, must still replace 922 with catalog MV).
+       * Same-caliber rifle swap (e.g. two .30-30 levers) does not merge ammo — preserves chrono-tuned MV.
+       */
       const shouldMergeAmmo =
-        next.bulletId && (bulletResolvedChanged || bulletIdExplicit);
+        next.bulletId &&
+        (bulletResolvedChanged || bulletIdExplicit || caliberChanged);
       if (shouldMergeCartridge || shouldMergeAmmo) {
         const bullet = getBulletById(next.bulletId);
         if (bullet) {

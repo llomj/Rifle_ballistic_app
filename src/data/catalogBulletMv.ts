@@ -5,6 +5,7 @@
  */
 
 import type { BallisticProfile, BulletCatalogItem } from './ballistic';
+import { BULLETS } from './catalogs';
 
 /** Representative factory / SAAMI-style MV (m/s) for each caliber in the bullet catalog. */
 export const DEFAULT_MUZZLE_VELOCITY_MPS_BY_CALIBER_KEY: Record<string, number> = {
@@ -15,7 +16,8 @@ export const DEFAULT_MUZZLE_VELOCITY_MPS_BY_CALIBER_KEY: Record<string, number> 
   '280rem': 890,
   '280ai': 910,
   '30-06': 825,
-  '30-30': 640,
+  /** Mid-pack factory MV (m/s) for caliber; per-bullet weight scaling applied in getCatalogMuzzleVelocityMps. ~2360 fps class for 150 gr lever. */
+  '30-30': 712,
   '300prc': 875,
   '300rum': 915,
   '300saum': 900,
@@ -65,6 +67,26 @@ export const DEFAULT_REFERENCE_BARREL_LENGTH_CM_BY_CALIBER_KEY: Record<string, n
 };
 
 const FALLBACK_MV_MPS = 800;
+
+/** Mean bullet mass (g) per caliber in the catalog — used to scale MV by weight within the same cartridge. */
+let meanBulletWeightGramsByCaliber: Map<string, number> | null = null;
+
+function getMeanBulletWeightGramsForCaliber(caliberKey: string): number {
+  if (!meanBulletWeightGramsByCaliber) {
+    const sums = new Map<string, { sum: number; n: number }>();
+    for (const b of BULLETS) {
+      if (!sums.has(b.caliberKey)) sums.set(b.caliberKey, { sum: 0, n: 0 });
+      const s = sums.get(b.caliberKey)!;
+      s.sum += b.weightGrams;
+      s.n += 1;
+    }
+    meanBulletWeightGramsByCaliber = new Map();
+    for (const [k, { sum, n }] of sums) {
+      if (n > 0) meanBulletWeightGramsByCaliber.set(k, sum / n);
+    }
+  }
+  return meanBulletWeightGramsByCaliber.get(caliberKey) ?? 10;
+}
 
 /**
  * Representative factory-style propellant mass (g) per caliber for recoil estimate.
@@ -120,9 +142,18 @@ export function getCatalogMuzzleVelocityMps(bullet: BulletCatalogItem): number {
   ) {
     return bullet.muzzleVelocityMps;
   }
-  const d = DEFAULT_MUZZLE_VELOCITY_MPS_BY_CALIBER_KEY[bullet.caliberKey];
-  if (d != null && Number.isFinite(d) && d > 0) return d;
-  return FALLBACK_MV_MPS;
+  const base =
+    DEFAULT_MUZZLE_VELOCITY_MPS_BY_CALIBER_KEY[bullet.caliberKey] ?? FALLBACK_MV_MPS;
+  if (!Number.isFinite(base) || base <= 0) return FALLBACK_MV_MPS;
+  const refW = getMeanBulletWeightGramsForCaliber(bullet.caliberKey);
+  const w = bullet.weightGrams;
+  if (!Number.isFinite(w) || w <= 0 || !Number.isFinite(refW) || refW <= 0) {
+    return Math.round(base * 10) / 10;
+  }
+  /** Lighter bullets in the same cartridge are typically faster (factory loads); sqrt is a mild curve. */
+  const factor = Math.sqrt(refW / w);
+  const clamped = Math.min(1.08, Math.max(0.92, factor));
+  return Math.round(base * clamped * 10) / 10;
 }
 
 export function getDefaultReferenceBarrelLengthCmForCaliber(caliberKey: string): number | undefined {
