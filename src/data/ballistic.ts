@@ -619,7 +619,7 @@ export interface TurretResult {
   /** e.g. "Turret: 35cm -1.2 ^12 clicks" */
   line: string;
   inRange: boolean;
-  /** true if distance is beyond the table (e.g. > 800 m) */
+  /** true if distance is beyond the configured table max (e.g. > 1200 m) */
   outOfRange: boolean;
 }
 
@@ -959,7 +959,7 @@ export function getTurretForExactDistance(
   dropAtRangeCm: (rangeM: number) => number,
   scopeClickValue: number,
   scopeUnit: ScopeUnit,
-  maxM: number = 800
+  maxM: number = 1200
 ): TurretResult | null {
   if (!Number.isFinite(distanceM) || distanceM <= 0 || scopeClickValue <= 0) return null;
   const dropCm = dropAtRangeCm(distanceM);

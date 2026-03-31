@@ -12,7 +12,7 @@ export interface ClicksConfig {
 
 export const DEFAULT_CLICKS_CONFIG: ClicksConfig = {
   minM: 100,
-  maxM: 800,
+  maxM: 1200,
   intervalM: 50,
 };
 

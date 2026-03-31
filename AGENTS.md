@@ -6,6 +6,13 @@
 
 **This is a mobile app for hunting and using a rifle.** It is a personal rifle ballistic calculator: mobile-friendly (PWA or mobile web), works offline, minimal field-friendly UI.
 
+### North Star (Permanent Goal)
+This project must become a **real, marketable ballistic app**. Agent work should prioritize:
+- **Accuracy & trust**: Trajectory, wind, and scope adjustment outputs must match established point‑mass/ballistic solver expectations as closely as practical for an offline mobile app.
+- **Unit correctness**: No mixed units, no silent conversions, and no MIL/MOA inconsistencies between screens.
+- **Offline-first reliability**: The app must always open and function offline after first install/cached run; never add runtime CDN dependencies.
+- **Verification mindset**: When any discrepancy/bug is suspected, investigate until root cause is found and fixed; add regression tests when feasible.
+
 ### Goal
 Build a personal rifle ballistic app that allows the user to input rifle specifications, scope data, and bullet information, then calculate **shooting distance**, **bullet drop**, and **scope adjustments**.
 
