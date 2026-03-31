@@ -5,10 +5,21 @@ import { useBallisticProfile } from '../contexts/BallisticProfileContext';
 import { useBallisticSettings } from '../contexts/BallisticSettingsContext';
 import { ydToM, mToYd, cmToIn } from '../utils/ballisticUnits';
 import { RifleScopeSection } from './RifleScopeSection';
+import { SearchCombobox } from './SearchCombobox';
 import { CliLine, CliSep, CliTable } from './CliBlock';
 import { useTrajectoryTables } from '../hooks/useTrajectoryTables';
-import { getUniqueCalibers, getBulletById, getScopeById, getRifleById, getBulletsForCaliberKey, searchBullets, searchCalibers, searchScopes, searchRifles } from '../data/catalogs';
-import type { CaliberOption } from '../data/catalogs';
+import {
+  RIFLES,
+  SCOPES,
+  getBulletById,
+  getScopeById,
+  getRifleById,
+  getBulletsForCaliberKey,
+  searchBullets,
+  searchScopesForUnit,
+  searchRifles,
+} from '../data/catalogs';
+import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
 
 /** Display name for default profile bullet so it always shows .300 Win Mag 180 gr (avoids cached JSON showing old label). */
@@ -49,11 +60,6 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const [ammunitionExpanded, setAmmunitionExpanded] = useState(false);
   const [scopeExpanded, setScopeExpanded] = useState(false);
   const [rifleExpanded, setRifleExpanded] = useState(false);
-  const [scopeFilterQuery, setScopeFilterQuery] = useState('');
-  const [rifleFilterQuery, setRifleFilterQuery] = useState('');
-  const [caliberFilterQuery, setCaliberFilterQuery] = useState('');
-  const [bulletFilterQuery, setBulletFilterQuery] = useState('');
-  const [filterCaliberKey, setFilterCaliberKey] = useState<string | null>(null);
   const [turretMinStr, setTurretMinStr] = useState('');
   const [turretMaxStr, setTurretMaxStr] = useState('');
   const [turretIntervalStr, setTurretIntervalStr] = useState('');
@@ -89,38 +95,20 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const rifle = useMemo(() => getRifleById(currentProfile.rifleId), [currentProfile.rifleId]);
-  const caliberOptions = useMemo(() => getUniqueCalibers(), []);
-  // When rifle is selected, ammunition list shows only bullets for that rifle's caliber.
-  const ammunitionForRifle = useMemo(
-    () => (rifle ? getBulletsForCaliberKey(rifle.caliberKey) : []),
-    [rifle?.id, rifle?.caliberKey]
-  );
-  const filteredAmmunitionList = useMemo(() => {
-    const q = bulletFilterQuery.trim().toLowerCase();
-    const base = q
-      ? ammunitionForRifle.filter(
-          (b) =>
-            b.name.toLowerCase().includes(q) ||
-            b.caliber.toLowerCase().includes(q) ||
-            b.caliberKey.toLowerCase().includes(q)
-        ).slice(0, 200)
-      : ammunitionForRifle.slice(0, 200);
-    // Ensure current profile bullet is in list and first when it matches this rifle (e.g. default .300 Win Mag 180 gr).
-    if (rifle && bullet && bullet.caliberKey === rifle.caliberKey) {
-      if (!base.some((b) => b.id === bullet.id)) return [bullet, ...base];
-      if (base[0].id !== bullet.id) {
-        const rest = base.filter((b) => b.id !== bullet.id);
-        return [bullet, ...rest];
+  /** Bullets for combobox: caliber-filtered + current selection first (matches ps.md default ammo behaviour). */
+  const bulletItemsForCombobox = useMemo(() => {
+    if (!rifle) return [];
+    const base = getBulletsForCaliberKey(rifle.caliberKey);
+    const b = bullet;
+    if (b && b.caliberKey === rifle.caliberKey) {
+      if (!base.some((x) => x.id === b.id)) return [b, ...base];
+      if (base[0]?.id !== b.id) {
+        const rest = base.filter((x) => x.id !== b.id);
+        return [b, ...rest];
       }
     }
     return base;
-  }, [ammunitionForRifle, bulletFilterQuery, rifle, bullet]);
-  const selectedCaliberKey = rifle?.caliberKey ?? filterCaliberKey ?? bullet?.caliberKey ?? (caliberOptions[0]?.caliberKey ?? '');
-
-  useEffect(() => {
-    if (rifle?.caliberKey) setFilterCaliberKey(rifle.caliberKey);
-  }, [rifle?.caliberKey]);
-
+  }, [rifle, bullet]);
   const handleSave = () => {
     playTapSound();
     saveCurrent({ userName: profileNameInput });
@@ -420,7 +408,11 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Rifle — list of rifles; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section
+        className={`glass mb-6 rounded-2xl border border-white/10 overflow-visible !bg-slate-900/[0.0009] ${
+          rifleExpanded ? 'relative z-[100]' : ''
+        }`}
+      >
         <button
           type="button"
           onClick={() => { playTapSound(); setRifleExpanded((e) => !e); }}
@@ -433,43 +425,35 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${rifleExpanded ? 'rotate-180' : ''}`} />
         </button>
         {rifleExpanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3" onClick={(e) => e.stopPropagation()}>
             <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.rifle')}</label>
-            <input
-              type="text"
-              value={rifleFilterQuery}
-              onChange={(e) => setRifleFilterQuery(e.target.value)}
+            <SearchCombobox<RifleCatalogItem>
+              items={RIFLES}
+              getItemId={(r) => r.id}
+              getItemLabel={(r) => r.name}
+              value={currentProfile.rifleId}
+              onSelect={(r) => {
+                if (!r) return;
+                updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
+                playTapSound();
+              }}
+              search={(q, l) => searchRifles(q, l ?? 200)}
+              limit={200}
               placeholder={t('ballistic.rifle')}
-              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+              getLabelForId={(id) => getRifleById(id)?.name ?? id}
+              className="w-full min-w-0"
+              inputClassName="!text-sm py-2.5 rounded-lg"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
-              {searchRifles(rifleFilterQuery, 200).map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate });
-                    setRifleFilterQuery('');
-                    playTapSound();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    currentProfile.rifleId === r.id
-                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                  }`}
-                >
-                  {r.name}
-                </button>
-              ))}
-            </div>
           </div>
         )}
       </section>
 
       {/* Ammunition — filtered by rifle caliber; list persists so user can re-select. */}
-      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section
+        className={`glass mb-6 rounded-2xl border border-white/10 overflow-visible !bg-slate-900/[0.0009] ${
+          ammunitionExpanded ? 'relative z-[90]' : ''
+        }`}
+      >
         <button
           type="button"
           onClick={() => { playTapSound(); setAmmunitionExpanded((e) => !e); }}
@@ -489,37 +473,31 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   {t('ballistic.ammunitionForCaliber') ?? 'Ammunition for'} {rifle.caliber}
                 </p>
                 <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.bullet')}</label>
-                <input
-                  type="text"
-                  value={bulletFilterQuery}
-                  onChange={(e) => setBulletFilterQuery(e.target.value)}
-                  placeholder={t('ballistic.bullet')}
-                  className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
-                />
-                <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
-                  {filteredAmmunitionList.length === 0 ? (
+                <div onClick={(e) => e.stopPropagation()}>
+                  {bulletItemsForCombobox.length === 0 ? (
                     <p className="text-slate-500 text-sm py-2">{t('ballistic.noBulletsForCaliber') ?? 'No ammunition entries for this caliber.'}</p>
                   ) : (
-                    filteredAmmunitionList.map((b) => (
-                      <button
-                        key={b.id}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          updateCurrentProfile({ bulletId: b.id });
-                          setBulletFilterQuery('');
-                          playTapSound();
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                          currentProfile.bulletId === b.id
-                            ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                            : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                        }`}
-                      >
-                        {b.name}
-                      </button>
-                    ))
+                    <SearchCombobox<BulletCatalogItem>
+                      items={bulletItemsForCombobox}
+                      getItemId={(b) => b.id}
+                      getItemLabel={(b) => b.name}
+                      value={currentProfile.bulletId}
+                      onSelect={(b) => {
+                        if (!b) return;
+                        updateCurrentProfile({ bulletId: b.id });
+                        playTapSound();
+                      }}
+                      search={(q, l) => searchBullets(q, rifle.caliberKey, l ?? 200)}
+                      limit={200}
+                      placeholder={t('ballistic.bullet')}
+                      getLabelForId={(id) =>
+                        id === DEFAULT_BALLISTIC_PROFILE.bulletId
+                          ? DEFAULT_BULLET_DISPLAY_NAME
+                          : (getBulletById(id)?.name ?? id)
+                      }
+                      className="w-full min-w-0"
+                      inputClassName="!text-sm py-2.5 rounded-lg"
+                    />
                   )}
                 </div>
               </>
@@ -551,7 +529,11 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
       </section>
 
       {/* Scope — list of scopes; selection fills rifle profile. List persists so user can re-select. */}
-      <section className="glass mb-6 rounded-2xl border border-white/10 overflow-hidden !bg-slate-900/[0.0009]">
+      <section
+        className={`glass mb-6 rounded-2xl border border-white/10 overflow-visible !bg-slate-900/[0.0009] ${
+          scopeExpanded ? 'relative z-[80]' : ''
+        }`}
+      >
         <button
           type="button"
           onClick={() => { playTapSound(); setScopeExpanded((e) => !e); }}
@@ -564,37 +546,25 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
           <i className={`fas fa-chevron-down text-xs transition-transform shrink-0 ${scopeExpanded ? 'rotate-180' : ''}`} />
         </button>
         {scopeExpanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+          <div className="px-4 pb-4 pt-0 border-t border-white/10 space-y-3" onClick={(e) => e.stopPropagation()}>
             <label className="text-xs text-slate-400 uppercase tracking-wider">{t('ballistic.scope')}</label>
-            <input
-              type="text"
-              value={scopeFilterQuery}
-              onChange={(e) => setScopeFilterQuery(e.target.value)}
+            <SearchCombobox<ScopeCatalogItem>
+              items={SCOPES}
+              getItemId={(s) => s.id}
+              getItemLabel={(s) => s.name}
+              value={currentProfile.scopeId}
+              onSelect={(s) => {
+                if (!s) return;
+                updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
+                playTapSound();
+              }}
+              search={(q, l) => searchScopesForUnit(q, scopeUnit, l ?? 200)}
+              limit={200}
               placeholder={t('ballistic.scope')}
-              className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0 placeholder-slate-500"
+              getLabelForId={(id) => getScopeById(id)?.name ?? id}
+              className="w-full min-w-0"
+              inputClassName="!text-sm py-2.5 rounded-lg"
             />
-            <div className="max-h-[40vh] overflow-y-auto overscroll-contain space-y-1 pb-24" onClick={(e) => e.stopPropagation()}>
-              {searchScopes(scopeFilterQuery, 200).map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit });
-                    setScopeFilterQuery('');
-                    playTapSound();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    currentProfile.scopeId === s.id
-                      ? 'border-theme-accent-50 bg-theme-accent-10 text-theme-accent'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-slate-200 hover:border-white/20'
-                  }`}
-                >
-                  {s.name}
-                </button>
-              ))}
-            </div>
           </div>
         )}
       </section>

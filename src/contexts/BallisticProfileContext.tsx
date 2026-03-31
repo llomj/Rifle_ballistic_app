@@ -4,6 +4,14 @@ import {
   BALLISTIC_PROFILES_STORAGE_KEY,
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
+import { resolveBulletIdForRifle } from '../data/catalogs';
+
+/** Ensures `bulletId` references a round compatible with `rifleId` (same caliberKey in catalog). */
+function profileWithBulletMatchingRifle(profile: BallisticProfile): BallisticProfile {
+  const bulletId = resolveBulletIdForRifle(profile.rifleId, profile.bulletId);
+  if (bulletId === profile.bulletId) return profile;
+  return { ...profile, bulletId };
+}
 
 interface BallisticProfileContextType {
   /** Currently active profile (default or a saved one). */
@@ -45,9 +53,11 @@ function loadSavedFromStorage(): BallisticProfile[] {
         typeof (p as BallisticProfile).muzzleVelocityMps === 'number'
     );
     // Only show user-added profiles: remove any "test" entries (legacy/demo)
-    return valid.filter(
+    const cleaned = valid.filter(
       (p) => (p.userName || '').trim().toLowerCase() !== 'test'
     );
+    // Align ammunition with rifle caliber for any legacy or edited JSON.
+    return cleaned.map((p) => profileWithBulletMatchingRifle(p));
   } catch {
     return [];
   }
@@ -61,21 +71,21 @@ function persistSaved(saved: BallisticProfile[]) {
 
 export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [savedProfiles, setSavedProfiles] = useState<BallisticProfile[]>(loadSavedFromStorage);
-  const [currentProfile, setCurrentProfileState] = useState<BallisticProfile>(() => ({
-    ...DEFAULT_BALLISTIC_PROFILE,
-  }));
+  const [currentProfile, setCurrentProfileState] = useState<BallisticProfile>(() =>
+    profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE })
+  );
 
   useEffect(() => {
     persistSaved(savedProfiles);
   }, [savedProfiles]);
 
   const setCurrentProfile = useCallback((profile: BallisticProfile) => {
-    setCurrentProfileState({ ...profile });
+    setCurrentProfileState(profileWithBulletMatchingRifle({ ...profile }));
   }, []);
 
   const updateCurrentProfile = useCallback((updates: Partial<BallisticProfile>) => {
     setCurrentProfileState((prev) => {
-      const next = { ...prev, ...updates };
+      const next = profileWithBulletMatchingRifle({ ...prev, ...updates });
       // When user selects rifle, scope, or ammunition, lock into current profile; persist if saved.
       if (prev.id !== 'default') {
         setSavedProfiles((list) =>
@@ -121,29 +131,29 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
 
   const addNewProfile = useCallback(() => {
     const id = `saved-${Date.now()}`;
-    const newProfile: BallisticProfile = {
+    const newProfile: BallisticProfile = profileWithBulletMatchingRifle({
       ...DEFAULT_BALLISTIC_PROFILE,
       id,
       userName: 'New profile',
       createdAt: Date.now(),
-    };
+    });
     setSavedProfiles((prev) => [...prev, newProfile]);
     setCurrentProfileState(newProfile);
   }, []);
 
   const loadProfile = useCallback((id: string) => {
     if (id === 'default') {
-      setCurrentProfileState({ ...DEFAULT_BALLISTIC_PROFILE });
+      setCurrentProfileState(profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE }));
       return;
     }
     const found = savedProfiles.find((p) => p.id === id);
-    if (found) setCurrentProfileState({ ...found });
+    if (found) setCurrentProfileState(profileWithBulletMatchingRifle({ ...found }));
   }, [savedProfiles]);
 
   const deleteSavedProfile = useCallback((id: string) => {
     setSavedProfiles((prev) => prev.filter((p) => p.id !== id));
     if (currentProfile.id === id) {
-      setCurrentProfileState({ ...DEFAULT_BALLISTIC_PROFILE });
+      setCurrentProfileState(profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE }));
     }
   }, [currentProfile.id]);
 

@@ -32,15 +32,19 @@ export function SearchCombobox<T>({
 }: SearchComboboxProps<T>): React.ReactElement {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  /** After focus, show selected label until the user types (so filtering runs on '' and list opens). */
+  const [userHasTyped, setUserHasTyped] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Some catalogs are large; avoid running full search/filter work when the dropdown is closed.
   const filteredRaw = useMemo(() => {
-    if (!open && query.length === 0) return [];
-    return search(query, limit);
-  }, [open, query, limit, search]);
+    if (!open) return [];
+    const q = userHasTyped ? query : '';
+    return search(q, limit);
+  }, [open, query, limit, search, userHasTyped]);
   // Ensure current value appears in list (e.g. default rifle) even if not in search results
   const currentItem = value ? items.find((i) => getItemId(i) === value) : null;
   const filtered =
@@ -55,7 +59,21 @@ export function SearchCombobox<T>({
           const item = items.find((i) => getItemId(i) === value);
           return item ? getItemLabel(item) : value;
         })());
-  const showList = open && (query.length > 0 || filtered.length > 0);
+  /** Show suggestion list whenever the combobox is open (typing may yield zero matches). */
+  const showList = open;
+
+  const inputValue = useMemo(() => {
+    if (!open) return displayLabel || '';
+    if (userHasTyped) return query;
+    return displayLabel || '';
+  }, [open, userHasTyped, query, displayLabel]);
+
+  useEffect(() => {
+    if (!open) {
+      setUserHasTyped(false);
+      setQuery('');
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!showList) setFocusedIndex(0);
@@ -95,6 +113,7 @@ export function SearchCombobox<T>({
       if (item) {
         onSelect(item);
         setQuery('');
+        setUserHasTyped(false);
         setOpen(false);
       }
     } else if (e.key === 'Escape') {
@@ -105,14 +124,30 @@ export function SearchCombobox<T>({
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className={`relative ${className}`}>
       <input
+        ref={inputRef}
         type="text"
-        value={open ? query : (displayLabel || '')}
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={showList}
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
+        value={inputValue}
         onChange={(e) => {
-          setQuery(e.target.value);
+          const v = e.target.value;
+          setUserHasTyped(true);
+          setQuery(v);
           setOpen(true);
-          if (!e.target.value) onSelect(null);
+          if (!v) onSelect(null);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true);
+          setUserHasTyped(false);
+          setQuery('');
+          requestAnimationFrame(() => {
+            inputRef.current?.select();
+          });
+        }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={disabled}
@@ -121,6 +156,7 @@ export function SearchCombobox<T>({
       {showList && (
         <ul
           ref={listRef}
+          role="listbox"
           className="absolute z-50 mt-1 max-h-[50vh] min-h-[8rem] w-full overflow-y-auto overscroll-contain rounded border border-white/20 bg-slate-900 py-1 shadow-lg touch-pan-y"
           style={{ WebkitOverflowScrolling: 'touch' }}
           onTouchStart={(e) => e.stopPropagation()}
@@ -141,6 +177,7 @@ export function SearchCombobox<T>({
                 onClick={() => {
                   onSelect(item);
                   setQuery('');
+                  setUserHasTyped(false);
                   setOpen(false);
                 }}
               >

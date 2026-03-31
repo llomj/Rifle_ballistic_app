@@ -28,6 +28,20 @@ export function getBulletsForCaliberKey(caliberKey: string): BulletCatalogItem[]
   return BULLETS.filter((b) => b.caliberKey === caliberKey);
 }
 
+/**
+ * Keep profile ammunition aligned with the selected rifle: same `caliberKey` as the rifle catalog entry.
+ * If the current bullet matches the rifle, returns `currentBulletId`. Otherwise returns the first catalog
+ * load for that rifle's caliber (or `currentBulletId` if the rifle is unknown or no loads exist).
+ */
+export function resolveBulletIdForRifle(rifleId: string, currentBulletId: string): string {
+  const rifle = getRifleById(rifleId);
+  if (!rifle) return currentBulletId;
+  const bullet = getBulletById(currentBulletId);
+  if (bullet && bullet.caliberKey === rifle.caliberKey) return currentBulletId;
+  const list = getBulletsForCaliberKey(rifle.caliberKey);
+  return list[0]?.id ?? currentBulletId;
+}
+
 export function searchRifles(query: string, limit = 20): RifleCatalogItem[] {
   const q = query.trim().toLowerCase();
   if (!q) return RIFLES.slice(0, limit);
@@ -64,7 +78,9 @@ export function searchScopesForUnit(query: string, unit: 'MIL' | 'MOA', limit = 
 }
 
 export function searchBullets(query: string, caliberKey?: string, limit = 20): BulletCatalogItem[] {
-  const base = caliberKey ? getBulletsForCaliberKey(caliberKey) : BULLETS;
+  /** No rifle caliber → no ammunition list (profile must select a rifle first). */
+  if (!caliberKey) return [];
+  const base = getBulletsForCaliberKey(caliberKey);
   const q = query.trim().toLowerCase();
   if (!q) return base.slice(0, limit);
   return base

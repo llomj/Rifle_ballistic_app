@@ -30,7 +30,7 @@ import {
   getBulletById,
   getBulletsForCaliberKey,
   searchRifles,
-  searchScopes,
+  searchScopesForUnit,
   searchBullets,
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
@@ -58,7 +58,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
   const { t } = useLanguage();
   const { playTapSound } = useSound();
   const { currentProfile, updateCurrentProfile, saveCurrentAs } = useBallisticProfile();
-  const { measurement, setMeasurement } = useBallisticSettings();
+  const { measurement, setMeasurement, scopeUnit } = useBallisticSettings();
 
   const rifle = useMemo(() => getRifleById(currentProfile.rifleId), [currentProfile.rifleId]);
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
@@ -98,8 +98,12 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
 
   const bulletSearch = useMemo(
     () => (q: string, limit?: number) =>
-      searchBullets(q, rifle?.caliberKey, limit ?? 20),
+      searchBullets(q, rifle?.caliberKey, limit ?? 200),
     [rifle?.caliberKey]
+  );
+  const scopeSearch = useMemo(
+    () => (q: string, limit?: number) => searchScopesForUnit(q, scopeUnit, limit ?? 200),
+    [scopeUnit]
   );
   const bulletItems = useMemo(
     () => getBulletsForCaliberKey(rifle?.caliberKey ?? ''),
@@ -183,7 +187,8 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemLabel={(r) => r.name}
               value={currentProfile.rifleId}
               onSelect={(r) => r && updateCurrentProfile({ rifleId: r.id, barrelLengthCm: r.barrelLengthCm, twistRate: r.twistRate })}
-              search={searchRifles}
+              search={(q, l) => searchRifles(q, l ?? 200)}
+              limit={200}
               placeholder={t('ballistic.rifle')}
               getLabelForId={(id) => getRifleById(id)?.name ?? id}
               className="flex-1 min-w-0"
@@ -198,7 +203,8 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemLabel={(s) => s.name}
               value={currentProfile.scopeId}
               onSelect={(s) => s && updateCurrentProfile({ scopeId: s.id, scopeUnit: s.unit })}
-              search={searchScopes}
+              search={scopeSearch}
+              limit={200}
               placeholder={t('ballistic.scope')}
               getLabelForId={(id) => getScopeById(id)?.name ?? id}
               className="flex-1 min-w-0"
@@ -336,8 +342,13 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               value={currentProfile.bulletId}
               onSelect={(b) => b && updateCurrentProfile({ bulletId: b.id })}
               search={bulletSearch}
+              limit={200}
               placeholder={rifle ? t('ballistic.bullet') : t('ballistic.rifle') + ' first'}
-              getLabelForId={(id) => getBulletById(id)?.name ?? id}
+              getLabelForId={(id) =>
+                id === DEFAULT_BALLISTIC_PROFILE.bulletId
+                  ? DEFAULT_BULLET_DISPLAY_NAME
+                  : (getBulletById(id)?.name ?? id)
+              }
               className="flex-1 min-w-0"
               inputClassName={inputCls}
             />
