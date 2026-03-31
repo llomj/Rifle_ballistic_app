@@ -45,7 +45,11 @@ import {
   getReferenceBarrelLengthCm,
   invertEffectiveMuzzleVelocityToBaseMps,
 } from '../data/ballisticMvAdjust';
-import { getCatalogMuzzleVelocityMps, getCatalogPowderChargeGrams } from '../data/catalogBulletMv';
+import {
+  getCatalogMuzzleVelocityMps,
+  getCatalogPowderChargeGrams,
+  getProfileAmmoFieldsFromBullet,
+} from '../data/catalogBulletMv';
 
 /** Display m/s without unnecessary decimals (922 vs 922.5). */
 function formatMvMpsForDisplay(mps: number): string {
@@ -382,7 +386,9 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemId={(b) => b.id}
               getItemLabel={(b) => b.name}
               value={currentProfile.bulletId}
-              onSelect={(b) => b && updateCurrentProfile({ bulletId: b.id })}
+              onSelect={(b) =>
+                b && updateCurrentProfile({ bulletId: b.id, ...getProfileAmmoFieldsFromBullet(b) })
+              }
               search={bulletSearch}
               limit={200}
               placeholder={rifle ? t('ballistic.bullet') : t('ballistic.rifle') + ' first'}
