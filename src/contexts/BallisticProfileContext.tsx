@@ -95,14 +95,22 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
           : profileWithBulletMatchingRifle({ ...prev, ...updates });
       const bulletIdExplicit = updates.bulletId !== undefined;
       const bulletResolvedChanged = next.bulletId !== bulletIdBefore;
-      if ((bulletResolvedChanged || bulletIdExplicit) && next.bulletId) {
+      const rifleChanged = updates.rifleId !== undefined;
+      /** Cartridge reference dimensions (rim / case / OAL): refresh when rifle or load identity changes so values do not stick to a previous caliber’s defaults. */
+      const shouldMergeCartridge =
+        next.bulletId && (rifleChanged || bulletResolvedChanged || bulletIdExplicit);
+      /** MV / powder: only when the catalog load changes — do not reset tuned MV when switching same-caliber rifles. */
+      const shouldMergeAmmo =
+        next.bulletId && (bulletResolvedChanged || bulletIdExplicit);
+      if (shouldMergeCartridge || shouldMergeAmmo) {
         const bullet = getBulletById(next.bulletId);
         if (bullet) {
-          next = {
-            ...next,
-            ...getProfileCartridgeFieldsFromBullet(bullet),
-            ...getProfileAmmoFieldsFromBullet(bullet),
-          };
+          if (shouldMergeCartridge) {
+            next = { ...next, ...getProfileCartridgeFieldsFromBullet(bullet) };
+          }
+          if (shouldMergeAmmo) {
+            next = { ...next, ...getProfileAmmoFieldsFromBullet(bullet) };
+          }
         }
       }
       // When user selects rifle, scope, or ammunition, lock into current profile; persist if saved.
