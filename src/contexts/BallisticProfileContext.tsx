@@ -88,7 +88,11 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
   const updateCurrentProfile = useCallback((updates: Partial<BallisticProfile>) => {
     setCurrentProfileState((prev) => {
       const bulletIdBefore = prev.bulletId;
-      let next = profileWithBulletMatchingRifle({ ...prev, ...updates });
+      // Explicit ammunition pick must be kept: do not replace with resolveBulletIdForRifle (caliber mismatch).
+      let next: BallisticProfile =
+        updates.bulletId !== undefined
+          ? { ...prev, ...updates }
+          : profileWithBulletMatchingRifle({ ...prev, ...updates });
       const bulletIdExplicit = updates.bulletId !== undefined;
       const bulletResolvedChanged = next.bulletId !== bulletIdBefore;
       if ((bulletResolvedChanged || bulletIdExplicit) && next.bulletId) {

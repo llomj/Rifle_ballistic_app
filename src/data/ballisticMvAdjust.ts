@@ -51,6 +51,38 @@ export function computeEffectiveMuzzleVelocityMps(inputs: MuzzleVelocityAdjustIn
   return Math.max(50, v);
 }
 
+/**
+ * Recover stored base MV from an effective (measured/adjusted) muzzle velocity.
+ * Inverse of {@link computeEffectiveMuzzleVelocityMps} — used when the UI shows effective MV and the user edits it.
+ */
+export function invertEffectiveMuzzleVelocityToBaseMps(
+  effectiveMps: number,
+  inputs: Omit<MuzzleVelocityAdjustInputs, 'baseMuzzleVelocityMps'>
+): number {
+  if (!Number.isFinite(effectiveMps) || effectiveMps <= 0) return 50;
+  let base = effectiveMps;
+  if (inputs.powderTempC != null && Number.isFinite(inputs.powderTempC)) {
+    const refT =
+      inputs.mvReferenceTempC != null && Number.isFinite(inputs.mvReferenceTempC)
+        ? inputs.mvReferenceTempC
+        : DEFAULT_MV_REFERENCE_TEMP_C;
+    base -= (inputs.powderTempC - refT) * MV_CHANGE_MPS_PER_DEGREE_C;
+  }
+  const refB = inputs.referenceBarrelLengthCm;
+  const userB = inputs.barrelLengthCm;
+  if (
+    refB != null &&
+    Number.isFinite(refB) &&
+    refB > 0 &&
+    userB != null &&
+    Number.isFinite(userB) &&
+    userB > 0
+  ) {
+    base -= (userB - refB) * MV_CHANGE_MPS_PER_CM_BARREL;
+  }
+  return Math.max(50, base);
+}
+
 export function getReferenceBarrelLengthCm(bullet: BulletCatalogItem | undefined): number | undefined {
   if (!bullet) return undefined;
   if (bullet.referenceBarrelLengthCm != null && bullet.referenceBarrelLengthCm > 0) {

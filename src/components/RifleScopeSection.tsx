@@ -40,7 +40,11 @@ import {
   getScopeMagnificationForMeasure,
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
-import { computeEffectiveMuzzleVelocityMps, getReferenceBarrelLengthCm } from '../data/ballisticMvAdjust';
+import {
+  computeEffectiveMuzzleVelocityMps,
+  getReferenceBarrelLengthCm,
+  invertEffectiveMuzzleVelocityToBaseMps,
+} from '../data/ballisticMvAdjust';
 import { getCatalogMuzzleVelocityMps, getCatalogPowderChargeGrams } from '../data/catalogBulletMv';
 
 /** Display m/s without unnecessary decimals (922 vs 922.5). */
@@ -71,23 +75,30 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
   const scope = useMemo(() => getScopeById(currentProfile.scopeId), [currentProfile.scopeId]);
   const bullet = useMemo(() => getBulletById(currentProfile.bulletId), [currentProfile.bulletId]);
 
-  const effectiveMuzzleVelocityMps = useMemo(
-    () =>
-      computeEffectiveMuzzleVelocityMps({
-        baseMuzzleVelocityMps: currentProfile.muzzleVelocityMps,
-        powderTempC: currentProfile.powderTempC,
-        mvReferenceTempC: currentProfile.mvReferenceTempC,
-        barrelLengthCm: currentProfile.barrelLengthCm,
-        referenceBarrelLengthCm: getReferenceBarrelLengthCm(bullet),
-      }),
+  const mvAdjustInputsNoBase = useMemo(
+    () => ({
+      powderTempC: currentProfile.powderTempC,
+      mvReferenceTempC: currentProfile.mvReferenceTempC,
+      barrelLengthCm: currentProfile.barrelLengthCm,
+      referenceBarrelLengthCm: getReferenceBarrelLengthCm(bullet),
+    }),
     [
-      currentProfile.muzzleVelocityMps,
       currentProfile.powderTempC,
       currentProfile.mvReferenceTempC,
       currentProfile.barrelLengthCm,
       bullet?.referenceBarrelLengthCm,
+      bullet?.caliberKey,
       bullet?.id,
     ]
+  );
+
+  const effectiveMuzzleVelocityMps = useMemo(
+    () =>
+      computeEffectiveMuzzleVelocityMps({
+        baseMuzzleVelocityMps: currentProfile.muzzleVelocityMps,
+        ...mvAdjustInputsNoBase,
+      }),
+    [currentProfile.muzzleVelocityMps, mvAdjustInputsNoBase]
   );
 
   const recoilJ = useMemo(() => {
@@ -397,17 +408,17 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               inputMode="decimal"
               value={
                 measurement === 'imperial'
-                  ? Math.round(msToFps(currentProfile.muzzleVelocityMps))
-                  : Math.round(currentProfile.muzzleVelocityMps * 10) / 10
+                  ? Math.round(msToFps(effectiveMuzzleVelocityMps))
+                  : Math.round(effectiveMuzzleVelocityMps * 10) / 10
               }
               onChange={(e) => {
                 const v = e.target.value;
                 if (v === '' || v === '-' || v === '.') return;
                 const raw = parseFloat(v);
                 if (!Number.isFinite(raw) || raw < 0) return;
-                updateCurrentProfile({
-                  muzzleVelocityMps: measurement === 'imperial' ? fpsToMs(raw) : raw,
-                });
+                const effectiveMps = measurement === 'imperial' ? fpsToMs(raw) : raw;
+                const base = invertEffectiveMuzzleVelocityToBaseMps(effectiveMps, mvAdjustInputsNoBase);
+                updateCurrentProfile({ muzzleVelocityMps: base });
               }}
               onBlur={(e) => {
                 if (e.target.value !== '') return;
@@ -417,20 +428,10 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
                 });
               }}
               className={`${inputCls} ${numInputCls}`}
-              placeholder={measurement === 'imperial' ? '3025 fps' : '922 m/s'}
+              placeholder={measurement === 'imperial' ? '2100 fps' : '640 m/s'}
             />
             <span className="text-slate-500 shrink-0">{measurement === 'imperial' ? 'fps' : 'm/s'}</span>
           </div>
-          {Math.abs(effectiveMuzzleVelocityMps - currentProfile.muzzleVelocityMps) > 0.05 && (
-            <div className="flex items-center gap-2 text-slate-500">
-              <span className={`${labelCls} w-28`}>{t('ballistic.trajectorySpeed')}</span>
-              <span className="text-theme-accent font-mono text-xs">
-                {measurement === 'imperial'
-                  ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps`
-                  : `${effectiveMuzzleVelocityMps.toFixed(1)} m/s`}
-              </span>
-            </div>
-          )}
           <div className="flex items-center gap-2 text-slate-500">
             <span className={`${labelCls} w-28`}>{t('ballistic.shotInclination')}</span>
             <input
@@ -622,7 +623,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="white">{t('ballistic.scope')}: {scope?.name ?? currentProfile.scopeId}</CliLine>
           <CliLine role="white">{t('ballistic.scopeHeight')}:{"\t"}{currentProfile.scopeHeightCm != null ? formatScopeHeight(currentProfile.scopeHeightCm, measurement) : '—'} · {t('ballistic.barrelLength')}: {currentProfile.barrelLengthCm != null ? formatBarrelLength(currentProfile.barrelLengthCm, measurement) : '—'} · {t('ballistic.twist')}: {currentProfile.twistRate ?? '—'}</CliLine>
           <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
-          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(currentProfile.muzzleVelocityMps))} fps` : `${formatMvMpsForDisplay(currentProfile.muzzleVelocityMps)} m/s`) : '—'}</CliLine>
+          <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps` : `${formatMvMpsForDisplay(effectiveMuzzleVelocityMps)} m/s`) : '—'}</CliLine>
           {(() => {
             const parts: string[] = [];
             if (currentProfile.shotInclinationDeg != null && currentProfile.shotInclinationDeg !== 0) {
@@ -648,9 +649,6 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             if (parts.length === 0) return null;
             return <CliLine role="white">{parts.join(' · ')}</CliLine>;
           })()}
-          {Math.abs(effectiveMuzzleVelocityMps - currentProfile.muzzleVelocityMps) > 0.05 ? (
-            <CliLine role="yellow">{t('ballistic.trajectorySpeed')}: {measurement === 'imperial' ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps` : `${effectiveMuzzleVelocityMps.toFixed(1)} m/s`}</CliLine>
-          ) : null}
           <CliLine role="white">{t('ballistic.recoil')}:{"\t"}{recoilJ != null ? (measurement === 'imperial' ? `${(recoilJ * 0.737562).toFixed(2)} ft·lb` : `${recoilJ.toFixed(2)} J`) : '—'} · {t('ballistic.coefficient')}: {bcDisplay != null ? `${bcDisplay} G1` : '—'}</CliLine>
         </section>
       )}
