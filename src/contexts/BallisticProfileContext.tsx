@@ -134,6 +134,14 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
     hydrateProfileFromBulletCatalog({ ...DEFAULT_BALLISTIC_PROFILE })
   );
 
+  const setSavedProfilesAndPersist = useCallback((updater: (prev: BallisticProfile[]) => BallisticProfile[]) => {
+    setSavedProfiles((prev) => {
+      const next = updater(prev);
+      persistSaved(next);
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     persistSaved(savedProfiles);
   }, [savedProfiles]);
@@ -199,7 +207,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       }
       // When user selects rifle, scope, or ammunition, lock into current profile; persist if saved.
       if (prev.id !== 'default') {
-        setSavedProfiles((list) =>
+        setSavedProfilesAndPersist((list) =>
           list.map((p) =>
             p.id === prev.id
               ? { ...next, id: prev.id, userName: next.userName, createdAt: p.createdAt }
@@ -209,7 +217,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       }
       return next;
     });
-  }, []);
+  }, [setSavedProfilesAndPersist]);
 
   const saveCurrentAs = useCallback((userName: string) => {
     const id = `saved-${Date.now()}`;
@@ -219,9 +227,9 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       userName: userName.trim() || 'My setup',
       createdAt: Date.now(),
     };
-    setSavedProfiles((prev) => [...prev, newProfile]);
+    setSavedProfilesAndPersist((prev) => [...prev, newProfile]);
     setCurrentProfileState(newProfile);
-  }, [currentProfile]);
+  }, [currentProfile, setSavedProfilesAndPersist]);
 
   const saveCurrent = useCallback((overrides?: Partial<BallisticProfile>) => {
     const profile = { ...currentProfile, ...overrides };
@@ -229,7 +237,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
     if (profile.id === 'default') {
       saveCurrentAs(name);
     } else {
-      setSavedProfiles((prev) =>
+      setSavedProfilesAndPersist((prev) =>
         prev.map((p) =>
           p.id === profile.id
             ? { ...profile, userName: name, createdAt: p.createdAt }
@@ -238,7 +246,7 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       );
       setCurrentProfileState((prev) => (prev.id === profile.id ? { ...profile, userName: name } : prev));
     }
-  }, [currentProfile, saveCurrentAs]);
+  }, [currentProfile, saveCurrentAs, setSavedProfilesAndPersist]);
 
   const addNewProfile = useCallback(() => {
     const id = `saved-${Date.now()}`;
@@ -248,9 +256,9 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
       userName: 'New profile',
       createdAt: Date.now(),
     });
-    setSavedProfiles((prev) => [...prev, newProfile]);
+    setSavedProfilesAndPersist((prev) => [...prev, newProfile]);
     setCurrentProfileState(newProfile);
-  }, []);
+  }, [setSavedProfilesAndPersist]);
 
   const loadProfile = useCallback((id: string) => {
     if (id === 'default') {
@@ -264,11 +272,11 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
   }, [savedProfiles]);
 
   const deleteSavedProfile = useCallback((id: string) => {
-    setSavedProfiles((prev) => prev.filter((p) => p.id !== id));
+    setSavedProfilesAndPersist((prev) => prev.filter((p) => p.id !== id));
     if (currentProfile.id === id) {
       setCurrentProfileState(hydrateProfileFromBulletCatalog({ ...DEFAULT_BALLISTIC_PROFILE }));
     }
-  }, [currentProfile.id]);
+  }, [currentProfile.id, setSavedProfilesAndPersist]);
 
   return (
     <BallisticProfileContext.Provider
