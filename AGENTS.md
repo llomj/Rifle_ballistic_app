@@ -16,7 +16,7 @@ The app automatically chooses the correct formula from the scope unit selected i
 
 ### Core Distance Formulas
 - **MIL:** `distance = (target_height * 1000) / mils`
-- **MOA:** `distance = (target_height * 95.5) / moa`
+- **MOA:** `distance = (target_height * (180/π)×60 ) / moa` — true MOA with height and distance in metres (~3438)
 
 ### Languages
 - **English** and **French**. User can switch language instantly from Settings.

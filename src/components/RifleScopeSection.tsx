@@ -41,6 +41,7 @@ import {
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
 import { computeEffectiveMuzzleVelocityMps, getReferenceBarrelLengthCm } from '../data/ballisticMvAdjust';
+import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
 
 const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
 
@@ -340,7 +341,13 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               getItemId={(b) => b.id}
               getItemLabel={(b) => b.name}
               value={currentProfile.bulletId}
-              onSelect={(b) => b && updateCurrentProfile({ bulletId: b.id })}
+              onSelect={(b) =>
+                b &&
+                updateCurrentProfile({
+                  bulletId: b.id,
+                  ...getProfileCartridgeFieldsFromBullet(b),
+                })
+              }
               search={bulletSearch}
               limit={200}
               placeholder={rifle ? t('ballistic.bullet') : t('ballistic.rifle') + ' first'}

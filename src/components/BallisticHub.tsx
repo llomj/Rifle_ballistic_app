@@ -21,6 +21,7 @@ import {
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
 
 /** Display name for default profile bullet so it always shows .300 Win Mag 180 gr (avoids cached JSON showing old label). */
 const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
@@ -484,7 +485,10 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                       value={currentProfile.bulletId}
                       onSelect={(b) => {
                         if (!b) return;
-                        updateCurrentProfile({ bulletId: b.id });
+                        updateCurrentProfile({
+                          bulletId: b.id,
+                          ...getProfileCartridgeFieldsFromBullet(b),
+                        });
                         playTapSound();
                       }}
                       search={(q, l) => searchBullets(q, rifle.caliberKey, l ?? 200)}

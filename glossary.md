@@ -134,7 +134,7 @@ Comprehensive reference for rifles, scopes, bullets, ballistics, ammunition, env
 
 - **Target height / size**: The apparent or known dimension of the target used in the range formula (e.g. shoulder width of game, height in mils).
 - **Range estimation (mils)**: Distance = (target size × 1000) / mils when size is in the same units as distance (e.g. metres). Formula assumes correct subtension (e.g. FFP or SFP at correct mag).
-- **Range estimation (MOA)**: Distance = (target size × 95.5) / MOA (approx.) with size and distance in consistent units.
+- **Range estimation (MOA)**: Distance = (target size × (180/π)×60) / MOA ≈ (target size × 3438) / MOA for true MOA (TMOA) with size and distance in metres.
 - **Atmosphere**: Air density affects drag and thus trajectory. Modelled by temperature, pressure (or altitude), and optionally humidity.
 - **Altitude**: Height above sea level. Higher altitude usually means less dense air, less drag, less drop.
 - **Temperature**: Colder air is denser; bullet slows more and drops more. Hotter air has the opposite effect.

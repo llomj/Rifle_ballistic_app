@@ -104,6 +104,12 @@ export interface BulletCatalogItem {
    * When set with the user profile barrel length, MV can be adjusted for barrel difference (estimate).
    */
   referenceBarrelLengthCm?: number;
+  /** Optional: override auto-filled rim diameter (mm) from caliber map. */
+  rimDiametersMm?: number;
+  /** Optional: override auto-filled case length (mm) from caliber map. */
+  caseLengthMm?: number;
+  /** Optional: override auto-filled cartridge OAL (mm) from caliber map. */
+  overallLengthMm?: number;
 }
 
 /** User ballistic setup: rifle + scope + bullet + inputs. Saved with userName. */
@@ -343,16 +349,22 @@ export const TURRET_TABLE: TurretRow[] = [
   { distanceMin: 751, distanceMax: 800, dropCm: '540cm', mrad: '-7.5', clicks: '^75 clicks', inRange: false },
 ];
 
+/**
+ * True MOA (TMOA): small-angle range when height and distance are in metres.
+ * distance_m = height_m × MOA_METERS_PER_TRUE_MOA / MOA, MOA_METERS_PER_TRUE_MOA = (180/π)×60 ≈ 3437.75.
+ */
+export const MOA_METERS_PER_TRUE_MOA = (180 / Math.PI) * 60;
+
 /** Distance from target height and mils. Formula: height × 1000 / mils = distance (m). */
 export function distanceFromHeightMils(heightM: number, mils: number): number {
   if (mils <= 0) return 0;
   return Math.round((heightM * 1000) / mils * 100) / 100;
 }
 
-/** Distance from target height and MOA. Formula: height × 95.5 / moa = distance (m). */
+/** Distance from target height and MOA (true MOA). Formula: height × MOA_METERS_PER_TRUE_MOA / MOA = distance (m). */
 export function distanceFromHeightMOA(heightM: number, moa: number): number {
   if (moa <= 0) return 0;
-  return Math.round((heightM * 95.5) / moa * 100) / 100;
+  return Math.round((heightM * MOA_METERS_PER_TRUE_MOA) / moa * 100) / 100;
 }
 
 /** Unified: distance from target height and subtension (mils or MOA). */
@@ -372,9 +384,9 @@ export function heightFromDistanceMils(distanceM: number, mils: number): number 
   return Math.round((distanceM * mils) / 1000 * 100) / 100;
 }
 
-/** Height from target distance and MOA. Formula: distance × moa / 95.5 = height (m). */
+/** Height from target distance and MOA (true MOA). Formula: distance × MOA / MOA_METERS_PER_TRUE_MOA = height (m). */
 export function heightFromDistanceMOA(distanceM: number, moa: number): number {
-  return Math.round((distanceM * moa) / 95.5 * 100) / 100;
+  return Math.round((distanceM * moa) / MOA_METERS_PER_TRUE_MOA * 100) / 100;
 }
 
 export interface TurretResult {
