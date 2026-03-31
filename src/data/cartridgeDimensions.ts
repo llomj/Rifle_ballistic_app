@@ -46,7 +46,10 @@ export const CARTRIDGE_DIMENSIONS_BY_CALIBER_KEY: Record<string, CartridgeDimens
 };
 
 export type ProfileCartridgeFields = Partial<
-  Pick<BallisticProfile, 'rimDiametersMm' | 'caseLengthMm' | 'overallLengthMm'>
+  Pick<
+    BallisticProfile,
+    'rimDiametersMm' | 'caseLengthMm' | 'overallLengthMm' | 'bulletDiameterMm'
+  >
 >;
 
 /**
@@ -75,9 +78,11 @@ export function getProfileCartridgeFieldsFromBullet(
   const rim = bullet.rimDiametersMm ?? ref?.rimDiametersMm;
   const caseLen = bullet.caseLengthMm ?? ref?.caseLengthMm;
   const oal = bullet.overallLengthMm ?? ref?.overallLengthMm;
+  const bd = bullet.diameterMm;
   return {
     ...(rim != null && Number.isFinite(rim) ? { rimDiametersMm: rim } : {}),
     ...(caseLen != null && Number.isFinite(caseLen) ? { caseLengthMm: caseLen } : {}),
     ...(oal != null && Number.isFinite(oal) ? { overallLengthMm: oal } : {}),
+    ...(bd != null && Number.isFinite(bd) ? { bulletDiameterMm: bd } : {}),
   };
 }

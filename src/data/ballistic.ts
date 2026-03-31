@@ -136,6 +136,8 @@ export interface BallisticProfile {
   rimDiametersMm?: number;
   caseLengthMm?: number;
   overallLengthMm?: number;
+  /** Bullet / groove nominal diameter (mm), from catalog when ammunition is selected. */
+  bulletDiameterMm?: number;
   bulletId: string;
   /** Propellant charge in grams (recoil estimate). Optional per-bullet catalog `powderChargeGrams` or caliber default on select. */
   bulletGram?: number;
@@ -208,9 +210,10 @@ export const DEFAULT_BALLISTIC_PROFILE: BallisticProfile = {
   zeroDistanceM: 100,
   barrelLengthCm: 60,
   twistRate: '1:11',
-  rimDiametersMm: 13.3,
+  rimDiametersMm: 13.5,
   caseLengthMm: 67,
   overallLengthMm: 85,
+  bulletDiameterMm: 7.82,
   bulletId: '300winmag-180gr-g1',
   muzzleVelocityMps: 922,
   scopeUnit: 'MIL',

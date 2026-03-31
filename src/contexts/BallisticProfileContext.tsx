@@ -8,6 +8,23 @@ import { getCatalogMuzzleVelocityMps, getProfileAmmoFieldsFromBullet } from '../
 import { getProfileCartridgeFieldsFromBullet } from '../data/cartridgeDimensions';
 import { getBulletById, getRifleById, resolveBulletIdForRifle } from '../data/catalogs';
 
+/**
+ * Fills rim / case / OAL / bullet diameter from the catalog bullet when the profile has gaps.
+ * Used on load so saved profiles and first paint match `updateCurrentProfile` behaviour after ammo pick.
+ */
+function fillMissingCartridgeFieldsFromBullet(profile: BallisticProfile): BallisticProfile {
+  const bullet = getBulletById(profile.bulletId);
+  if (!bullet) return profile;
+  const extra = getProfileCartridgeFieldsFromBullet(bullet);
+  return {
+    ...profile,
+    rimDiametersMm: profile.rimDiametersMm ?? extra.rimDiametersMm,
+    caseLengthMm: profile.caseLengthMm ?? extra.caseLengthMm,
+    overallLengthMm: profile.overallLengthMm ?? extra.overallLengthMm,
+    bulletDiameterMm: profile.bulletDiameterMm ?? extra.bulletDiameterMm,
+  };
+}
+
 /** Ensures `bulletId` references a round compatible with `rifleId` (same caliberKey in catalog). */
 function profileWithBulletMatchingRifle(profile: BallisticProfile): BallisticProfile {
   const bulletId = resolveBulletIdForRifle(profile.rifleId, profile.bulletId);
@@ -58,8 +75,10 @@ function loadSavedFromStorage(): BallisticProfile[] {
     const cleaned = valid.filter(
       (p) => (p.userName || '').trim().toLowerCase() !== 'test'
     );
-    // Align ammunition with rifle caliber for any legacy or edited JSON.
-    return cleaned.map((p) => profileWithBulletMatchingRifle(p));
+    // Align ammunition with rifle caliber for any legacy or edited JSON; fill cartridge dims from bullet.
+    return cleaned.map((p) =>
+      fillMissingCartridgeFieldsFromBullet(profileWithBulletMatchingRifle(p))
+    );
   } catch {
     return [];
   }
@@ -74,7 +93,9 @@ function persistSaved(saved: BallisticProfile[]) {
 export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [savedProfiles, setSavedProfiles] = useState<BallisticProfile[]>(loadSavedFromStorage);
   const [currentProfile, setCurrentProfileState] = useState<BallisticProfile>(() =>
-    profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE })
+    fillMissingCartridgeFieldsFromBullet(
+      profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE })
+    )
   );
 
   useEffect(() => {
@@ -99,7 +120,9 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
   }, [currentProfile.bulletId]);
 
   const setCurrentProfile = useCallback((profile: BallisticProfile) => {
-    setCurrentProfileState(profileWithBulletMatchingRifle({ ...profile }));
+    setCurrentProfileState(
+      fillMissingCartridgeFieldsFromBullet(profileWithBulletMatchingRifle({ ...profile }))
+    );
   }, []);
 
   const updateCurrentProfile = useCallback((updates: Partial<BallisticProfile>) => {
@@ -185,29 +208,43 @@ export const BallisticProfileProvider: React.FC<{ children: ReactNode }> = ({ ch
 
   const addNewProfile = useCallback(() => {
     const id = `saved-${Date.now()}`;
-    const newProfile: BallisticProfile = profileWithBulletMatchingRifle({
-      ...DEFAULT_BALLISTIC_PROFILE,
-      id,
-      userName: 'New profile',
-      createdAt: Date.now(),
-    });
+    const newProfile: BallisticProfile = fillMissingCartridgeFieldsFromBullet(
+      profileWithBulletMatchingRifle({
+        ...DEFAULT_BALLISTIC_PROFILE,
+        id,
+        userName: 'New profile',
+        createdAt: Date.now(),
+      })
+    );
     setSavedProfiles((prev) => [...prev, newProfile]);
     setCurrentProfileState(newProfile);
   }, []);
 
   const loadProfile = useCallback((id: string) => {
     if (id === 'default') {
-      setCurrentProfileState(profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE }));
+      setCurrentProfileState(
+        fillMissingCartridgeFieldsFromBullet(
+          profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE })
+        )
+      );
       return;
     }
     const found = savedProfiles.find((p) => p.id === id);
-    if (found) setCurrentProfileState(profileWithBulletMatchingRifle({ ...found }));
+    if (found) {
+      setCurrentProfileState(
+        fillMissingCartridgeFieldsFromBullet(profileWithBulletMatchingRifle({ ...found }))
+      );
+    }
   }, [savedProfiles]);
 
   const deleteSavedProfile = useCallback((id: string) => {
     setSavedProfiles((prev) => prev.filter((p) => p.id !== id));
     if (currentProfile.id === id) {
-      setCurrentProfileState(profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE }));
+      setCurrentProfileState(
+        fillMissingCartridgeFieldsFromBullet(
+          profileWithBulletMatchingRifle({ ...DEFAULT_BALLISTIC_PROFILE })
+        )
+      );
     }
   }, [currentProfile.id]);
 

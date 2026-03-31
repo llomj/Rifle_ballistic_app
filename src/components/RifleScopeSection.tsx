@@ -304,6 +304,30 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
             <span className="text-slate-500 shrink-0">{measurement === 'imperial' ? 'in' : 'mm'}</span>
           </div>
           <div className="flex items-center gap-2 text-slate-500">
+            <span className={`${labelCls} w-28`}>{t('ballistic.bulletDiameter')} ({t('ballistic.optional')})</span>
+            <input
+              type="number"
+              min="0"
+              step={measurement === 'imperial' ? 0.0001 : 0.01}
+              value={currentProfile.bulletDiameterMm != null
+                ? (measurement === 'imperial'
+                  ? Math.round(mmToIn(currentProfile.bulletDiameterMm) * 10000) / 10000
+                  : currentProfile.bulletDiameterMm)
+                : ''}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  updateCurrentProfile({ bulletDiameterMm: undefined });
+                  return;
+                }
+                const raw = parseFloat(e.target.value) || 0;
+                updateCurrentProfile({ bulletDiameterMm: measurement === 'imperial' ? inToMm(raw) : raw });
+              }}
+              className={`${inputCls} ${numInputCls}`}
+              placeholder={measurement === 'imperial' ? '0.308 in' : '7.82 mm'}
+            />
+            <span className="text-slate-500 shrink-0">{measurement === 'imperial' ? 'in' : 'mm'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500">
             <span className={`${labelCls} w-28`}>{t('ballistic.caseLength')} ({t('ballistic.optional')})</span>
             <input
               type="number"
@@ -622,7 +646,7 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
           <CliLine role="white">{t('ballistic.rifle')}:   {rifle?.name ?? currentProfile.rifleId}</CliLine>
           <CliLine role="white">{t('ballistic.scope')}: {scope?.name ?? currentProfile.scopeId}</CliLine>
           <CliLine role="white">{t('ballistic.scopeHeight')}:{"\t"}{currentProfile.scopeHeightCm != null ? formatScopeHeight(currentProfile.scopeHeightCm, measurement) : '—'} · {t('ballistic.barrelLength')}: {currentProfile.barrelLengthCm != null ? formatBarrelLength(currentProfile.barrelLengthCm, measurement) : '—'} · {t('ballistic.twist')}: {currentProfile.twistRate ?? '—'}</CliLine>
-          <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
+          <CliLine role="white">{t('ballistic.rimDiameters')}: {currentProfile.rimDiametersMm != null ? formatMmLength(currentProfile.rimDiametersMm, measurement) : '—'} · {t('ballistic.bulletDiameter')}: {currentProfile.bulletDiameterMm != null ? formatMmLength(currentProfile.bulletDiameterMm, measurement) : '—'} · {t('ballistic.caseLength')}: {currentProfile.caseLengthMm != null ? formatMmLength(currentProfile.caseLengthMm, measurement) : '—'} · {t('ballistic.overallLength')}: {currentProfile.overallLengthMm != null ? formatMmLength(currentProfile.overallLengthMm, measurement) : '—'}</CliLine>
           <CliLine role="white">{t('ballistic.bullet')}:{"\t"}{currentProfile.bulletId === DEFAULT_BALLISTIC_PROFILE.bulletId ? DEFAULT_BULLET_DISPLAY_NAME : (bullet?.name ?? currentProfile.bulletId)} · {t('ballistic.bulletGram')}: {currentProfile.bulletGram != null ? `${currentProfile.bulletGram} g` : '—'} · {t('ballistic.averageSpeed')}: {currentProfile.muzzleVelocityMps != null ? (measurement === 'imperial' ? `${Math.round(msToFps(effectiveMuzzleVelocityMps))} fps` : `${formatMvMpsForDisplay(effectiveMuzzleVelocityMps)} m/s`) : '—'}</CliLine>
           {(() => {
             const parts: string[] = [];
