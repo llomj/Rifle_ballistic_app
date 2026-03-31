@@ -21,6 +21,7 @@ import {
 } from '../data/catalogs';
 import type { RifleCatalogItem, ScopeCatalogItem, BulletCatalogItem } from '../data/ballistic';
 import { DEFAULT_BALLISTIC_PROFILE } from '../data/ballistic';
+import { getCatalogPowderChargeGrams } from '../data/catalogBulletMv';
 
 /** Display name for default profile bullet so it always shows .300 Win Mag 180 gr (avoids cached JSON showing old label). */
 const DEFAULT_BULLET_DISPLAY_NAME = '.300 Win Mag 180 gr';
@@ -513,12 +514,22 @@ export const BallisticHub: React.FC<BallisticHubProps> = ({
                   step="0.1"
                   inputMode="decimal"
                   value={currentProfile.bulletGram ?? ''}
-                  onChange={(e) =>
-                    updateCurrentProfile({
-                      bulletGram: e.target.value === '' ? undefined : parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  placeholder="e.g. 180"
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === '') {
+                      updateCurrentProfile({ bulletGram: undefined });
+                      return;
+                    }
+                    if (v === '-' || v === '.') return;
+                    const raw = parseFloat(v);
+                    if (!Number.isFinite(raw) || raw < 0) return;
+                    updateCurrentProfile({ bulletGram: raw });
+                  }}
+                  onBlur={() => {
+                    if (currentProfile.bulletGram != null) return;
+                    if (bullet) updateCurrentProfile({ bulletGram: getCatalogPowderChargeGrams(bullet) });
+                  }}
+                  placeholder="e.g. 6.0"
                   className="w-full rounded-lg bg-black/40 border border-white/20 px-3 py-2.5 text-theme-accent font-mono text-sm min-w-0"
                 />
                 <span className="text-slate-500 shrink-0">g</span>

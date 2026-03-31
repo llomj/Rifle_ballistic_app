@@ -41,7 +41,7 @@ import {
   DEFAULT_BALLISTIC_PROFILE,
 } from '../data/ballistic';
 import { computeEffectiveMuzzleVelocityMps, getReferenceBarrelLengthCm } from '../data/ballisticMvAdjust';
-import { getCatalogMuzzleVelocityMps } from '../data/catalogBulletMv';
+import { getCatalogMuzzleVelocityMps, getCatalogPowderChargeGrams } from '../data/catalogBulletMv';
 
 /** Display m/s without unnecessary decimals (922 vs 922.5). */
 function formatMvMpsForDisplay(mps: number): string {
@@ -368,12 +368,22 @@ export const RifleScopeSection: React.FC<RifleScopeSectionProps> = ({
               step="0.1"
               inputMode="decimal"
               value={currentProfile.bulletGram ?? ''}
-              onChange={(e) =>
-                updateCurrentProfile({
-                  bulletGram: e.target.value === '' ? undefined : parseFloat(e.target.value) || 0,
-                })
-              }
-              placeholder="e.g. 180"
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === '') {
+                  updateCurrentProfile({ bulletGram: undefined });
+                  return;
+                }
+                if (v === '-' || v === '.') return;
+                const raw = parseFloat(v);
+                if (!Number.isFinite(raw) || raw < 0) return;
+                updateCurrentProfile({ bulletGram: raw });
+              }}
+              onBlur={() => {
+                if (currentProfile.bulletGram != null) return;
+                if (bullet) updateCurrentProfile({ bulletGram: getCatalogPowderChargeGrams(bullet) });
+              }}
+              placeholder="e.g. 6.0"
               className={`${inputCls} ${numInputCls}`}
             />
             <span className="text-slate-500 shrink-0">g</span>

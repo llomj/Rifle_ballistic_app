@@ -109,6 +109,11 @@ export interface BulletCatalogItem {
    * When set, autopopulates profile average speed when this bullet is selected; otherwise a caliber default is used.
    */
   muzzleVelocityMps?: number;
+  /**
+   * Optional: typical propellant charge (g) for this load (factory / published load data).
+   * When set, autopopulates powder charge when this bullet is selected; otherwise a caliber default is used.
+   */
+  powderChargeGrams?: number;
   /** Optional: override auto-filled rim diameter (mm) from caliber map. */
   rimDiametersMm?: number;
   /** Optional: override auto-filled case length (mm) from caliber map. */
@@ -132,7 +137,7 @@ export interface BallisticProfile {
   caseLengthMm?: number;
   overallLengthMm?: number;
   bulletId: string;
-  /** Powder charge in grams (user input). */
+  /** Propellant charge in grams (recoil estimate). Optional per-bullet catalog `powderChargeGrams` or caliber default on select. */
   bulletGram?: number;
   muzzleVelocityMps: number;
   bcOverride?: number;
